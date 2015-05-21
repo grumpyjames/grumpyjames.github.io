@@ -145,31 +145,6 @@ Elm.Array.make = function (_elm) {
                        ,foldr: foldr};
    return _elm.Array.values;
 };
-Elm.Arrays = Elm.Arrays || {};
-Elm.Arrays.make = function (_elm) {
-   "use strict";
-   _elm.Arrays = _elm.Arrays || {};
-   if (_elm.Arrays.values)
-   return _elm.Arrays.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Arrays",
-   $Array = Elm.Array.make(_elm),
-   $Native$Arrays = Elm.Native.Arrays.make(_elm);
-   var cartesian = F3(function (f,
-   xs,
-   ys) {
-      return A3($Native$Arrays.cartesian,
-      f,
-      $Array.fromList(xs),
-      $Array.fromList(ys));
-   });
-   _elm.Arrays.values = {_op: _op
-                        ,cartesian: cartesian};
-   return _elm.Arrays.values;
-};
 Elm.Basics = Elm.Basics || {};
 Elm.Basics.make = function (_elm) {
    "use strict";
@@ -1960,26 +1935,6 @@ Elm.Dict.make = function (_elm) {
                       ,toList: toList
                       ,fromList: fromList};
    return _elm.Dict.values;
-};
-Elm.Functions = Elm.Functions || {};
-Elm.Functions.make = function (_elm) {
-   "use strict";
-   _elm.Functions = _elm.Functions || {};
-   if (_elm.Functions.values)
-   return _elm.Functions.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Functions";
-   var andThen = F3(function (f,
-   g,
-   a) {
-      return A2(g,a,f(a));
-   });
-   _elm.Functions.values = {_op: _op
-                           ,andThen: andThen};
-   return _elm.Functions.values;
 };
 Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Collage = Elm.Graphics.Collage || {};
@@ -4540,38 +4495,6 @@ Elm.Native.Array.make = function(localRuntime) {
 
 	return localRuntime.Native.Array.values = Elm.Native.Array.values;
 
-}
-
-var My = My || {};
-
-My.Native = Elm.Native || {};
-My.Native.Arrays = {};
-My.Native.Arrays.make = function(localRuntime) {
-    localRuntime.Native = localRuntime.Native || {};
-    localRuntime.Native.Arrays = localRuntime.Native.Arrays || {};
-    if (localRuntime.Native.Arrays.values) {
-        return localRuntime.Native.Arrays.values;
-    }
-
-    var Arr = Elm.Native.Array.make(localRuntime);
-    
-    var cartesian = function(f, xs, ys) {
-        var yLen = Arr.length(ys);
-        var xLen = Arr.length(xs);
-        var result = new Array(yLen);
-        for (var i = 0; i < yLen; ++i) {
-            current = new Array(xLen);
-            for (var j = 0; j < xLen; ++j) {
-                current[j] = f(Arr.get(j)(xs))(Arr.get(i)(ys));
-            }
-            result[i] = Arr.fromJSArray(current);
-        }
-        return Arr.fromJSArray(result);
-    }
-    
-    return localRuntime.Native.Arrays.values = {
-        cartesian: F3(cartesian)
-    };
 }
 
 Elm.Native.Basics = {};
@@ -9306,6 +9229,295 @@ Elm.Native.Text.make = function(localRuntime) {
 	};
 };
 
+Elm.Native.Time = {};
+Elm.Native.Time.make = function(localRuntime)
+{
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Time = localRuntime.Native.Time || {};
+	if (localRuntime.Native.Time.values)
+	{
+		return localRuntime.Native.Time.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+
+
+	// FRAMES PER SECOND
+
+	function fpsWhen(desiredFPS, isOn)
+	{
+		var msPerFrame = 1000 / desiredFPS;
+		var ticker = NS.input('fps-' + desiredFPS, null);
+
+		function notifyTicker()
+		{
+			localRuntime.notify(ticker.id, null);
+		}
+
+		function firstArg(x, y)
+		{
+			return x;
+		}
+
+		// input fires either when isOn changes, or when ticker fires.
+		// Its value is a tuple with the current timestamp, and the state of isOn
+		var input = NS.timestamp(A3(NS.map2, F2(firstArg), NS.dropRepeats(isOn), ticker));
+
+		var initialState = {
+			isOn: false,
+			time: localRuntime.timer.programStart,
+			delta: 0
+		};
+
+		var timeoutId;
+
+		function update(input,state)
+		{
+			var currentTime = input._0;
+			var isOn = input._1;
+			var wasOn = state.isOn;
+			var previousTime = state.time;
+
+			if (isOn)
+			{
+				timeoutId = localRuntime.setTimeout(notifyTicker, msPerFrame);
+			}
+			else if (wasOn)
+			{
+				clearTimeout(timeoutId);
+			}
+
+			return {
+				isOn: isOn,
+				time: currentTime,
+				delta: (isOn && !wasOn) ? 0 : currentTime - previousTime
+			};
+		}
+
+		return A2(
+			NS.map,
+			function(state) { return state.delta; },
+			A3(NS.foldp, F2(update), update(input.value,initialState), input)
+		);
+	}
+
+
+	// EVERY
+
+	function every(t)
+	{
+		var ticker = NS.input('every-' + t, null);
+		function tellTime()
+		{
+			localRuntime.notify(ticker.id, null);
+		}
+		var clock = A2( NS.map, fst, NS.timestamp(ticker) );
+		setInterval(tellTime, t);
+		return clock;
+	}
+
+
+	function fst(pair)
+	{
+		return pair._0;
+	}
+
+
+	function read(s)
+	{
+		var t = Date.parse(s);
+		return isNaN(t) ? Maybe.Nothing : Maybe.Just(t);
+	}
+
+	return localRuntime.Native.Time.values = {
+		fpsWhen: F2(fpsWhen),
+		every: every,
+		toDate: function(t) { return new window.Date(t); },
+		read: read
+	};
+
+};
+
+Elm.Native = Elm.Native || {};
+Elm.Native.Touch = {};
+Elm.Native.Touch.make = function(localRuntime) {
+
+    localRuntime.Native = localRuntime.Native || {};
+    localRuntime.Native.Touch = localRuntime.Native.Touch || {};
+    if (localRuntime.Native.Touch.values)
+    {
+        return localRuntime.Native.Touch.values;
+    }
+
+    var Signal = Elm.Signal.make(localRuntime);
+    var NS = Elm.Native.Signal.make(localRuntime);
+    var List = Elm.Native.List.make(localRuntime);
+    var Utils = Elm.Native.Utils.make(localRuntime);
+
+    function Dict() {
+        this.keys = [];
+        this.values = [];
+
+        this.insert = function(key,value) {
+            this.keys.push(key);
+            this.values.push(value);
+        };
+        this.lookup = function(key) {
+            var i = this.keys.indexOf(key)
+            return i >= 0 ? this.values[i] : {x:0,y:0,t:0};
+        };
+        this.remove = function(key) {
+            var i = this.keys.indexOf(key);
+            if (i < 0) return;
+            var t = this.values[i];
+            this.keys.splice(i,1);
+            this.values.splice(i,1);
+            return t;
+        };
+        this.clear = function() {
+            this.keys = [];
+            this.values = [];
+        };
+    }
+
+    var root = NS.input('touch', []),
+    tapTime = 500,
+    hasTap = false,
+    tap = {_:{},x:0,y:0},
+    dict = new Dict();
+
+    function touch(t) {
+        var r = dict.lookup(t.identifier);
+        var point = Utils.getXY(t);
+        return {
+            _ : {},
+            id: t.identifier,
+            x : point._0,
+            y : point._1,
+            x0: r.x,
+            y0: r.y,
+            t0: r.t
+         };
+    }
+
+    var node = localRuntime.isFullscreen()
+        ? document
+        : localRuntime.node;
+
+    function start(e) {
+        var point = Utils.getXY(e);
+        dict.insert(e.identifier, {
+            x: point._0,
+            y: point._1,
+            t: localRuntime.timer.now()
+        });
+    }
+    function end(e) {
+        var t = dict.remove(e.identifier);
+        if (localRuntime.timer.now() - t.t < tapTime)
+        {
+            hasTap = true;
+            tap = {
+                _: {},
+                x: t.x,
+                y: t.y
+            };
+        }
+    }
+
+    function listen(name, f) {
+        function update(e) {
+            for (var i = e.changedTouches.length; i--; ) {
+                f(e.changedTouches[i]);
+            }
+            var ts = new Array(e.touches.length);
+            for (var i = e.touches.length; i--; ) {
+                ts[i] = touch(e.touches[i]);
+            }
+            localRuntime.notify(root.id, ts);
+            e.preventDefault();
+        }
+        localRuntime.addListener([root.id], node, name, update);
+    }
+
+    listen("touchstart", start);
+    listen("touchmove", function(_){});
+    listen("touchend", end);
+    listen("touchcancel", end);
+    listen("touchleave", end);
+
+    var mouseID = -1;
+    function move(e) {
+        var point = Utils.getXY(e);
+        for (var i = root.value.length; i--; ) {
+            if (root.value[i].id === mouseID)
+            {
+                root.value[i].x = point._0;
+                root.value[i].y = point._1;
+                localRuntime.notify(root.id, root.value);
+                break;
+            }
+        }
+    }
+    localRuntime.addListener([root.id], node, "mousedown", function down(e) {
+        node.addEventListener("mousemove", move);
+        e.identifier = mouseID;
+        start(e);
+        root.value.push(touch(e));
+        localRuntime.notify(root.id, root.value);
+    });
+    localRuntime.addListener([root.id], document, "mouseup", function up(e) {
+        node.removeEventListener("mousemove", move);
+        e.identifier = mouseID;
+        end(e);
+        for (var i = root.value.length; i--; ) {
+            if (root.value[i].id === mouseID)
+            {
+                root.value.splice(i, 1);
+                --mouseID;
+                break;
+            }
+        }
+        localRuntime.notify(root.id, root.value);
+    });
+    localRuntime.addListener([root.id], node, "blur", function blur(e) {
+        node.removeEventListener("mousemove", move);
+        if (root.value.length > 0)
+        {
+            localRuntime.notify(root.id, []);
+            --mouseID;
+        }
+        dict.clear();
+    });
+
+    function dependency(f) {
+        var sig = A2( Signal.map, f, root );
+        root.defaultNumberOfKids += 1;
+        sig.defaultNumberOfKids = 0;
+        return sig;
+    }
+
+    var touches = dependency(List.fromArray);
+
+    var taps = function() {
+        var sig = dependency(function(_) { return tap; });
+        sig.defaultNumberOfKids = 1;
+        function pred(_) {
+            var b = hasTap;
+            hasTap = false;
+            return b;
+        }
+        var sig2 = A3( Signal.filter, pred, {_:{},x:0,y:0}, sig);
+        sig2.defaultNumberOfKids = 0;
+        return sig2;
+    }();
+
+    return localRuntime.Native.Touch.values = { touches: touches, taps: taps };
+
+};
+
 Elm.Native.Transform2D = {};
 Elm.Native.Transform2D.make = function(localRuntime) {
 
@@ -10431,6 +10643,7 @@ Elm.SlippyMap.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Text = Elm.Text.make(_elm),
    $Tile = Elm.Tile.make(_elm),
+   $TouchParser = Elm.TouchParser.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
    $Types = Elm.Types.make(_elm),
    $Window = Elm.Window.make(_elm);
@@ -10500,7 +10713,7 @@ Elm.SlippyMap.make = function (_elm) {
                  gpt.lon + dlon);
               }();}
          _U.badCase($moduleName,
-         "between lines 83 and 85");
+         "between lines 95 and 97");
       }();
    });
    var applyDrag = F2(function (m,
@@ -10512,50 +10725,74 @@ Elm.SlippyMap.make = function (_elm) {
                          drag)]],
       m);
    });
+   var applyGest = F2(function (m,
+   g) {
+      return function () {
+         switch (g.ctor)
+         {case "Just":
+            return function () {
+                 switch (g._0.ctor)
+                 {case "Drag":
+                    switch (g._0._0.ctor)
+                      {case "_Tuple2":
+                         return A2(applyDrag,
+                           m,
+                           {ctor: "_Tuple2"
+                           ,_0: -1 * g._0._0._0
+                           ,_1: g._0._0._1});}
+                      break;}
+                 return m;
+              }();
+            case "Nothing": return m;}
+         _U.badCase($moduleName,
+         "between lines 87 and 92");
+      }();
+   });
    var applyKeys = applyDrag;
    var applyMouse = F2(function (model,
-   _v2) {
+   _v8) {
       return function () {
-         switch (_v2.ctor)
+         switch (_v8.ctor)
          {case "_Tuple2":
-            switch (_v2._1.ctor)
+            switch (_v8._1.ctor)
               {case "_Tuple2":
                  return function () {
-                      var _v8 = model.mouseState;
-                      switch (_v8.ctor)
-                      {case "_Tuple2": switch (_v8._0)
+                      var _v14 = model.mouseState;
+                      switch (_v14.ctor)
+                      {case "_Tuple2":
+                         switch (_v14._0)
                            {case false:
                               return _U.replace([["mouseState"
                                                  ,{ctor: "_Tuple2"
-                                                  ,_0: _v2._0
+                                                  ,_0: _v8._0
                                                   ,_1: {ctor: "_Tuple2"
-                                                       ,_0: _v2._1._0
-                                                       ,_1: _v2._1._1}}]],
+                                                       ,_0: _v8._1._0
+                                                       ,_1: _v8._1._1}}]],
                                 model);
-                              case true: switch (_v8._1.ctor)
+                              case true: switch (_v14._1.ctor)
                                 {case "_Tuple2":
                                    return function () {
                                         var newModel = A2(applyDrag,
                                         model,
                                         {ctor: "_Tuple2"
-                                        ,_0: _v8._1._0 - _v2._1._0
-                                        ,_1: _v2._1._1 - _v8._1._1});
+                                        ,_0: _v14._1._0 - _v8._1._0
+                                        ,_1: _v8._1._1 - _v14._1._1});
                                         return _U.replace([["mouseState"
                                                            ,{ctor: "_Tuple2"
-                                                            ,_0: _v2._0
+                                                            ,_0: _v8._0
                                                             ,_1: {ctor: "_Tuple2"
-                                                                 ,_0: _v2._1._0
-                                                                 ,_1: _v2._1._1}}]],
+                                                                 ,_0: _v8._1._0
+                                                                 ,_1: _v8._1._1}}]],
                                         newModel);
                                      }();}
                                 break;}
                            break;}
                       _U.badCase($moduleName,
-                      "between lines 70 and 74");
+                      "between lines 73 and 77");
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 70 and 74");
+         "between lines 73 and 77");
       }();
    });
    var None = {ctor: "None"};
@@ -10591,10 +10828,10 @@ Elm.SlippyMap.make = function (_elm) {
                     case "Out":
                     return $Types.Zoom(zoom._0 - 1);}
                  _U.badCase($moduleName,
-                 "between lines 52 and 55");
+                 "between lines 55 and 58");
               }();}
          _U.badCase($moduleName,
-         "between lines 51 and 55");
+         "between lines 54 and 58");
       }();
    });
    var applyZoom = F2(function (m,
@@ -10603,6 +10840,9 @@ Elm.SlippyMap.make = function (_elm) {
                          ,A2(newZoom,zc,m.zoom)]],
       m);
    });
+   var G = function (a) {
+      return {ctor: "G",_0: a};
+   };
    var T = function (a) {
       return {ctor: "T",_0: a};
    };
@@ -10616,6 +10856,9 @@ Elm.SlippyMap.make = function (_elm) {
       return {ctor: "Z",_0: a};
    };
    var events = function () {
+      var gests = A2($Signal.map,
+      G,
+      $TouchParser.gestures);
       var tileSource = A2($Signal.map,
       T,
       tileSrc.signal);
@@ -10628,6 +10871,7 @@ Elm.SlippyMap.make = function (_elm) {
       var zooms = $Signal.map(Z)(zoomChange.signal);
       return $Signal.mergeMany(_L.fromArray([tileSource
                                             ,zooms
+                                            ,gests
                                             ,mouse
                                             ,keys]));
    }();
@@ -10636,7 +10880,10 @@ Elm.SlippyMap.make = function (_elm) {
    m) {
       return function () {
          switch (e.ctor)
-         {case "K": return A2(applyKeys,
+         {case "G": return A2(applyGest,
+              m,
+              e._0);
+            case "K": return A2(applyKeys,
               m,
               e._0);
             case "M": return A2(applyMouse,
@@ -10653,13 +10900,13 @@ Elm.SlippyMap.make = function (_elm) {
                                        ,defaultTileSrc]],
                       m);}
                  _U.badCase($moduleName,
-                 "between lines 44 and 46");
+                 "between lines 47 and 49");
               }();
             case "Z": return A2(applyZoom,
               m,
               e._0);}
          _U.badCase($moduleName,
-         "between lines 40 and 46");
+         "between lines 42 and 49");
       }();
    });
    var main = function () {
@@ -11118,17 +11365,29 @@ Elm.Tile.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Tile",
-   $Array = Elm.Array.make(_elm),
-   $Arrays = Elm.Arrays.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $List = Elm.List.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
    $Types = Elm.Types.make(_elm);
-   var rows = function (f) {
-      return $Basics.uncurry($Arrays.cartesian(f));
-   };
+   var rows = F2(function (f,_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return A2($List.map,
+              function (y) {
+                 return A2($List.map,
+                 function (x) {
+                    return A2(f,x,y);
+                 },
+                 _v0._0);
+              },
+              _v0._1);}
+         _U.badCase($moduleName,
+         "on line 69, column 19 to 56");
+      }();
+   });
    var range = F2(function (origin,
    count) {
       return _L.range(origin,
@@ -11161,7 +11420,9 @@ Elm.Tile.make = function (_elm) {
          var flowRender = F3(function (dir,
          r,
          els) {
-            return $Graphics$Element.flow(dir)($List.map(r)($Array.toList(els)));
+            return $Graphics$Element.flow(dir)(A2($List.map,
+            r,
+            els));
          });
          return A3(flowRender,
          $Graphics$Element.down,
@@ -11250,6 +11511,463 @@ Elm.Tile.make = function (_elm) {
    _elm.Tile.values = {_op: _op
                       ,render: render};
    return _elm.Tile.values;
+};
+Elm.Time = Elm.Time || {};
+Elm.Time.make = function (_elm) {
+   "use strict";
+   _elm.Time = _elm.Time || {};
+   if (_elm.Time.values)
+   return _elm.Time.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Time",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Signal = Elm.Native.Signal.make(_elm),
+   $Native$Time = Elm.Native.Time.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var delay = $Native$Signal.delay;
+   var since = F2(function (time,
+   signal) {
+      return function () {
+         var stop = A2($Signal.map,
+         $Basics.always(-1),
+         A2(delay,time,signal));
+         var start = A2($Signal.map,
+         $Basics.always(1),
+         signal);
+         var delaydiff = A3($Signal.foldp,
+         F2(function (x,y) {
+            return x + y;
+         }),
+         0,
+         A2($Signal.merge,start,stop));
+         return A2($Signal.map,
+         F2(function (x,y) {
+            return !_U.eq(x,y);
+         })(0),
+         delaydiff);
+      }();
+   });
+   var timestamp = $Native$Signal.timestamp;
+   var every = $Native$Time.every;
+   var fpsWhen = $Native$Time.fpsWhen;
+   var fps = function (targetFrames) {
+      return A2(fpsWhen,
+      targetFrames,
+      $Signal.constant(true));
+   };
+   var inMilliseconds = function (t) {
+      return t;
+   };
+   var millisecond = 1;
+   var second = 1000 * millisecond;
+   var minute = 60 * second;
+   var hour = 60 * minute;
+   var inHours = function (t) {
+      return t / hour;
+   };
+   var inMinutes = function (t) {
+      return t / minute;
+   };
+   var inSeconds = function (t) {
+      return t / second;
+   };
+   _elm.Time.values = {_op: _op
+                      ,millisecond: millisecond
+                      ,second: second
+                      ,minute: minute
+                      ,hour: hour
+                      ,inMilliseconds: inMilliseconds
+                      ,inSeconds: inSeconds
+                      ,inMinutes: inMinutes
+                      ,inHours: inHours
+                      ,fps: fps
+                      ,fpsWhen: fpsWhen
+                      ,every: every
+                      ,timestamp: timestamp
+                      ,delay: delay
+                      ,since: since};
+   return _elm.Time.values;
+};
+Elm.Touch = Elm.Touch || {};
+Elm.Touch.make = function (_elm) {
+   "use strict";
+   _elm.Touch = _elm.Touch || {};
+   if (_elm.Touch.values)
+   return _elm.Touch.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Touch",
+   $Native$Touch = Elm.Native.Touch.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var taps = $Native$Touch.taps;
+   var touches = $Native$Touch.touches;
+   var Touch = F6(function (a,
+   b,
+   c,
+   d,
+   e,
+   f) {
+      return {_: {}
+             ,id: c
+             ,t0: f
+             ,x: a
+             ,x0: d
+             ,y: b
+             ,y0: e};
+   });
+   _elm.Touch.values = {_op: _op
+                       ,touches: touches
+                       ,taps: taps
+                       ,Touch: Touch};
+   return _elm.Touch.values;
+};
+Elm.TouchParser = Elm.TouchParser || {};
+Elm.TouchParser.make = function (_elm) {
+   "use strict";
+   _elm.TouchParser = _elm.TouchParser || {};
+   if (_elm.TouchParser.values)
+   return _elm.TouchParser.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "TouchParser",
+   $Basics = Elm.Basics.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Touch = Elm.Touch.make(_elm),
+   $Tuple = Elm.Tuple.make(_elm);
+   var find = F2(function (feature,
+   needle) {
+      return function ($) {
+         return $List.head($List.filter(function (x) {
+            return _U.eq(feature(x),
+            needle);
+         })($));
+      };
+   });
+   var pairBy = F3(function (f,
+   xs,
+   ys) {
+      return function () {
+         var pairOf = function (x) {
+            return A3(find,f,f(x),ys);
+         };
+         var maybeMatch = function (x) {
+            return $Maybe.map(function (y) {
+               return {ctor: "_Tuple2"
+                      ,_0: x
+                      ,_1: y};
+            })(pairOf(x));
+         };
+         return A2($List.filterMap,
+         maybeMatch,
+         xs);
+      }();
+   });
+   var size = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return $Basics.sqrt(Math.pow(_v0._0,
+              2) + Math.pow(_v0._1,2));}
+         _U.badCase($moduleName,
+         "on line 86, column 15 to 30");
+      }();
+   };
+   var point = function (t) {
+      return A2($Tuple.map,
+      $Basics.toFloat,
+      {ctor: "_Tuple2"
+      ,_0: t.x
+      ,_1: t.y});
+   };
+   var pt = function (t) {
+      return {ctor: "_Tuple2"
+             ,_0: t.x * 1
+             ,_1: t.y * 1};
+   };
+   var Drag = function (a) {
+      return {ctor: "Drag",_0: a};
+   };
+   var parseDrag = function (_v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return Drag({ctor: "_Tuple2"
+                        ,_0: _v4._1.x - _v4._0.x
+                        ,_1: _v4._1.y - _v4._0.y});}
+         _U.badCase($moduleName,
+         "on line 99, column 22 to 52");
+      }();
+   };
+   var Affine = function (a) {
+      return {ctor: "Affine"
+             ,_0: a};
+   };
+   var AffineComponents = F2(function (a,
+   b) {
+      return {_: {}
+             ,rotation: a
+             ,scale: b};
+   });
+   var fromTwoTouchPairs = F2(function (_v8,
+   _v9) {
+      return function () {
+         switch (_v9.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v8.ctor)
+                 {case "_Tuple2":
+                    return function () {
+                         var nanToZero = function (f) {
+                            return $Basics.isNaN(f) ? 0 : f;
+                         };
+                         var b = A2($Tuple.subtract,
+                         point(_v9._1),
+                         point(_v8._1));
+                         var a = A2($Tuple.subtract,
+                         point(_v9._0),
+                         point(_v8._0));
+                         var $ = A2($Tuple.multiply,a,b),
+                         dotx = $._0,
+                         doty = $._1;
+                         var theta = $Basics.acos((dotx + doty) / (size(a) * size(b)));
+                         var scale = A2($Tuple.map,
+                         function ($) {
+                            return $Basics.abs(nanToZero($));
+                         },
+                         A2($Tuple.divide,b,a));
+                         return Affine(A2(AffineComponents,
+                         theta,
+                         scale));
+                      }();}
+                 _U.badCase($moduleName,
+                 "between lines 90 and 96");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 90 and 96");
+      }();
+   });
+   var parseOne = function (ts) {
+      return function () {
+         switch (ts.ctor)
+         {case "::": switch (ts._1.ctor)
+              {case "::":
+                 switch (ts._1._1.ctor)
+                   {case "::":
+                      switch (ts._1._1._1.ctor)
+                        {case "[]":
+                           return $Maybe.Nothing;}
+                        break;
+                      case "[]":
+                      return $Maybe.Just(A2(fromTwoTouchPairs,
+                        ts._0,
+                        ts._1._0));}
+                   break;
+                 case "[]":
+                 return $Maybe.Just(parseDrag(ts._0));}
+              break;}
+         return $Maybe.Nothing;
+      }();
+   };
+   var parseEvent = F2(function (oldTs,
+   newTs) {
+      return function () {
+         var matches = A3(pairBy,
+         function (t) {
+            return t.id;
+         },
+         oldTs,
+         newTs);
+         return parseOne(matches);
+      }();
+   });
+   var maybeParse = F2(function (oldTs,
+   newTs) {
+      return _U.eq($List.length(oldTs),
+      $List.length(newTs)) ? A2(parseEvent,
+      oldTs,
+      newTs) : $Maybe.Nothing;
+   });
+   var t = F2(function (_v23,id) {
+      return function () {
+         switch (_v23.ctor)
+         {case "_Tuple2":
+            return A6($Touch.Touch,
+              _v23._0,
+              _v23._1,
+              id,
+              0,
+              0,
+              0);}
+         _U.badCase($moduleName,
+         "on line 42, column 15 to 33");
+      }();
+   });
+   var clone = function (t) {
+      return A6($Touch.Touch,
+      t.x * 1,
+      t.y * 1,
+      t.id * 1,
+      0,
+      0,
+      0);
+   };
+   var TouchState = F2(function (a,
+   b) {
+      return {_: {}
+             ,maybeGesture: b
+             ,oldTouches: a};
+   });
+   var parse = F2(function (newTs,
+   oldState) {
+      return function () {
+         var _v27 = oldState.oldTouches;
+         switch (_v27.ctor)
+         {case "::":
+            switch (_v27._1.ctor)
+              {case "::":
+                 switch (_v27._1._1.ctor)
+                   {case "::":
+                      switch (_v27._1._1._1.ctor)
+                        {case "::": return oldState;}
+                        break;}
+                   break;}
+              break;
+            case "[]": return A2(TouchState,
+              A2($List.map,clone,newTs),
+              $Maybe.Nothing);}
+         return A2(TouchState,
+         A2($List.map,clone,newTs),
+         A2(parseEvent,
+         oldState.oldTouches,
+         newTs));
+      }();
+   });
+   var test = function () {
+      var f = maybeParse;
+      return $Signal.constant($Graphics$Element.show(_L.fromArray([A2(f,
+                                                                  _L.fromArray([A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 1},
+                                                                               0)
+                                                                               ,A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 0},
+                                                                               1)]),
+                                                                  _L.fromArray([A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 1},
+                                                                               0)
+                                                                               ,A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 0},
+                                                                               1)]))
+                                                                  ,A2(f,
+                                                                  _L.fromArray([A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 0},
+                                                                               0)
+                                                                               ,A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 1},
+                                                                               1)]),
+                                                                  _L.fromArray([A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 0},
+                                                                               0)
+                                                                               ,A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 1
+                                                                               ,_1: 0},
+                                                                               1)]))
+                                                                  ,A2(f,
+                                                                  _L.fromArray([A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 0},
+                                                                               0)
+                                                                               ,A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 1},
+                                                                               1)]),
+                                                                  _L.fromArray([A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 0},
+                                                                               0)
+                                                                               ,A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 2},
+                                                                               1)]))
+                                                                  ,A2(f,
+                                                                  _L.fromArray([A2(t,
+                                                                  {ctor: "_Tuple2"
+                                                                  ,_0: 0
+                                                                  ,_1: 0},
+                                                                  0)]),
+                                                                  _L.fromArray([A2(t,
+                                                                  {ctor: "_Tuple2"
+                                                                  ,_0: 0
+                                                                  ,_1: 3},
+                                                                  0)]))
+                                                                  ,A2(f,
+                                                                  _L.fromArray([A2(t,
+                                                                  {ctor: "_Tuple2"
+                                                                  ,_0: 0
+                                                                  ,_1: 0},
+                                                                  0)]),
+                                                                  _L.fromArray([A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 0
+                                                                               ,_1: 3},
+                                                                               0)
+                                                                               ,A2(t,
+                                                                               {ctor: "_Tuple2"
+                                                                               ,_0: 1
+                                                                               ,_1: 1},
+                                                                               1)]))])));
+   }();
+   var gestures = $Signal.map(function (t) {
+      return t.maybeGesture;
+   })(A2($Signal.foldp,
+   parse,
+   A2(TouchState,
+   _L.fromArray([]),
+   $Maybe.Nothing))(A2($Signal.map,
+   $List.map(clone),
+   $Touch.touches)));
+   var main = $Signal.map($Graphics$Element.show)(A2($Signal.foldp,
+   parse,
+   A2(TouchState,
+   _L.fromArray([]),
+   $Maybe.Nothing))(A2($Signal.map,
+   $List.map(clone),
+   $Touch.touches)));
+   _elm.TouchParser.values = {_op: _op
+                             ,main: main
+                             ,gestures: gestures
+                             ,Affine: Affine
+                             ,Drag: Drag};
+   return _elm.TouchParser.values;
 };
 Elm.Transform2D = Elm.Transform2D || {};
 Elm.Transform2D.make = function (_elm) {
@@ -11359,6 +12077,10 @@ Elm.Tuple.make = function (_elm) {
    y) {
       return x * y;
    }));
+   var divide = merge(F2(function (x,
+   y) {
+      return x / y;
+   }));
    var map = F2(function (f,_v8) {
       return function () {
          switch (_v8.ctor)
@@ -11378,6 +12100,7 @@ Elm.Tuple.make = function (_elm) {
                        ,merge: merge
                        ,map: map
                        ,add: add
+                       ,divide: divide
                        ,multiply: multiply
                        ,subtract: subtract};
    return _elm.Tuple.values;
