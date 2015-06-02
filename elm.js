@@ -14,39 +14,31 @@ Elm.ArcGIS.make = function (_elm) {
    $CommonLocator = Elm.CommonLocator.make(_elm),
    $Types = Elm.Types.make(_elm);
    var arcGISBase = "http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/";
-   var arcGISUrl = F2(function (zoom,
+   var arcGISUrl = F2(function (z,
    t) {
       return function () {
          var wrap = F2(function (z,
          c) {
             return A2($Basics._op["%"],
             c,
-            Math.pow(2,z));
+            Math.pow(2,$Basics.floor(z)));
          });
          var $ = t.coordinate,
          x = $._0,
          y = $._1;
-         return function () {
-            switch (zoom.ctor)
-            {case "Zoom":
-               return A2($Basics._op["++"],
-                 arcGISBase,
-                 A2($Basics._op["++"],
-                 $Basics.toString(zoom._0),
-                 A2($Basics._op["++"],
-                 "/",
-                 A2($Basics._op["++"],
-                 $Basics.toString(y),
-                 A2($Basics._op["++"],
-                 "/",
-                 A2($Basics._op["++"],
-                 $Basics.toString(A2(wrap,
-                 zoom._0,
-                 x)),
-                 ".png"))))));}
-            _U.badCase($moduleName,
-            "on line 17, column 8 to 122");
-         }();
+         return A2($Basics._op["++"],
+         arcGISBase,
+         A2($Basics._op["++"],
+         $Basics.toString($Basics.floor(z)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(y),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(A2(wrap,z,x)),
+         ".png"))))));
       }();
    });
    var arcGIS = A3($Types.TileSource,
@@ -866,28 +858,16 @@ Elm.CommonLocator.make = function (_elm) {
          0 - n)));
       }();
    });
-   var lon2tilex = F2(function (zoom,
+   var lon2tilex = F2(function (z,
    lon) {
-      return function () {
-         switch (zoom.ctor)
-         {case "Zoom":
-            return (lon + 180.0) / 360.0 * Math.pow(2.0,
-              $Basics.toFloat(zoom._0));}
-         _U.badCase($moduleName,
-         "on line 19, column 5 to 72");
-      }();
+      return (lon + 180.0) / 360.0 * Math.pow(2.0,
+      $Basics.toFloat($Basics.floor(z)));
    });
    var log = $Basics.logBase($Basics.e);
-   var lat2tiley = F2(function (zoom,
+   var lat2tiley = F2(function (z,
    lat) {
-      return function () {
-         switch (zoom.ctor)
-         {case "Zoom":
-            return (1.0 - log($Basics.tan(lat * $Basics.pi / 180.0) + 1.0 / $Basics.cos(lat * $Basics.pi / 180.0)) / $Basics.pi) / 2.0 * Math.pow(2.0,
-              $Basics.toFloat(zoom._0));}
-         _U.badCase($moduleName,
-         "on line 23, column 5 to 122");
-      }();
+      return (1.0 - log($Basics.tan(lat * $Basics.pi / 180.0) + 1.0 / $Basics.cos(lat * $Basics.pi / 180.0)) / $Basics.pi) / 2.0 * Math.pow(2.0,
+      $Basics.toFloat($Basics.floor(z)));
    });
    var common = F3(function (tileSize,
    zoom,
@@ -3373,6 +3353,68 @@ Elm.List.make = function (_elm) {
                       ,sortBy: sortBy
                       ,sortWith: sortWith};
    return _elm.List.values;
+};
+Elm.MapBox = Elm.MapBox || {};
+Elm.MapBox.make = function (_elm) {
+   "use strict";
+   _elm.MapBox = _elm.MapBox || {};
+   if (_elm.MapBox.values)
+   return _elm.MapBox.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "MapBox",
+   $Basics = Elm.Basics.make(_elm),
+   $CommonLocator = Elm.CommonLocator.make(_elm),
+   $Types = Elm.Types.make(_elm);
+   var mapBoxUrl = F4(function (id,
+   token,
+   z,
+   t) {
+      return function () {
+         var wrap = F2(function (z,
+         c) {
+            return A2($Basics._op["%"],
+            c,
+            Math.pow(2,$Basics.floor(z)));
+         });
+         var $ = t.coordinate,
+         x = $._0,
+         y = $._1;
+         return A2($Basics._op["++"],
+         "https://api.tiles.mapbox.com/v4/",
+         A2($Basics._op["++"],
+         id,
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString($Basics.floor(z)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(A2(wrap,z,x)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(y),
+         A2($Basics._op["++"],
+         ".png?access_token=",
+         token)))))))));
+      }();
+   });
+   var tileSize = 256;
+   var locate = $CommonLocator.common(tileSize);
+   var mapBox = F2(function (identifier,
+   token) {
+      return A3($Types.TileSource,
+      tileSize,
+      $CommonLocator.common(tileSize),
+      A2(mapBoxUrl,identifier,token));
+   });
+   _elm.MapBox.values = {_op: _op
+                        ,mapBox: mapBox};
+   return _elm.MapBox.values;
 };
 Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
@@ -10078,39 +10120,30 @@ Elm.Osm.make = function (_elm) {
    $CommonLocator = Elm.CommonLocator.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Types = Elm.Types.make(_elm);
-   var osmUrl = F2(function (zoom,
-   t) {
+   var osmUrl = F2(function (z,t) {
       return function () {
          var wrap = F2(function (z,
          c) {
             return A2($Basics._op["%"],
             c,
-            Math.pow(2,z));
+            Math.pow(2,$Basics.floor(z)));
          });
          var $ = t.coordinate,
          x = $._0,
          y = $._1;
-         return function () {
-            switch (zoom.ctor)
-            {case "Zoom":
-               return A2($Basics._op["++"],
-                 "http://tile.openstreetmap.org/",
-                 A2($Basics._op["++"],
-                 $Basics.toString(zoom._0),
-                 A2($Basics._op["++"],
-                 "/",
-                 A2($Basics._op["++"],
-                 $Basics.toString(A2(wrap,
-                 zoom._0,
-                 x)),
-                 A2($Basics._op["++"],
-                 "/",
-                 A2($Basics._op["++"],
-                 $Basics.toString(y),
-                 ".png"))))));}
-            _U.badCase($moduleName,
-            "on line 21, column 8 to 144");
-         }();
+         return A2($Basics._op["++"],
+         "http://tile.openstreetmap.org/",
+         A2($Basics._op["++"],
+         $Basics.toString($Basics.floor(z)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(A2(wrap,z,x)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(y),
+         ".png"))))));
       }();
    });
    var tileSize = 256;
@@ -10637,12 +10670,14 @@ Elm.SlippyMap.make = function (_elm) {
    $Color = Elm.Color.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $MapBox = Elm.MapBox.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Movement = Elm.Movement.make(_elm),
    $Osm = Elm.Osm.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Text = Elm.Text.make(_elm),
    $Tile = Elm.Tile.make(_elm),
+   $Time = Elm.Time.make(_elm),
    $TouchParser = Elm.TouchParser.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
    $Types = Elm.Types.make(_elm),
@@ -10684,6 +10719,7 @@ Elm.SlippyMap.make = function (_elm) {
          down);
       }();
    });
+   var accessToken = "pk.eyJ1IjoiZ3J1bXB5amFtZXMiLCJhIjoiNWQzZjdjMDY1YTI2MjExYTQ4ZWU4YjgwZGNmNjUzZmUifQ.BpRWJBEup08Z9DJzstigvg";
    var tileSrc = $Signal.mailbox($Maybe.Nothing);
    var tileSrcDropDown = A2($Graphics$Input.dropDown,
    $Signal.message(tileSrc.address),
@@ -10692,30 +10728,33 @@ Elm.SlippyMap.make = function (_elm) {
                  ,_1: $Maybe.Just($Osm.openStreetMap)}
                 ,{ctor: "_Tuple2"
                  ,_0: "ArcGIS"
-                 ,_1: $Maybe.Just($ArcGIS.arcGIS)}]));
-   var move = F3(function (zoom,
+                 ,_1: $Maybe.Just($ArcGIS.arcGIS)}
+                ,{ctor: "_Tuple2"
+                 ,_0: "MapBox"
+                 ,_1: $Maybe.Just(A2($MapBox.mapBox,
+                 "mapbox.run-bike-hike",
+                 accessToken))}]));
+   var move = F3(function (z,
    gpt,
    pixOff) {
       return function () {
-         switch (zoom.ctor)
-         {case "Zoom":
-            return function () {
-                 var $ = A2($Tuple.map,
-                 function (t) {
-                    return $Basics.toFloat(t) * 1.0 / $Basics.toFloat(Math.pow(2,
-                    zoom._0));
-                 },
-                 pixOff),
-                 dlon = $._0,
-                 dlat = $._1;
-                 return A2($Types.GeoPoint,
-                 gpt.lat + dlat,
-                 gpt.lon + dlon);
-              }();}
-         _U.badCase($moduleName,
-         "between lines 95 and 97");
+         var $ = A2($Tuple.map,
+         function (t) {
+            return $Basics.toFloat(t) * 1.0 / $Basics.toFloat(Math.pow(2,
+            $Basics.floor(z)));
+         },
+         pixOff),
+         dlon = $._0,
+         dlat = $._1;
+         return A2($Types.GeoPoint,
+         gpt.lat + dlat,
+         gpt.lon + dlon);
       }();
    });
+   var isInt = function (z) {
+      return _U.eq($Basics.toFloat($Basics.round(z)),
+      z);
+   };
    var applyDrag = F2(function (m,
    drag) {
       return _U.replace([["centre"
@@ -10725,89 +10764,91 @@ Elm.SlippyMap.make = function (_elm) {
                          drag)]],
       m);
    });
-   var applyGest = F2(function (m,
-   g) {
-      return function () {
-         switch (g.ctor)
-         {case "Just":
-            return function () {
-                 switch (g._0.ctor)
-                 {case "Drag":
-                    switch (g._0._0.ctor)
-                      {case "_Tuple2":
-                         return A2(applyDrag,
-                           m,
-                           {ctor: "_Tuple2"
-                           ,_0: -1 * g._0._0._0
-                           ,_1: g._0._0._1});}
-                      break;}
-                 return m;
-              }();
-            case "Nothing": return m;}
-         _U.badCase($moduleName,
-         "between lines 87 and 92");
-      }();
-   });
    var applyKeys = applyDrag;
    var applyMouse = F2(function (model,
-   _v8) {
+   _v0) {
       return function () {
-         switch (_v8.ctor)
+         switch (_v0.ctor)
          {case "_Tuple2":
-            switch (_v8._1.ctor)
+            switch (_v0._1.ctor)
               {case "_Tuple2":
                  return function () {
-                      var _v14 = model.mouseState;
-                      switch (_v14.ctor)
-                      {case "_Tuple2":
-                         switch (_v14._0)
+                      var _v6 = model.mouseState;
+                      switch (_v6.ctor)
+                      {case "_Tuple2": switch (_v6._0)
                            {case false:
                               return _U.replace([["mouseState"
                                                  ,{ctor: "_Tuple2"
-                                                  ,_0: _v8._0
+                                                  ,_0: _v0._0
                                                   ,_1: {ctor: "_Tuple2"
-                                                       ,_0: _v8._1._0
-                                                       ,_1: _v8._1._1}}]],
+                                                       ,_0: _v0._1._0
+                                                       ,_1: _v0._1._1}}]],
                                 model);
-                              case true: switch (_v14._1.ctor)
+                              case true: switch (_v6._1.ctor)
                                 {case "_Tuple2":
                                    return function () {
                                         var newModel = A2(applyDrag,
                                         model,
                                         {ctor: "_Tuple2"
-                                        ,_0: _v14._1._0 - _v8._1._0
-                                        ,_1: _v8._1._1 - _v14._1._1});
+                                        ,_0: _v6._1._0 - _v0._1._0
+                                        ,_1: _v0._1._1 - _v6._1._1});
                                         return _U.replace([["mouseState"
                                                            ,{ctor: "_Tuple2"
-                                                            ,_0: _v8._0
+                                                            ,_0: _v0._0
                                                             ,_1: {ctor: "_Tuple2"
-                                                                 ,_0: _v8._1._0
-                                                                 ,_1: _v8._1._1}}]],
+                                                                 ,_0: _v0._1._0
+                                                                 ,_1: _v0._1._1}}]],
                                         newModel);
                                      }();}
                                 break;}
                            break;}
                       _U.badCase($moduleName,
-                      "between lines 73 and 77");
+                      "between lines 92 and 96");
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 73 and 77");
+         "between lines 92 and 96");
       }();
    });
+   var applyTime = F2(function (m,
+   t) {
+      return function () {
+         var zoomAmount = 0.5 * ($Basics.toFloat($Basics.round(m.zoom)) - m.zoom);
+         var $ = _U.cmp($Basics.abs(zoomAmount),
+         1.0e-2) < 0 ? {ctor: "_Tuple2"
+                       ,_0: $Basics.toFloat($Basics.round(m.zoom))
+                       ,_1: true} : {ctor: "_Tuple2"
+                                    ,_0: m.zoom + zoomAmount
+                                    ,_1: false},
+         newZoom = $._0,
+         done = $._1;
+         return _U.replace([["zoom"
+                            ,newZoom]
+                           ,["dirty",$Basics.not(done)]],
+         m);
+      }();
+   });
+   var dirty = function (f) {
+      return _U.eq($Basics.toFloat($Basics.round(f)),
+      f);
+   };
    var None = {ctor: "None"};
    var zoomChange = $Signal.mailbox(None);
-   var Out = {ctor: "Out"};
+   var Out = function (a) {
+      return {ctor: "Out",_0: a};
+   };
    var zoomOut = A2(ourButton,
    A2($Signal.message,
    zoomChange.address,
-   Out),
+   Out(0.4)),
    "-");
-   var In = {ctor: "In"};
+   var In = function (a) {
+      return {ctor: "In",_0: a};
+   };
    var zoomIn = A2(ourButton,
    A2($Signal.message,
    zoomChange.address,
-   In),
+   In(0.52)),
    "+");
    var buttons = A2($Graphics$Element.flow,
    $Graphics$Element.right,
@@ -10815,23 +10856,14 @@ Elm.SlippyMap.make = function (_elm) {
                 ,zoomOut
                 ,tileSrcDropDown]));
    var newZoom = F2(function (zc,
-   zoom) {
+   z) {
       return function () {
-         switch (zoom.ctor)
-         {case "Zoom":
-            return function () {
-                 switch (zc.ctor)
-                 {case "In":
-                    return $Types.Zoom(zoom._0 + 1);
-                    case "None":
-                    return $Types.Zoom(zoom._0);
-                    case "Out":
-                    return $Types.Zoom(zoom._0 - 1);}
-                 _U.badCase($moduleName,
-                 "between lines 55 and 58");
-              }();}
+         switch (zc.ctor)
+         {case "In": return z + zc._0;
+            case "None": return z;
+            case "Out": return z - zc._0;}
          _U.badCase($moduleName,
-         "between lines 54 and 58");
+         "between lines 64 and 67");
       }();
    });
    var applyZoom = F2(function (m,
@@ -10839,6 +10871,67 @@ Elm.SlippyMap.make = function (_elm) {
       return _U.replace([["zoom"
                          ,A2(newZoom,zc,m.zoom)]],
       m);
+   });
+   var applyGest = F2(function (m,
+   g) {
+      return function () {
+         var pct = function (aff) {
+            return $Basics.sqrt($Tuple.combine(F2(function (x,
+            y) {
+               return x + y;
+            }))(A2($Tuple.map,
+            function (ti) {
+               return Math.pow(ti,2);
+            },
+            aff.scale)));
+         };
+         var toZoomChange = function (aff) {
+            return _U.cmp(pct(aff),
+            1) > 0 ? In(pct(aff)) : Out(pct(aff));
+         };
+         return function () {
+            switch (g.ctor)
+            {case "Just":
+               return function () {
+                    switch (g._0.ctor)
+                    {case "Affine":
+                       return A2(applyZoom,
+                         m,
+                         toZoomChange(g._0._0));
+                       case "Drag":
+                       switch (g._0._0.ctor)
+                         {case "_Tuple2":
+                            return A2(applyDrag,
+                              m,
+                              {ctor: "_Tuple2"
+                              ,_0: -1 * g._0._0._0
+                              ,_1: g._0._0._1});}
+                         break;
+                       case "End":
+                       return _U.replace([["dirty"
+                                          ,$Basics.not(isInt(m.zoom))]],
+                         m);}
+                    return m;
+                 }();
+               case "Nothing": return m;}
+            _U.badCase($moduleName,
+            "between lines 111 and 118");
+         }();
+      }();
+   });
+   var appIfClean = F3(function (f,
+   m,
+   a) {
+      return m.dirty ? m : A2(f,
+      m,
+      a);
+   });
+   var appIfDirty = F3(function (f,
+   m,
+   a) {
+      return $Basics.not(m.dirty) ? m : A2(f,
+      m,
+      a);
    });
    var G = function (a) {
       return {ctor: "G",_0: a};
@@ -10855,7 +10948,13 @@ Elm.SlippyMap.make = function (_elm) {
    var Z = function (a) {
       return {ctor: "Z",_0: a};
    };
+   var C = function (a) {
+      return {ctor: "C",_0: a};
+   };
    var events = function () {
+      var clockTicks = A2($Signal.map,
+      C,
+      $Time.fps(25));
       var gests = A2($Signal.map,
       G,
       $TouchParser.gestures);
@@ -10870,6 +10969,7 @@ Elm.SlippyMap.make = function (_elm) {
                                                             ,_1: 256}))($Movement.keyState));
       var zooms = $Signal.map(Z)(zoomChange.signal);
       return $Signal.mergeMany(_L.fromArray([tileSource
+                                            ,clockTicks
                                             ,zooms
                                             ,gests
                                             ,mouse
@@ -10880,13 +10980,20 @@ Elm.SlippyMap.make = function (_elm) {
    m) {
       return function () {
          switch (e.ctor)
-         {case "G": return A2(applyGest,
+         {case "C": return A3(appIfDirty,
+              applyTime,
               m,
               e._0);
-            case "K": return A2(applyKeys,
+            case "G": return A3(appIfClean,
+              applyGest,
               m,
               e._0);
-            case "M": return A2(applyMouse,
+            case "K": return A3(appIfClean,
+              applyKeys,
+              m,
+              e._0);
+            case "M": return A3(appIfClean,
+              applyMouse,
               m,
               e._0);
             case "T": return function () {
@@ -10900,13 +11007,14 @@ Elm.SlippyMap.make = function (_elm) {
                                        ,defaultTileSrc]],
                       m);}
                  _U.badCase($moduleName,
-                 "between lines 47 and 49");
+                 "between lines 51 and 53");
               }();
-            case "Z": return A2(applyZoom,
+            case "Z": return A3(appIfClean,
+              applyZoom,
               m,
               e._0);}
          _U.badCase($moduleName,
-         "between lines 42 and 49");
+         "between lines 45 and 53");
       }();
    });
    var main = function () {
@@ -10917,11 +11025,11 @@ Elm.SlippyMap.make = function (_elm) {
                                                       model)
                                                       ,buttons]));
       });
-      var initialZoom = $Types.Zoom(15);
+      var initialZoom = 15.0;
       var greenwich = A2($Types.GeoPoint,
       51.48,
       0.0);
-      var initialModel = A4($Types.Model,
+      var initialModel = A5($Types.Model,
       greenwich,
       initialZoom,
       {ctor: "_Tuple2"
@@ -10929,7 +11037,8 @@ Elm.SlippyMap.make = function (_elm) {
       ,_1: {ctor: "_Tuple2"
            ,_0: 0
            ,_1: 0}},
-      defaultTileSrc);
+      defaultTileSrc,
+      false);
       return A3($Signal.map2,
       draw,
       $Window.dimensions,
@@ -11385,7 +11494,7 @@ Elm.Tile.make = function (_elm) {
               },
               _v0._1);}
          _U.badCase($moduleName,
-         "on line 69, column 19 to 56");
+         "on line 74, column 19 to 56");
       }();
    });
    var range = F2(function (origin,
@@ -11453,17 +11562,13 @@ Elm.Tile.make = function (_elm) {
       vid(2),
       tileCounts)));
    });
-   var renderOneTile = F2(function (model,
+   var renderOneTile = F4(function (zoom,
+   tileSize,
+   url,
    tile) {
-      return function () {
-         var url = model.tileSource.tileUrl;
-         var tileSize = model.tileSource.tileSize;
-         return A2($Graphics$Element.image,
-         tileSize,
-         tileSize)(A2(url,
-         model.zoom,
-         tile));
-      }();
+      return A2($Graphics$Element.image,
+      tileSize,
+      tileSize)(A2(url,zoom,tile));
    });
    var applyPosition = F2(function (el,
    distance) {
@@ -11471,6 +11576,15 @@ Elm.Tile.make = function (_elm) {
       $Basics.toFloat,
       distance.pixels))($Graphics$Collage.toForm(el));
    });
+   var calcTileSize = function (m) {
+      return function () {
+         var frac = function (f) {
+            return f - $Basics.toFloat($Basics.floor(f));
+         };
+         var digizoom = $Basics.floor(frac(m.zoom) * 256);
+         return m.tileSource.tileSize + digizoom;
+      }();
+   };
    var render = F2(function (window,
    m) {
       return function () {
@@ -11486,16 +11600,20 @@ Elm.Tile.make = function (_elm) {
          var originTile = A2(origin,
          mapCentre.tile,
          tileCounts);
-         var offset = A3(originOffset,
-         m.tileSource.tileSize,
-         tileCounts,
-         mapCentre.position);
          var tileRows = rows($Basics.curry($Types.Tile))(A3($Tuple.merge,
          range,
          originTile.coordinate,
          tileCounts));
+         var tileSize = calcTileSize(m);
+         var offset = A3(originOffset,
+         tileSize,
+         tileCounts,
+         mapCentre.position);
          var mapEl = A2(flowTable,
-         renderOneTile(m),
+         A3(renderOneTile,
+         m.zoom,
+         tileSize,
+         m.tileSource.tileUrl),
          tileRows);
          return $Graphics$Element.layers(_L.fromArray([A3($Basics.uncurry,
                                                       $Graphics$Collage.collage,
@@ -11680,7 +11798,7 @@ Elm.TouchParser.make = function (_elm) {
             return $Basics.sqrt(Math.pow(_v0._0,
               2) + Math.pow(_v0._1,2));}
          _U.badCase($moduleName,
-         "on line 86, column 15 to 30");
+         "on line 92, column 15 to 30");
       }();
    };
    var point = function (t) {
@@ -11695,6 +11813,7 @@ Elm.TouchParser.make = function (_elm) {
              ,_0: t.x * 1
              ,_1: t.y * 1};
    };
+   var End = {ctor: "End"};
    var Drag = function (a) {
       return {ctor: "Drag",_0: a};
    };
@@ -11706,13 +11825,14 @@ Elm.TouchParser.make = function (_elm) {
                         ,_0: _v4._1.x - _v4._0.x
                         ,_1: _v4._1.y - _v4._0.y});}
          _U.badCase($moduleName,
-         "on line 99, column 22 to 52");
+         "on line 105, column 22 to 52");
       }();
    };
    var Affine = function (a) {
       return {ctor: "Affine"
              ,_0: a};
    };
+   var Start = {ctor: "Start"};
    var AffineComponents = F2(function (a,
    b) {
       return {_: {}
@@ -11751,10 +11871,10 @@ Elm.TouchParser.make = function (_elm) {
                          scale));
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 90 and 96");
+                 "between lines 96 and 102");
               }();}
          _U.badCase($moduleName,
-         "between lines 90 and 96");
+         "between lines 96 and 102");
       }();
    });
    var parseOne = function (ts) {
@@ -11793,10 +11913,15 @@ Elm.TouchParser.make = function (_elm) {
    });
    var maybeParse = F2(function (oldTs,
    newTs) {
-      return _U.eq($List.length(oldTs),
-      $List.length(newTs)) ? A2(parseEvent,
-      oldTs,
-      newTs) : $Maybe.Nothing;
+      return function () {
+         var newLen = $List.length(newTs);
+         var oldLen = $List.length(oldTs);
+         return _U.cmp(oldLen,
+         newLen) > 0 ? $Maybe.Just(End) : _U.cmp(newLen,
+         oldLen) > 0 ? $Maybe.Just(Start) : A2(parseEvent,
+         oldTs,
+         newTs);
+      }();
    });
    var t = F2(function (_v23,id) {
       return function () {
@@ -11845,10 +11970,10 @@ Elm.TouchParser.make = function (_elm) {
               break;
             case "[]": return A2(TouchState,
               A2($List.map,clone,newTs),
-              $Maybe.Nothing);}
+              $Maybe.Just(Start));}
          return A2(TouchState,
          A2($List.map,clone,newTs),
-         A2(parseEvent,
+         A2(maybeParse,
          oldState.oldTouches,
          newTs));
       }();
@@ -11965,8 +12090,11 @@ Elm.TouchParser.make = function (_elm) {
    _elm.TouchParser.values = {_op: _op
                              ,main: main
                              ,gestures: gestures
+                             ,AffineComponents: AffineComponents
+                             ,Start: Start
                              ,Affine: Affine
-                             ,Drag: Drag};
+                             ,Drag: Drag
+                             ,End: End};
    return _elm.TouchParser.values;
 };
 Elm.Transform2D = Elm.Transform2D || {};
@@ -12059,10 +12187,10 @@ Elm.Tuple.make = function (_elm) {
                            ,_0: A2(op,_v0._0,_v1._0)
                            ,_1: A2(op,_v0._1,_v1._1)};}
                  _U.badCase($moduleName,
-                 "on line 9, column 31 to 49");
+                 "on line 12, column 31 to 49");
               }();}
          _U.badCase($moduleName,
-         "on line 9, column 31 to 49");
+         "on line 12, column 31 to 49");
       }();
    });
    var add = merge(F2(function (x,
@@ -12081,13 +12209,24 @@ Elm.Tuple.make = function (_elm) {
    y) {
       return x / y;
    }));
-   var map = F2(function (f,_v8) {
+   var combine = F2(function (f,
+   _v8) {
       return function () {
          switch (_v8.ctor)
+         {case "_Tuple2": return A2(f,
+              _v8._0,
+              _v8._1);}
+         _U.badCase($moduleName,
+         "on line 9, column 20 to 25");
+      }();
+   });
+   var map = F2(function (f,_v12) {
+      return function () {
+         switch (_v12.ctor)
          {case "_Tuple2":
             return {ctor: "_Tuple2"
-                   ,_0: f(_v8._0)
-                   ,_1: f(_v8._1)};}
+                   ,_0: f(_v12._0)
+                   ,_1: f(_v12._1)};}
          _U.badCase($moduleName,
          "on line 6, column 19 to 29");
       }();
@@ -12102,7 +12241,8 @@ Elm.Tuple.make = function (_elm) {
                        ,add: add
                        ,divide: divide
                        ,multiply: multiply
-                       ,subtract: subtract};
+                       ,subtract: subtract
+                       ,combine: combine};
    return _elm.Tuple.values;
 };
 Elm.Types = Elm.Types || {};
@@ -12116,12 +12256,14 @@ Elm.Types.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Types";
-   var Model = F4(function (a,
+   var Model = F5(function (a,
    b,
    c,
-   d) {
+   d,
+   e) {
       return {_: {}
              ,centre: a
+             ,dirty: e
              ,mouseState: c
              ,tileSource: d
              ,zoom: b};
@@ -12150,17 +12292,13 @@ Elm.Types.make = function (_elm) {
    b) {
       return {_: {},lat: a,lon: b};
    });
-   var Zoom = function (a) {
-      return {ctor: "Zoom",_0: a};
-   };
    _elm.Types.values = {_op: _op
                        ,GeoPoint: GeoPoint
                        ,Model: Model
                        ,Position: Position
                        ,TileOffset: TileOffset
                        ,TileSource: TileSource
-                       ,Tile: Tile
-                       ,Zoom: Zoom};
+                       ,Tile: Tile};
    return _elm.Types.values;
 };
 Elm.Window = Elm.Window || {};
