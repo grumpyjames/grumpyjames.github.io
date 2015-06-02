@@ -1,4 +1,142 @@
 var Elm = Elm || { Native: {} };
+Elm.ArcGIS = Elm.ArcGIS || {};
+Elm.ArcGIS.make = function (_elm) {
+   "use strict";
+   _elm.ArcGIS = _elm.ArcGIS || {};
+   if (_elm.ArcGIS.values)
+   return _elm.ArcGIS.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "ArcGIS",
+   $Basics = Elm.Basics.make(_elm),
+   $CommonLocator = Elm.CommonLocator.make(_elm),
+   $Types = Elm.Types.make(_elm);
+   var arcGISBase = "http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/";
+   var arcGISUrl = F2(function (z,
+   t) {
+      return function () {
+         var wrap = F2(function (z,
+         c) {
+            return A2($Basics._op["%"],
+            c,
+            Math.pow(2,$Basics.floor(z)));
+         });
+         var $ = t.coordinate,
+         x = $._0,
+         y = $._1;
+         return A2($Basics._op["++"],
+         arcGISBase,
+         A2($Basics._op["++"],
+         $Basics.toString($Basics.floor(z)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(y),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(A2(wrap,z,x)),
+         ".png"))))));
+      }();
+   });
+   var arcGIS = A3($Types.TileSource,
+   256,
+   $CommonLocator.common(256),
+   arcGISUrl);
+   _elm.ArcGIS.values = {_op: _op
+                        ,arcGIS: arcGIS};
+   return _elm.ArcGIS.values;
+};
+Elm.Array = Elm.Array || {};
+Elm.Array.make = function (_elm) {
+   "use strict";
+   _elm.Array = _elm.Array || {};
+   if (_elm.Array.values)
+   return _elm.Array.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Array",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Array = Elm.Native.Array.make(_elm);
+   var append = $Native$Array.append;
+   var length = $Native$Array.length;
+   var slice = $Native$Array.slice;
+   var set = $Native$Array.set;
+   var get = F2(function (i,
+   array) {
+      return _U.cmp(0,
+      i) < 1 && _U.cmp(i,
+      $Native$Array.length(array)) < 0 ? $Maybe.Just(A2($Native$Array.get,
+      i,
+      array)) : $Maybe.Nothing;
+   });
+   var push = $Native$Array.push;
+   var empty = $Native$Array.empty;
+   var filter = F2(function (isOkay,
+   arr) {
+      return function () {
+         var update = F2(function (x,
+         xs) {
+            return isOkay(x) ? A2($Native$Array.push,
+            x,
+            xs) : xs;
+         });
+         return A3($Native$Array.foldl,
+         update,
+         $Native$Array.empty,
+         arr);
+      }();
+   });
+   var foldr = $Native$Array.foldr;
+   var foldl = $Native$Array.foldl;
+   var indexedMap = $Native$Array.indexedMap;
+   var map = $Native$Array.map;
+   var toIndexedList = function (array) {
+      return A3($List.map2,
+      F2(function (v0,v1) {
+         return {ctor: "_Tuple2"
+                ,_0: v0
+                ,_1: v1};
+      }),
+      _L.range(0,
+      $Native$Array.length(array) - 1),
+      $Native$Array.toList(array));
+   };
+   var toList = $Native$Array.toList;
+   var fromList = $Native$Array.fromList;
+   var initialize = $Native$Array.initialize;
+   var repeat = F2(function (n,e) {
+      return A2(initialize,
+      n,
+      $Basics.always(e));
+   });
+   var Array = {ctor: "Array"};
+   _elm.Array.values = {_op: _op
+                       ,empty: empty
+                       ,repeat: repeat
+                       ,initialize: initialize
+                       ,fromList: fromList
+                       ,length: length
+                       ,push: push
+                       ,append: append
+                       ,get: get
+                       ,set: set
+                       ,slice: slice
+                       ,toList: toList
+                       ,toIndexedList: toIndexedList
+                       ,map: map
+                       ,indexedMap: indexedMap
+                       ,filter: filter
+                       ,foldl: foldl
+                       ,foldr: foldr};
+   return _elm.Array.values;
+};
 Elm.Basics = Elm.Basics || {};
 Elm.Basics.make = function (_elm) {
    "use strict";
@@ -176,6 +314,70 @@ Elm.Basics.make = function (_elm) {
                         ,EQ: EQ
                         ,GT: GT};
    return _elm.Basics.values;
+};
+Elm.Char = Elm.Char || {};
+Elm.Char.make = function (_elm) {
+   "use strict";
+   _elm.Char = _elm.Char || {};
+   if (_elm.Char.values)
+   return _elm.Char.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Char",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Char = Elm.Native.Char.make(_elm);
+   var fromCode = $Native$Char.fromCode;
+   var toCode = $Native$Char.toCode;
+   var toLocaleLower = $Native$Char.toLocaleLower;
+   var toLocaleUpper = $Native$Char.toLocaleUpper;
+   var toLower = $Native$Char.toLower;
+   var toUpper = $Native$Char.toUpper;
+   var isBetween = F3(function (low,
+   high,
+   $char) {
+      return function () {
+         var code = toCode($char);
+         return _U.cmp(code,
+         toCode(low)) > -1 && _U.cmp(code,
+         toCode(high)) < 1;
+      }();
+   });
+   var isUpper = A2(isBetween,
+   _U.chr("A"),
+   _U.chr("Z"));
+   var isLower = A2(isBetween,
+   _U.chr("a"),
+   _U.chr("z"));
+   var isDigit = A2(isBetween,
+   _U.chr("0"),
+   _U.chr("9"));
+   var isOctDigit = A2(isBetween,
+   _U.chr("0"),
+   _U.chr("7"));
+   var isHexDigit = function ($char) {
+      return isDigit($char) || (A3(isBetween,
+      _U.chr("a"),
+      _U.chr("f"),
+      $char) || A3(isBetween,
+      _U.chr("A"),
+      _U.chr("F"),
+      $char));
+   };
+   _elm.Char.values = {_op: _op
+                      ,isUpper: isUpper
+                      ,isLower: isLower
+                      ,isDigit: isDigit
+                      ,isOctDigit: isOctDigit
+                      ,isHexDigit: isHexDigit
+                      ,toUpper: toUpper
+                      ,toLower: toLower
+                      ,toLocaleUpper: toLocaleUpper
+                      ,toLocaleLower: toLocaleLower
+                      ,toCode: toCode
+                      ,fromCode: fromCode};
+   return _elm.Char.values;
 };
 Elm.Color = Elm.Color || {};
 Elm.Color.make = function (_elm) {
@@ -628,6 +830,81 @@ Elm.Color.make = function (_elm) {
                        ,darkGray: darkGray};
    return _elm.Color.values;
 };
+Elm.CommonLocator = Elm.CommonLocator || {};
+Elm.CommonLocator.make = function (_elm) {
+   "use strict";
+   _elm.CommonLocator = _elm.CommonLocator || {};
+   if (_elm.CommonLocator.values)
+   return _elm.CommonLocator.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "CommonLocator",
+   $Basics = Elm.Basics.make(_elm),
+   $Types = Elm.Types.make(_elm);
+   var tilex2long = F2(function (x,
+   z) {
+      return x / Math.pow(2.0,
+      z) * 360.0 - 180;
+   });
+   var tiley2lat = F2(function (y,
+   z) {
+      return function () {
+         var n = $Basics.pi - 2.0 * $Basics.pi * y / Math.pow(2.0,
+         z);
+         return 180.0 / $Basics.pi * $Basics.atan(0.5 * (Math.pow($Basics.e,
+         n) - Math.pow($Basics.e,
+         0 - n)));
+      }();
+   });
+   var lon2tilex = F2(function (z,
+   lon) {
+      return (lon + 180.0) / 360.0 * Math.pow(2.0,
+      $Basics.toFloat($Basics.floor(z)));
+   });
+   var log = $Basics.logBase($Basics.e);
+   var lat2tiley = F2(function (z,
+   lat) {
+      return (1.0 - log($Basics.tan(lat * $Basics.pi / 180.0) + 1.0 / $Basics.cos(lat * $Basics.pi / 180.0)) / $Basics.pi) / 2.0 * Math.pow(2.0,
+      $Basics.toFloat($Basics.floor(z)));
+   });
+   var common = F3(function (tileSize,
+   zoom,
+   geopt) {
+      return function () {
+         var index = function (f) {
+            return $Basics.floor(f);
+         };
+         var pixel = function (f) {
+            return $Basics.floor((f - $Basics.toFloat(index(f))) * $Basics.toFloat(tileSize));
+         };
+         var position = F2(function (f1,
+         f2) {
+            return $Types.Position({ctor: "_Tuple2"
+                                   ,_0: pixel(f1)
+                                   ,_1: pixel(f2)});
+         });
+         var tile = F2(function (f1,f2) {
+            return $Types.Tile({ctor: "_Tuple2"
+                               ,_0: index(f1)
+                               ,_1: index(f2)});
+         });
+         var toOffset = F2(function (tX,
+         tY) {
+            return A2($Types.TileOffset,
+            A2(tile,tX,tY),
+            A2(position,tX,tY));
+         });
+         return A2(toOffset,
+         A2(lon2tilex,zoom,geopt.lon),
+         A2(lat2tiley,zoom,geopt.lat));
+      }();
+   });
+   _elm.CommonLocator.values = {_op: _op
+                               ,common: common};
+   return _elm.CommonLocator.values;
+};
 Elm.Debug = Elm.Debug || {};
 Elm.Debug.make = function (_elm) {
    "use strict";
@@ -653,6 +930,991 @@ Elm.Debug.make = function (_elm) {
                        ,watchSummary: watchSummary
                        ,trace: trace};
    return _elm.Debug.values;
+};
+Elm.Dict = Elm.Dict || {};
+Elm.Dict.make = function (_elm) {
+   "use strict";
+   _elm.Dict = _elm.Dict || {};
+   if (_elm.Dict.values)
+   return _elm.Dict.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Dict",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Debug = Elm.Native.Debug.make(_elm),
+   $String = Elm.String.make(_elm);
+   var foldr = F3(function (f,
+   acc,
+   t) {
+      return function () {
+         switch (t.ctor)
+         {case "RBEmpty":
+            switch (t._0.ctor)
+              {case "LBlack": return acc;}
+              break;
+            case "RBNode": return A3(foldr,
+              f,
+              A3(f,
+              t._1,
+              t._2,
+              A3(foldr,f,acc,t._4)),
+              t._3);}
+         _U.badCase($moduleName,
+         "between lines 408 and 416");
+      }();
+   });
+   var keys = function (dict) {
+      return A3(foldr,
+      F3(function (key,
+      value,
+      keyList) {
+         return A2($List._op["::"],
+         key,
+         keyList);
+      }),
+      _L.fromArray([]),
+      dict);
+   };
+   var values = function (dict) {
+      return A3(foldr,
+      F3(function (key,
+      value,
+      valueList) {
+         return A2($List._op["::"],
+         value,
+         valueList);
+      }),
+      _L.fromArray([]),
+      dict);
+   };
+   var toList = function (dict) {
+      return A3(foldr,
+      F3(function (key,value,list) {
+         return A2($List._op["::"],
+         {ctor: "_Tuple2"
+         ,_0: key
+         ,_1: value},
+         list);
+      }),
+      _L.fromArray([]),
+      dict);
+   };
+   var foldl = F3(function (f,
+   acc,
+   dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            switch (dict._0.ctor)
+              {case "LBlack": return acc;}
+              break;
+            case "RBNode": return A3(foldl,
+              f,
+              A3(f,
+              dict._1,
+              dict._2,
+              A3(foldl,f,acc,dict._3)),
+              dict._4);}
+         _U.badCase($moduleName,
+         "between lines 397 and 405");
+      }();
+   });
+   var isBBlack = function (dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            switch (dict._0.ctor)
+              {case "LBBlack": return true;}
+              break;
+            case "RBNode":
+            switch (dict._0.ctor)
+              {case "BBlack": return true;}
+              break;}
+         return false;
+      }();
+   };
+   var showFlag = function (f) {
+      return function () {
+         switch (f.ctor)
+         {case "Insert": return "Insert";
+            case "Remove": return "Remove";
+            case "Same": return "Same";}
+         _U.badCase($moduleName,
+         "between lines 173 and 179");
+      }();
+   };
+   var Same = {ctor: "Same"};
+   var Remove = {ctor: "Remove"};
+   var Insert = {ctor: "Insert"};
+   var get = F2(function (targetKey,
+   dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            switch (dict._0.ctor)
+              {case "LBlack":
+                 return $Maybe.Nothing;}
+              break;
+            case "RBNode":
+            return function () {
+                 var _v29 = A2($Basics.compare,
+                 targetKey,
+                 dict._1);
+                 switch (_v29.ctor)
+                 {case "EQ":
+                    return $Maybe.Just(dict._2);
+                    case "GT": return A2(get,
+                      targetKey,
+                      dict._4);
+                    case "LT": return A2(get,
+                      targetKey,
+                      dict._3);}
+                 _U.badCase($moduleName,
+                 "between lines 129 and 135");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 124 and 135");
+      }();
+   });
+   var member = F2(function (key,
+   dict) {
+      return function () {
+         var _v30 = A2(get,key,dict);
+         switch (_v30.ctor)
+         {case "Just": return true;
+            case "Nothing": return false;}
+         _U.badCase($moduleName,
+         "between lines 138 and 140");
+      }();
+   });
+   var max = function (dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            return $Native$Debug.crash("(max Empty) is not defined");
+            case "RBNode":
+            switch (dict._4.ctor)
+              {case "RBEmpty":
+                 return {ctor: "_Tuple2"
+                        ,_0: dict._1
+                        ,_1: dict._2};}
+              return max(dict._4);}
+         _U.badCase($moduleName,
+         "between lines 100 and 121");
+      }();
+   };
+   var min = function (dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            switch (dict._0.ctor)
+              {case "LBlack":
+                 return $Native$Debug.crash("(min Empty) is not defined");}
+              break;
+            case "RBNode":
+            switch (dict._3.ctor)
+              {case "RBEmpty":
+                 switch (dict._3._0.ctor)
+                   {case "LBlack":
+                      return {ctor: "_Tuple2"
+                             ,_0: dict._1
+                             ,_1: dict._2};}
+                   break;}
+              return min(dict._3);}
+         _U.badCase($moduleName,
+         "between lines 87 and 95");
+      }();
+   };
+   var RBEmpty = function (a) {
+      return {ctor: "RBEmpty"
+             ,_0: a};
+   };
+   var RBNode = F5(function (a,
+   b,
+   c,
+   d,
+   e) {
+      return {ctor: "RBNode"
+             ,_0: a
+             ,_1: b
+             ,_2: c
+             ,_3: d
+             ,_4: e};
+   });
+   var showLColor = function (color) {
+      return function () {
+         switch (color.ctor)
+         {case "LBBlack":
+            return "LBBlack";
+            case "LBlack": return "LBlack";}
+         _U.badCase($moduleName,
+         "between lines 70 and 72");
+      }();
+   };
+   var LBBlack = {ctor: "LBBlack"};
+   var LBlack = {ctor: "LBlack"};
+   var empty = RBEmpty(LBlack);
+   var map = F2(function (f,dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            switch (dict._0.ctor)
+              {case "LBlack":
+                 return RBEmpty(LBlack);}
+              break;
+            case "RBNode": return A5(RBNode,
+              dict._0,
+              dict._1,
+              A2(f,dict._1,dict._2),
+              A2(map,f,dict._3),
+              A2(map,f,dict._4));}
+         _U.badCase($moduleName,
+         "between lines 385 and 394");
+      }();
+   });
+   var showNColor = function (c) {
+      return function () {
+         switch (c.ctor)
+         {case "BBlack": return "BBlack";
+            case "Black": return "Black";
+            case "NBlack": return "NBlack";
+            case "Red": return "Red";}
+         _U.badCase($moduleName,
+         "between lines 56 and 60");
+      }();
+   };
+   var reportRemBug = F4(function (msg,
+   c,
+   lgot,
+   rgot) {
+      return $Native$Debug.crash($String.concat(_L.fromArray(["Internal red-black tree invariant violated, expected "
+                                                             ,msg
+                                                             ," and got "
+                                                             ,showNColor(c)
+                                                             ,"/"
+                                                             ,lgot
+                                                             ,"/"
+                                                             ,rgot
+                                                             ,"\nPlease report this bug to <https://github.com/elm-lang/Elm/issues>"])));
+   });
+   var NBlack = {ctor: "NBlack"};
+   var BBlack = {ctor: "BBlack"};
+   var Black = {ctor: "Black"};
+   var ensureBlackRoot = function (dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            switch (dict._0.ctor)
+              {case "LBlack": return dict;}
+              break;
+            case "RBNode":
+            switch (dict._0.ctor)
+              {case "Black": return dict;
+                 case "Red": return A5(RBNode,
+                   Black,
+                   dict._1,
+                   dict._2,
+                   dict._3,
+                   dict._4);}
+              break;}
+         _U.badCase($moduleName,
+         "between lines 145 and 157");
+      }();
+   };
+   var blackish = function (t) {
+      return function () {
+         switch (t.ctor)
+         {case "RBEmpty": return true;
+            case "RBNode":
+            return _U.eq(t._0,
+              Black) || _U.eq(t._0,BBlack);}
+         _U.badCase($moduleName,
+         "between lines 330 and 332");
+      }();
+   };
+   var blacken = function (t) {
+      return function () {
+         switch (t.ctor)
+         {case "RBEmpty":
+            return RBEmpty(LBlack);
+            case "RBNode": return A5(RBNode,
+              Black,
+              t._1,
+              t._2,
+              t._3,
+              t._4);}
+         _U.badCase($moduleName,
+         "between lines 369 and 371");
+      }();
+   };
+   var Red = {ctor: "Red"};
+   var moreBlack = function (color) {
+      return function () {
+         switch (color.ctor)
+         {case "BBlack":
+            return $Native$Debug.crash("Can\'t make a double black node more black!");
+            case "Black": return BBlack;
+            case "NBlack": return Red;
+            case "Red": return Black;}
+         _U.badCase($moduleName,
+         "between lines 235 and 239");
+      }();
+   };
+   var lessBlack = function (color) {
+      return function () {
+         switch (color.ctor)
+         {case "BBlack": return Black;
+            case "Black": return Red;
+            case "NBlack":
+            return $Native$Debug.crash("Can\'t make a negative black node less black!");
+            case "Red": return NBlack;}
+         _U.badCase($moduleName,
+         "between lines 244 and 248");
+      }();
+   };
+   var lessBlackTree = function (dict) {
+      return function () {
+         switch (dict.ctor)
+         {case "RBEmpty":
+            switch (dict._0.ctor)
+              {case "LBBlack":
+                 return RBEmpty(LBlack);}
+              break;
+            case "RBNode": return A5(RBNode,
+              lessBlack(dict._0),
+              dict._1,
+              dict._2,
+              dict._3,
+              dict._4);}
+         _U.badCase($moduleName,
+         "between lines 253 and 255");
+      }();
+   };
+   var redden = function (t) {
+      return function () {
+         switch (t.ctor)
+         {case "RBEmpty":
+            return $Native$Debug.crash("can\'t make a Leaf red");
+            case "RBNode": return A5(RBNode,
+              Red,
+              t._1,
+              t._2,
+              t._3,
+              t._4);}
+         _U.badCase($moduleName,
+         "between lines 377 and 382");
+      }();
+   };
+   var balance_node = function (t) {
+      return function () {
+         var assemble = function (col) {
+            return function (xk) {
+               return function (xv) {
+                  return function (yk) {
+                     return function (yv) {
+                        return function (zk) {
+                           return function (zv) {
+                              return function (a) {
+                                 return function (b) {
+                                    return function (c) {
+                                       return function (d) {
+                                          return A5(RBNode,
+                                          lessBlack(col),
+                                          yk,
+                                          yv,
+                                          A5(RBNode,Black,xk,xv,a,b),
+                                          A5(RBNode,Black,zk,zv,c,d));
+                                       };
+                                    };
+                                 };
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+         return blackish(t) ? function () {
+            switch (t.ctor)
+            {case "RBNode":
+               switch (t._3.ctor)
+                 {case "RBNode":
+                    switch (t._3._0.ctor)
+                      {case "Red":
+                         switch (t._3._3.ctor)
+                           {case "RBNode":
+                              switch (t._3._3._0.ctor)
+                                {case "Red":
+                                   return assemble(t._0)(t._3._3._1)(t._3._3._2)(t._3._1)(t._3._2)(t._1)(t._2)(t._3._3._3)(t._3._3._4)(t._3._4)(t._4);}
+                                break;}
+                           switch (t._3._4.ctor)
+                           {case "RBNode":
+                              switch (t._3._4._0.ctor)
+                                {case "Red":
+                                   return assemble(t._0)(t._3._1)(t._3._2)(t._3._4._1)(t._3._4._2)(t._1)(t._2)(t._3._3)(t._3._4._3)(t._3._4._4)(t._4);}
+                                break;}
+                           break;}
+                      break;}
+                 switch (t._4.ctor)
+                 {case "RBNode":
+                    switch (t._4._0.ctor)
+                      {case "Red":
+                         switch (t._4._3.ctor)
+                           {case "RBNode":
+                              switch (t._4._3._0.ctor)
+                                {case "Red":
+                                   return assemble(t._0)(t._1)(t._2)(t._4._3._1)(t._4._3._2)(t._4._1)(t._4._2)(t._3)(t._4._3._3)(t._4._3._4)(t._4._4);}
+                                break;}
+                           switch (t._4._4.ctor)
+                           {case "RBNode":
+                              switch (t._4._4._0.ctor)
+                                {case "Red":
+                                   return assemble(t._0)(t._1)(t._2)(t._4._1)(t._4._2)(t._4._4._1)(t._4._4._2)(t._3)(t._4._3)(t._4._4._3)(t._4._4._4);}
+                                break;}
+                           break;}
+                      break;}
+                 switch (t._0.ctor)
+                 {case "BBlack":
+                    switch (t._4.ctor)
+                      {case "RBNode":
+                         switch (t._4._0.ctor)
+                           {case "NBlack":
+                              switch (t._4._3.ctor)
+                                {case "RBNode":
+                                   switch (t._4._3._0.ctor)
+                                     {case "Black":
+                                        return function () {
+                                             switch (t._4._4.ctor)
+                                             {case "RBNode":
+                                                switch (t._4._4._0.ctor)
+                                                  {case "Black":
+                                                     return A5(RBNode,
+                                                       Black,
+                                                       t._4._3._1,
+                                                       t._4._3._2,
+                                                       A5(RBNode,
+                                                       Black,
+                                                       t._1,
+                                                       t._2,
+                                                       t._3,
+                                                       t._4._3._3),
+                                                       A5(balance,
+                                                       Black,
+                                                       t._4._1,
+                                                       t._4._2,
+                                                       t._4._3._4,
+                                                       redden(t._4._4)));}
+                                                  break;}
+                                             return t;
+                                          }();}
+                                     break;}
+                                break;}
+                           break;}
+                      switch (t._3.ctor)
+                      {case "RBNode":
+                         switch (t._3._0.ctor)
+                           {case "NBlack":
+                              switch (t._3._4.ctor)
+                                {case "RBNode":
+                                   switch (t._3._4._0.ctor)
+                                     {case "Black":
+                                        return function () {
+                                             switch (t._3._3.ctor)
+                                             {case "RBNode":
+                                                switch (t._3._3._0.ctor)
+                                                  {case "Black":
+                                                     return A5(RBNode,
+                                                       Black,
+                                                       t._3._4._1,
+                                                       t._3._4._2,
+                                                       A5(balance,
+                                                       Black,
+                                                       t._3._1,
+                                                       t._3._2,
+                                                       redden(t._3._3),
+                                                       t._3._4._3),
+                                                       A5(RBNode,
+                                                       Black,
+                                                       t._1,
+                                                       t._2,
+                                                       t._3._4._4,
+                                                       t._4));}
+                                                  break;}
+                                             return t;
+                                          }();}
+                                     break;}
+                                break;}
+                           break;}
+                      break;}
+                 break;}
+            return t;
+         }() : t;
+      }();
+   };
+   var balance = F5(function (c,
+   k,
+   v,
+   l,
+   r) {
+      return balance_node(A5(RBNode,
+      c,
+      k,
+      v,
+      l,
+      r));
+   });
+   var bubble = F5(function (c,
+   k,
+   v,
+   l,
+   r) {
+      return isBBlack(l) || isBBlack(r) ? A5(balance,
+      moreBlack(c),
+      k,
+      v,
+      lessBlackTree(l),
+      lessBlackTree(r)) : A5(RBNode,
+      c,
+      k,
+      v,
+      l,
+      r);
+   });
+   var remove_max = F5(function (c,
+   k,
+   v,
+   l,
+   r) {
+      return function () {
+         switch (r.ctor)
+         {case "RBEmpty": return A3(rem,
+              c,
+              l,
+              r);
+            case "RBNode": return A5(bubble,
+              c,
+              k,
+              v,
+              l,
+              A5(remove_max,
+              r._0,
+              r._1,
+              r._2,
+              r._3,
+              r._4));}
+         _U.badCase($moduleName,
+         "between lines 314 and 319");
+      }();
+   });
+   var rem = F3(function (c,l,r) {
+      return function () {
+         var _v169 = {ctor: "_Tuple2"
+                     ,_0: l
+                     ,_1: r};
+         switch (_v169.ctor)
+         {case "_Tuple2":
+            switch (_v169._0.ctor)
+              {case "RBEmpty":
+                 switch (_v169._1.ctor)
+                   {case "RBEmpty":
+                      return function () {
+                           switch (c.ctor)
+                           {case "Black":
+                              return RBEmpty(LBBlack);
+                              case "Red":
+                              return RBEmpty(LBlack);}
+                           _U.badCase($moduleName,
+                           "between lines 273 and 277");
+                        }();
+                      case "RBNode":
+                      return function () {
+                           var _v191 = {ctor: "_Tuple3"
+                                       ,_0: c
+                                       ,_1: _v169._0._0
+                                       ,_2: _v169._1._0};
+                           switch (_v191.ctor)
+                           {case "_Tuple3":
+                              switch (_v191._0.ctor)
+                                {case "Black":
+                                   switch (_v191._1.ctor)
+                                     {case "LBlack":
+                                        switch (_v191._2.ctor)
+                                          {case "Red": return A5(RBNode,
+                                               Black,
+                                               _v169._1._1,
+                                               _v169._1._2,
+                                               _v169._1._3,
+                                               _v169._1._4);}
+                                          break;}
+                                     break;}
+                                break;}
+                           return A4(reportRemBug,
+                           "Black/LBlack/Red",
+                           c,
+                           showLColor(_v169._0._0),
+                           showNColor(_v169._1._0));
+                        }();}
+                   break;
+                 case "RBNode":
+                 switch (_v169._1.ctor)
+                   {case "RBEmpty":
+                      return function () {
+                           var _v195 = {ctor: "_Tuple3"
+                                       ,_0: c
+                                       ,_1: _v169._0._0
+                                       ,_2: _v169._1._0};
+                           switch (_v195.ctor)
+                           {case "_Tuple3":
+                              switch (_v195._0.ctor)
+                                {case "Black":
+                                   switch (_v195._1.ctor)
+                                     {case "Red":
+                                        switch (_v195._2.ctor)
+                                          {case "LBlack":
+                                             return A5(RBNode,
+                                               Black,
+                                               _v169._0._1,
+                                               _v169._0._2,
+                                               _v169._0._3,
+                                               _v169._0._4);}
+                                          break;}
+                                     break;}
+                                break;}
+                           return A4(reportRemBug,
+                           "Black/Red/LBlack",
+                           c,
+                           showNColor(_v169._0._0),
+                           showLColor(_v169._1._0));
+                        }();
+                      case "RBNode":
+                      return function () {
+                           var l$ = A5(remove_max,
+                           _v169._0._0,
+                           _v169._0._1,
+                           _v169._0._2,
+                           _v169._0._3,
+                           _v169._0._4);
+                           var r = A5(RBNode,
+                           _v169._1._0,
+                           _v169._1._1,
+                           _v169._1._2,
+                           _v169._1._3,
+                           _v169._1._4);
+                           var l = A5(RBNode,
+                           _v169._0._0,
+                           _v169._0._1,
+                           _v169._0._2,
+                           _v169._0._3,
+                           _v169._0._4);
+                           var $ = max(l),
+                           k = $._0,
+                           v = $._1;
+                           return A5(bubble,c,k,v,l$,r);
+                        }();}
+                   break;}
+              break;}
+         _U.badCase($moduleName,
+         "between lines 271 and 300");
+      }();
+   });
+   var update = F3(function (k,
+   alter,
+   dict) {
+      return function () {
+         var up = function (dict) {
+            return function () {
+               switch (dict.ctor)
+               {case "RBEmpty":
+                  switch (dict._0.ctor)
+                    {case "LBlack":
+                       return function () {
+                            var _v206 = alter($Maybe.Nothing);
+                            switch (_v206.ctor)
+                            {case "Just":
+                               return {ctor: "_Tuple2"
+                                      ,_0: Insert
+                                      ,_1: A5(RBNode,
+                                      Red,
+                                      k,
+                                      _v206._0,
+                                      empty,
+                                      empty)};
+                               case "Nothing":
+                               return {ctor: "_Tuple2"
+                                      ,_0: Same
+                                      ,_1: empty};}
+                            _U.badCase($moduleName,
+                            "between lines 185 and 189");
+                         }();}
+                    break;
+                  case "RBNode":
+                  return function () {
+                       var _v208 = A2($Basics.compare,
+                       k,
+                       dict._1);
+                       switch (_v208.ctor)
+                       {case "EQ": return function () {
+                               var _v209 = alter($Maybe.Just(dict._2));
+                               switch (_v209.ctor)
+                               {case "Just":
+                                  return {ctor: "_Tuple2"
+                                         ,_0: Same
+                                         ,_1: A5(RBNode,
+                                         dict._0,
+                                         dict._1,
+                                         _v209._0,
+                                         dict._3,
+                                         dict._4)};
+                                  case "Nothing":
+                                  return {ctor: "_Tuple2"
+                                         ,_0: Remove
+                                         ,_1: A3(rem,
+                                         dict._0,
+                                         dict._3,
+                                         dict._4)};}
+                               _U.badCase($moduleName,
+                               "between lines 192 and 197");
+                            }();
+                          case "GT": return function () {
+                               var $ = up(dict._4),
+                               flag = $._0,
+                               newRight = $._1;
+                               return function () {
+                                  switch (flag.ctor)
+                                  {case "Insert":
+                                     return {ctor: "_Tuple2"
+                                            ,_0: Insert
+                                            ,_1: A5(balance,
+                                            dict._0,
+                                            dict._1,
+                                            dict._2,
+                                            dict._3,
+                                            newRight)};
+                                     case "Remove":
+                                     return {ctor: "_Tuple2"
+                                            ,_0: Remove
+                                            ,_1: A5(bubble,
+                                            dict._0,
+                                            dict._1,
+                                            dict._2,
+                                            dict._3,
+                                            newRight)};
+                                     case "Same":
+                                     return {ctor: "_Tuple2"
+                                            ,_0: Same
+                                            ,_1: A5(RBNode,
+                                            dict._0,
+                                            dict._1,
+                                            dict._2,
+                                            dict._3,
+                                            newRight)};}
+                                  _U.badCase($moduleName,
+                                  "between lines 206 and 211");
+                               }();
+                            }();
+                          case "LT": return function () {
+                               var $ = up(dict._3),
+                               flag = $._0,
+                               newLeft = $._1;
+                               return function () {
+                                  switch (flag.ctor)
+                                  {case "Insert":
+                                     return {ctor: "_Tuple2"
+                                            ,_0: Insert
+                                            ,_1: A5(balance,
+                                            dict._0,
+                                            dict._1,
+                                            dict._2,
+                                            newLeft,
+                                            dict._4)};
+                                     case "Remove":
+                                     return {ctor: "_Tuple2"
+                                            ,_0: Remove
+                                            ,_1: A5(bubble,
+                                            dict._0,
+                                            dict._1,
+                                            dict._2,
+                                            newLeft,
+                                            dict._4)};
+                                     case "Same":
+                                     return {ctor: "_Tuple2"
+                                            ,_0: Same
+                                            ,_1: A5(RBNode,
+                                            dict._0,
+                                            dict._1,
+                                            dict._2,
+                                            newLeft,
+                                            dict._4)};}
+                                  _U.badCase($moduleName,
+                                  "between lines 199 and 204");
+                               }();
+                            }();}
+                       _U.badCase($moduleName,
+                       "between lines 190 and 211");
+                    }();}
+               _U.badCase($moduleName,
+               "between lines 183 and 211");
+            }();
+         };
+         var $ = up(dict),
+         flag = $._0,
+         updatedDict = $._1;
+         return function () {
+            switch (flag.ctor)
+            {case "Insert":
+               return ensureBlackRoot(updatedDict);
+               case "Remove":
+               return blacken(updatedDict);
+               case "Same":
+               return updatedDict;}
+            _U.badCase($moduleName,
+            "between lines 213 and 219");
+         }();
+      }();
+   });
+   var insert = F3(function (key,
+   value,
+   dict) {
+      return A3(update,
+      key,
+      $Basics.always($Maybe.Just(value)),
+      dict);
+   });
+   var singleton = F2(function (key,
+   value) {
+      return A3(insert,
+      key,
+      value,
+      RBEmpty(LBlack));
+   });
+   var union = F2(function (t1,
+   t2) {
+      return A3(foldl,
+      insert,
+      t2,
+      t1);
+   });
+   var fromList = function (assocs) {
+      return A3($List.foldl,
+      F2(function (_v214,dict) {
+         return function () {
+            switch (_v214.ctor)
+            {case "_Tuple2":
+               return A3(insert,
+                 _v214._0,
+                 _v214._1,
+                 dict);}
+            _U.badCase($moduleName,
+            "on line 457, column 38 to 59");
+         }();
+      }),
+      empty,
+      assocs);
+   };
+   var filter = F2(function (predicate,
+   dictionary) {
+      return function () {
+         var add = F3(function (key,
+         value,
+         dict) {
+            return A2(predicate,
+            key,
+            value) ? A3(insert,
+            key,
+            value,
+            dict) : dict;
+         });
+         return A3(foldl,
+         add,
+         empty,
+         dictionary);
+      }();
+   });
+   var intersect = F2(function (t1,
+   t2) {
+      return A2(filter,
+      F2(function (k,_v218) {
+         return function () {
+            return A2(member,k,t2);
+         }();
+      }),
+      t1);
+   });
+   var partition = F2(function (predicate,
+   dict) {
+      return function () {
+         var add = F3(function (key,
+         value,
+         _v220) {
+            return function () {
+               switch (_v220.ctor)
+               {case "_Tuple2":
+                  return A2(predicate,
+                    key,
+                    value) ? {ctor: "_Tuple2"
+                             ,_0: A3(insert,
+                             key,
+                             value,
+                             _v220._0)
+                             ,_1: _v220._1} : {ctor: "_Tuple2"
+                                              ,_0: _v220._0
+                                              ,_1: A3(insert,
+                                              key,
+                                              value,
+                                              _v220._1)};}
+               _U.badCase($moduleName,
+               "between lines 478 and 480");
+            }();
+         });
+         return A3(foldl,
+         add,
+         {ctor: "_Tuple2"
+         ,_0: empty
+         ,_1: empty},
+         dict);
+      }();
+   });
+   var remove = F2(function (key,
+   dict) {
+      return A3(update,
+      key,
+      $Basics.always($Maybe.Nothing),
+      dict);
+   });
+   var diff = F2(function (t1,t2) {
+      return A3(foldl,
+      F3(function (k,v,t) {
+         return A2(remove,k,t);
+      }),
+      t1,
+      t2);
+   });
+   _elm.Dict.values = {_op: _op
+                      ,empty: empty
+                      ,singleton: singleton
+                      ,insert: insert
+                      ,update: update
+                      ,get: get
+                      ,remove: remove
+                      ,member: member
+                      ,filter: filter
+                      ,partition: partition
+                      ,foldl: foldl
+                      ,foldr: foldr
+                      ,map: map
+                      ,union: union
+                      ,intersect: intersect
+                      ,diff: diff
+                      ,keys: keys
+                      ,values: values
+                      ,toList: toList
+                      ,fromList: fromList};
+   return _elm.Dict.values;
 };
 Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Collage = Elm.Graphics.Collage || {};
@@ -1542,6 +2804,201 @@ Elm.Graphics.Element.make = function (_elm) {
                                   ,Position: Position};
    return _elm.Graphics.Element.values;
 };
+Elm.Graphics = Elm.Graphics || {};
+Elm.Graphics.Input = Elm.Graphics.Input || {};
+Elm.Graphics.Input.make = function (_elm) {
+   "use strict";
+   _elm.Graphics = _elm.Graphics || {};
+   _elm.Graphics.Input = _elm.Graphics.Input || {};
+   if (_elm.Graphics.Input.values)
+   return _elm.Graphics.Input.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Graphics.Input",
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Native$Graphics$Input = Elm.Native.Graphics.Input.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var clickable = $Native$Graphics$Input.clickable;
+   var hoverable = $Native$Graphics$Input.hoverable;
+   var dropDown = $Native$Graphics$Input.dropDown;
+   var checkbox = $Native$Graphics$Input.checkbox;
+   var customButton = $Native$Graphics$Input.customButton;
+   var button = $Native$Graphics$Input.button;
+   _elm.Graphics.Input.values = {_op: _op
+                                ,button: button
+                                ,customButton: customButton
+                                ,checkbox: checkbox
+                                ,dropDown: dropDown
+                                ,hoverable: hoverable
+                                ,clickable: clickable};
+   return _elm.Graphics.Input.values;
+};
+Elm.Keyboard = Elm.Keyboard || {};
+Elm.Keyboard.make = function (_elm) {
+   "use strict";
+   _elm.Keyboard = _elm.Keyboard || {};
+   if (_elm.Keyboard.values)
+   return _elm.Keyboard.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Keyboard",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Keyboard = Elm.Native.Keyboard.make(_elm),
+   $Set = Elm.Set.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var presses = A2($Signal.map,
+   function (_) {
+      return _.keyCode;
+   },
+   $Native$Keyboard.presses);
+   var toXY = F2(function (_v0,
+   keyCodes) {
+      return function () {
+         return function () {
+            var is = function (keyCode) {
+               return A2($Set.member,
+               keyCode,
+               keyCodes) ? 1 : 0;
+            };
+            return {_: {}
+                   ,x: is(_v0.right) - is(_v0.left)
+                   ,y: is(_v0.up) - is(_v0.down)};
+         }();
+      }();
+   });
+   var Directions = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,down: b
+             ,left: c
+             ,right: d
+             ,up: a};
+   });
+   var dropMap = F2(function (f,
+   signal) {
+      return $Signal.dropRepeats(A2($Signal.map,
+      f,
+      signal));
+   });
+   var EventInfo = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,alt: a
+             ,keyCode: c
+             ,meta: b};
+   });
+   var Blur = {ctor: "Blur"};
+   var Down = function (a) {
+      return {ctor: "Down",_0: a};
+   };
+   var Up = function (a) {
+      return {ctor: "Up",_0: a};
+   };
+   var rawEvents = $Signal.mergeMany(_L.fromArray([A2($Signal.map,
+                                                  Up,
+                                                  $Native$Keyboard.ups)
+                                                  ,A2($Signal.map,
+                                                  Down,
+                                                  $Native$Keyboard.downs)
+                                                  ,A2($Signal.map,
+                                                  $Basics.always(Blur),
+                                                  $Native$Keyboard.blurs)]));
+   var empty = {_: {}
+               ,alt: false
+               ,keyCodes: $Set.empty
+               ,meta: false};
+   var update = F2(function (event,
+   model) {
+      return function () {
+         switch (event.ctor)
+         {case "Blur": return empty;
+            case "Down": return {_: {}
+                                ,alt: event._0.alt
+                                ,keyCodes: A2($Set.insert,
+                                event._0.keyCode,
+                                model.keyCodes)
+                                ,meta: event._0.meta};
+            case "Up": return {_: {}
+                              ,alt: event._0.alt
+                              ,keyCodes: A2($Set.remove,
+                              event._0.keyCode,
+                              model.keyCodes)
+                              ,meta: event._0.meta};}
+         _U.badCase($moduleName,
+         "between lines 68 and 82");
+      }();
+   });
+   var model = A3($Signal.foldp,
+   update,
+   empty,
+   rawEvents);
+   var alt = A2(dropMap,
+   function (_) {
+      return _.alt;
+   },
+   model);
+   var meta = A2(dropMap,
+   function (_) {
+      return _.meta;
+   },
+   model);
+   var keysDown = A2(dropMap,
+   function (_) {
+      return _.keyCodes;
+   },
+   model);
+   var arrows = A2(dropMap,
+   toXY({_: {}
+        ,down: 40
+        ,left: 37
+        ,right: 39
+        ,up: 38}),
+   keysDown);
+   var wasd = A2(dropMap,
+   toXY({_: {}
+        ,down: 83
+        ,left: 65
+        ,right: 68
+        ,up: 87}),
+   keysDown);
+   var isDown = function (keyCode) {
+      return A2(dropMap,
+      $Set.member(keyCode),
+      keysDown);
+   };
+   var ctrl = isDown(17);
+   var shift = isDown(16);
+   var space = isDown(32);
+   var enter = isDown(13);
+   var Model = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,alt: a
+             ,keyCodes: c
+             ,meta: b};
+   });
+   _elm.Keyboard.values = {_op: _op
+                          ,arrows: arrows
+                          ,wasd: wasd
+                          ,enter: enter
+                          ,space: space
+                          ,ctrl: ctrl
+                          ,shift: shift
+                          ,alt: alt
+                          ,meta: meta
+                          ,isDown: isDown
+                          ,keysDown: keysDown
+                          ,presses: presses};
+   return _elm.Keyboard.values;
+};
 Elm.List = Elm.List || {};
 Elm.List.make = function (_elm) {
    "use strict";
@@ -1897,6 +3354,68 @@ Elm.List.make = function (_elm) {
                       ,sortWith: sortWith};
    return _elm.List.values;
 };
+Elm.MapBox = Elm.MapBox || {};
+Elm.MapBox.make = function (_elm) {
+   "use strict";
+   _elm.MapBox = _elm.MapBox || {};
+   if (_elm.MapBox.values)
+   return _elm.MapBox.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "MapBox",
+   $Basics = Elm.Basics.make(_elm),
+   $CommonLocator = Elm.CommonLocator.make(_elm),
+   $Types = Elm.Types.make(_elm);
+   var mapBoxUrl = F4(function (id,
+   token,
+   z,
+   t) {
+      return function () {
+         var wrap = F2(function (z,
+         c) {
+            return A2($Basics._op["%"],
+            c,
+            Math.pow(2,$Basics.floor(z)));
+         });
+         var $ = t.coordinate,
+         x = $._0,
+         y = $._1;
+         return A2($Basics._op["++"],
+         "https://api.tiles.mapbox.com/v4/",
+         A2($Basics._op["++"],
+         id,
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString($Basics.floor(z)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(A2(wrap,z,x)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(y),
+         A2($Basics._op["++"],
+         ".png?access_token=",
+         token)))))))));
+      }();
+   });
+   var tileSize = 256;
+   var locate = $CommonLocator.common(tileSize);
+   var mapBox = F2(function (identifier,
+   token) {
+      return A3($Types.TileSource,
+      tileSize,
+      $CommonLocator.common(tileSize),
+      A2(mapBoxUrl,identifier,token));
+   });
+   _elm.MapBox.values = {_op: _op
+                        ,mapBox: mapBox};
+   return _elm.MapBox.values;
+};
 Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
    "use strict";
@@ -1970,6 +3489,1056 @@ Elm.Maybe.make = function (_elm) {
                        ,Nothing: Nothing};
    return _elm.Maybe.values;
 };
+Elm.Mouse = Elm.Mouse || {};
+Elm.Mouse.make = function (_elm) {
+   "use strict";
+   _elm.Mouse = _elm.Mouse || {};
+   if (_elm.Mouse.values)
+   return _elm.Mouse.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Mouse",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Mouse = Elm.Native.Mouse.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var clicks = $Native$Mouse.clicks;
+   var isDown = $Native$Mouse.isDown;
+   var position = $Native$Mouse.position;
+   var x = A2($Signal.map,
+   $Basics.fst,
+   position);
+   var y = A2($Signal.map,
+   $Basics.snd,
+   position);
+   _elm.Mouse.values = {_op: _op
+                       ,position: position
+                       ,x: x
+                       ,y: y
+                       ,isDown: isDown
+                       ,clicks: clicks};
+   return _elm.Mouse.values;
+};
+Elm.Movement = Elm.Movement || {};
+Elm.Movement.make = function (_elm) {
+   "use strict";
+   _elm.Movement = _elm.Movement || {};
+   if (_elm.Movement.values)
+   return _elm.Movement.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Movement",
+   $Keyboard = Elm.Keyboard.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var mouseState = A3($Signal.map2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   $Mouse.isDown,
+   $Mouse.position);
+   var keyState = function () {
+      var toTuple = function (a) {
+         return {ctor: "_Tuple2"
+                ,_0: a.x
+                ,_1: a.y};
+      };
+      return A2($Signal.map,
+      toTuple,
+      $Keyboard.arrows);
+   }();
+   _elm.Movement.values = {_op: _op
+                          ,mouseState: mouseState
+                          ,keyState: keyState};
+   return _elm.Movement.values;
+};
+Elm.Native.Array = {};
+Elm.Native.Array.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Array = localRuntime.Native.Array || {};
+	if (localRuntime.Native.Array.values)
+	{
+		return localRuntime.Native.Array.values;
+	}
+	if ('values' in Elm.Native.Array)
+	{
+		return localRuntime.Native.Array.values = Elm.Native.Array.values;
+	}
+
+	var List = Elm.Native.List.make(localRuntime);
+
+	// A RRB-Tree has two distinct data types.
+	// Leaf -> "height"  is always 0
+	//         "table"   is an array of elements
+	// Node -> "height"  is always greater than 0
+	//         "table"   is an array of child nodes
+	//         "lengths" is an array of accumulated lengths of the child nodes
+
+	// M is the maximal table size. 32 seems fast. E is the allowed increase
+	// of search steps when concatting to find an index. Lower values will
+	// decrease balancing, but will increase search steps.
+	var M = 32;
+	var E = 2;
+
+	// An empty array.
+	var empty = {
+		ctor: "_Array",
+		height: 0,
+		table: new Array()
+	};
+
+
+	function get(i, array)
+	{
+		if (i < 0 || i >= length(array))
+		{
+			throw new Error(
+				"Index " + i + " is out of range. Check the length of " +
+				"your array first or use getMaybe or getWithDefault.");
+		}
+		return unsafeGet(i, array);
+	}
+
+
+	function unsafeGet(i, array)
+	{
+		for (var x = array.height; x > 0; x--)
+		{
+			var slot = i >> (x * 5);
+			while (array.lengths[slot] <= i)
+			{
+				slot++;
+			}
+			if (slot > 0)
+			{
+				i -= array.lengths[slot - 1];
+			}
+			array = array.table[slot];
+		}
+		return array.table[i];
+	}
+
+
+	// Sets the value at the index i. Only the nodes leading to i will get
+	// copied and updated.
+	function set(i, item, array)
+	{
+		if (i < 0 || length(array) <= i)
+		{
+			return array;
+		}
+		return unsafeSet(i, item, array);
+	}
+
+
+	function unsafeSet(i, item, array)
+	{
+		array = nodeCopy(array);
+
+		if (array.height == 0)
+		{
+			array.table[i] = item;
+		}
+		else
+		{
+			var slot = getSlot(i, array);
+			if (slot > 0)
+			{
+				i -= array.lengths[slot - 1];
+			}
+			array.table[slot] = unsafeSet(i, item, array.table[slot]);
+		}
+		return array;
+	}
+
+
+	function initialize(len, f)
+	{
+		if (len == 0)
+		{
+			return empty;
+		}
+		var h = Math.floor( Math.log(len) / Math.log(M) );
+		return initialize_(f, h, 0, len);
+	}
+
+	function initialize_(f, h, from, to)
+	{
+		if (h == 0)
+		{
+			var table = new Array((to - from) % (M + 1));
+			for (var i = 0; i < table.length; i++)
+			{
+			  table[i] = f(from + i);
+			}
+			return {
+				ctor: "_Array",
+				height: 0,
+				table: table
+			};
+		}
+
+		var step = Math.pow(M, h);
+		var table = new Array(Math.ceil((to - from) / step));
+		var lengths = new Array(table.length);
+		for (var i = 0; i < table.length; i++)
+		{
+			table[i] = initialize_(f, h - 1, from + (i * step), Math.min(from + ((i + 1) * step), to));
+			lengths[i] = length(table[i]) + (i > 0 ? lengths[i-1] : 0);
+		}
+		return {
+			ctor: "_Array",
+			height: h,
+			table: table,
+			lengths: lengths
+		};
+	}
+
+	function fromList(list)
+	{
+		if (list == List.Nil)
+		{
+			return empty;
+		}
+
+		// Allocate M sized blocks (table) and write list elements to it.
+		var table = new Array(M);
+		var nodes = new Array();
+		var i = 0;
+
+		while (list.ctor !== '[]')
+		{
+			table[i] = list._0;
+			list = list._1;
+			i++;
+
+			// table is full, so we can push a leaf containing it into the
+			// next node.
+			if (i == M)
+			{
+				var leaf = {
+					ctor: "_Array",
+					height: 0,
+					table: table
+				};
+				fromListPush(leaf, nodes);
+				table = new Array(M);
+				i = 0;
+			}
+		}
+
+		// Maybe there is something left on the table.
+		if (i > 0)
+		{
+			var leaf = {
+				ctor: "_Array",
+				height: 0,
+				table: table.splice(0,i)
+			};
+			fromListPush(leaf, nodes);
+		}
+
+		// Go through all of the nodes and eventually push them into higher nodes.
+		for (var h = 0; h < nodes.length - 1; h++)
+		{
+			if (nodes[h].table.length > 0)
+			{
+				fromListPush(nodes[h], nodes);
+			}
+		}
+
+		var head = nodes[nodes.length - 1];
+		if (head.height > 0 && head.table.length == 1)
+		{
+			return head.table[0];
+		}
+		else
+		{
+			return head;
+		}
+	}
+
+	// Push a node into a higher node as a child.
+	function fromListPush(toPush, nodes)
+	{
+		var h = toPush.height;
+
+		// Maybe the node on this height does not exist.
+		if (nodes.length == h)
+		{
+			var node = {
+				ctor: "_Array",
+				height: h + 1,
+				table: new Array(),
+				lengths: new Array()
+			};
+			nodes.push(node);
+		}
+
+		nodes[h].table.push(toPush);
+		var len = length(toPush);
+		if (nodes[h].lengths.length > 0)
+		{
+			len += nodes[h].lengths[nodes[h].lengths.length - 1];
+		}
+		nodes[h].lengths.push(len);
+
+		if (nodes[h].table.length == M)
+		{
+			fromListPush(nodes[h], nodes);
+			nodes[h] = {
+				ctor: "_Array",
+				height: h + 1,
+				table: new Array(),
+				lengths: new Array()
+			};
+		}
+	}
+
+	// Pushes an item via push_ to the bottom right of a tree.
+	function push(item, a)
+	{
+		var pushed = push_(item, a);
+		if (pushed !== null)
+		{
+			return pushed;
+		}
+
+		var newTree = create(item, a.height);
+		return siblise(a, newTree);
+	}
+
+	// Recursively tries to push an item to the bottom-right most
+	// tree possible. If there is no space left for the item,
+	// null will be returned.
+	function push_(item, a)
+	{
+		// Handle resursion stop at leaf level.
+		if (a.height == 0)
+		{
+			if (a.table.length < M)
+			{
+				var newA = {
+					ctor: "_Array",
+					height: 0,
+					table: a.table.slice()
+				};
+				newA.table.push(item);
+				return newA;
+			}
+			else
+			{
+			  return null;
+			}
+		}
+
+		// Recursively push
+		var pushed = push_(item, botRight(a));
+
+		// There was space in the bottom right tree, so the slot will
+		// be updated.
+		if (pushed != null)
+		{
+			var newA = nodeCopy(a);
+			newA.table[newA.table.length - 1] = pushed;
+			newA.lengths[newA.lengths.length - 1]++;
+			return newA;
+		}
+
+		// When there was no space left, check if there is space left
+		// for a new slot with a tree which contains only the item
+		// at the bottom.
+		if (a.table.length < M)
+		{
+			var newSlot = create(item, a.height - 1);
+			var newA = nodeCopy(a);
+			newA.table.push(newSlot);
+			newA.lengths.push(newA.lengths[newA.lengths.length - 1] + length(newSlot));
+			return newA;
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	// Converts an array into a list of elements.
+	function toList(a)
+	{
+		return toList_(List.Nil, a);
+	}
+
+	function toList_(list, a)
+	{
+		for (var i = a.table.length - 1; i >= 0; i--)
+		{
+			list =
+				a.height == 0
+					? List.Cons(a.table[i], list)
+					: toList_(list, a.table[i]);
+		}
+		return list;
+	}
+
+	// Maps a function over the elements of an array.
+	function map(f, a)
+	{
+		var newA = {
+			ctor: "_Array",
+			height: a.height,
+			table: new Array(a.table.length)
+		};
+		if (a.height > 0)
+		{
+			newA.lengths = a.lengths;
+		}
+		for (var i = 0; i < a.table.length; i++)
+		{
+			newA.table[i] =
+				a.height == 0
+					? f(a.table[i])
+					: map(f, a.table[i]);
+		}
+		return newA;
+	}
+
+	// Maps a function over the elements with their index as first argument.
+	function indexedMap(f, a)
+	{
+		return indexedMap_(f, a, 0);
+	}
+
+	function indexedMap_(f, a, from)
+	{
+		var newA = {
+			ctor: "_Array",
+			height: a.height,
+			table: new Array(a.table.length)
+		};
+		if (a.height > 0)
+		{
+			newA.lengths = a.lengths;
+		}
+		for (var i = 0; i < a.table.length; i++)
+		{
+			newA.table[i] =
+				a.height == 0
+					? A2(f, from + i, a.table[i])
+					: indexedMap_(f, a.table[i], i == 0 ? 0 : a.lengths[i - 1]);
+		}
+		return newA;
+	}
+
+	function foldl(f, b, a)
+	{
+		if (a.height == 0)
+		{
+			for (var i = 0; i < a.table.length; i++)
+			{
+				b = A2(f, a.table[i], b);
+			}
+		}
+		else
+		{
+			for (var i = 0; i < a.table.length; i++)
+			{
+				b = foldl(f, b, a.table[i]);
+			}
+		}
+		return b;
+	}
+
+	function foldr(f, b, a)
+	{
+		if (a.height == 0)
+		{
+			for (var i = a.table.length; i--; )
+			{
+				b = A2(f, a.table[i], b);
+			}
+		}
+		else
+		{
+			for (var i = a.table.length; i--; )
+			{
+				b = foldr(f, b, a.table[i]);
+			}
+		}
+		return b;
+	}
+
+	// TODO: currently, it slices the right, then the left. This can be
+	// optimized.
+	function slice(from, to, a)
+	{
+		if (from < 0)
+		{
+			from += length(a);
+		}
+		if (to < 0)
+		{
+			to += length(a);
+		}
+		return sliceLeft(from, sliceRight(to, a));
+	}
+
+	function sliceRight(to, a)
+	{
+		if (to == length(a))
+		{
+			return a;
+		}
+
+		// Handle leaf level.
+		if (a.height == 0)
+		{
+			var newA = { ctor:"_Array", height:0 };
+			newA.table = a.table.slice(0, to);
+			return newA;
+		}
+
+		// Slice the right recursively.
+		var right = getSlot(to, a);
+		var sliced = sliceRight(to - (right > 0 ? a.lengths[right - 1] : 0), a.table[right]);
+
+		// Maybe the a node is not even needed, as sliced contains the whole slice.
+		if (right == 0)
+		{
+			return sliced;
+		}
+
+		// Create new node.
+		var newA = {
+			ctor: "_Array",
+			height: a.height,
+			table: a.table.slice(0, right),
+			lengths: a.lengths.slice(0, right)
+		};
+		if (sliced.table.length > 0)
+		{
+			newA.table[right] = sliced;
+			newA.lengths[right] = length(sliced) + (right > 0 ? newA.lengths[right - 1] : 0);
+		}
+		return newA;
+	}
+
+	function sliceLeft(from, a)
+	{
+		if (from == 0)
+		{
+			return a;
+		}
+
+		// Handle leaf level.
+		if (a.height == 0)
+		{
+			var newA = { ctor:"_Array", height:0 };
+			newA.table = a.table.slice(from, a.table.length + 1);
+			return newA;
+		}
+
+		// Slice the left recursively.
+		var left = getSlot(from, a);
+		var sliced = sliceLeft(from - (left > 0 ? a.lengths[left - 1] : 0), a.table[left]);
+
+		// Maybe the a node is not even needed, as sliced contains the whole slice.
+		if (left == a.table.length - 1)
+		{
+			return sliced;
+		}
+
+		// Create new node.
+		var newA = {
+			ctor: "_Array",
+			height: a.height,
+			table: a.table.slice(left, a.table.length + 1),
+			lengths: new Array(a.table.length - left)
+		};
+		newA.table[0] = sliced;
+		var len = 0;
+		for (var i = 0; i < newA.table.length; i++)
+		{
+			len += length(newA.table[i]);
+			newA.lengths[i] = len;
+		}
+
+		return newA;
+	}
+
+	// Appends two trees.
+	function append(a,b)
+	{
+		if (a.table.length === 0)
+		{
+			return b;
+		}
+		if (b.table.length === 0)
+		{
+			return a;
+		}
+
+		var c = append_(a, b);
+
+		// Check if both nodes can be crunshed together.
+		if (c[0].table.length + c[1].table.length <= M)
+		{
+			if (c[0].table.length === 0)
+			{
+				return c[1];
+			}
+			if (c[1].table.length === 0)
+			{
+				return c[0];
+			}
+
+			// Adjust .table and .lengths
+			c[0].table = c[0].table.concat(c[1].table);
+			if (c[0].height > 0)
+			{
+				var len = length(c[0]);
+				for (var i = 0; i < c[1].lengths.length; i++)
+				{
+					c[1].lengths[i] += len;
+				}
+				c[0].lengths = c[0].lengths.concat(c[1].lengths);
+			}
+
+			return c[0];
+		}
+
+		if (c[0].height > 0)
+		{
+			var toRemove = calcToRemove(a, b);
+			if (toRemove > E)
+			{
+				c = shuffle(c[0], c[1], toRemove);
+			}
+		}
+
+		return siblise(c[0], c[1]);
+	}
+
+	// Returns an array of two nodes; right and left. One node _may_ be empty.
+	function append_(a, b)
+	{
+		if (a.height === 0 && b.height === 0)
+		{
+			return [a, b];
+		}
+
+		if (a.height !== 1 || b.height !== 1)
+		{
+			if (a.height === b.height)
+			{
+				a = nodeCopy(a);
+				b = nodeCopy(b);
+				var appended = append_(botRight(a), botLeft(b));
+
+				insertRight(a, appended[1]);
+				insertLeft(b, appended[0]);
+			}
+			else if (a.height > b.height)
+			{
+				a = nodeCopy(a);
+				var appended = append_(botRight(a), b);
+
+				insertRight(a, appended[0]);
+				b = parentise(appended[1], appended[1].height + 1);
+			}
+			else
+			{
+				b = nodeCopy(b);
+				var appended = append_(a, botLeft(b));
+
+				var left = appended[0].table.length === 0 ? 0 : 1;
+				var right = left === 0 ? 1 : 0;
+				insertLeft(b, appended[left]);
+				a = parentise(appended[right], appended[right].height + 1);
+			}
+		}
+
+		// Check if balancing is needed and return based on that.
+		if (a.table.length === 0 || b.table.length === 0)
+		{
+			return [a,b];
+		}
+
+		var toRemove = calcToRemove(a, b);
+		if (toRemove <= E)
+		{
+			return [a,b];
+		}
+		return shuffle(a, b, toRemove);
+	}
+
+	// Helperfunctions for append_. Replaces a child node at the side of the parent.
+	function insertRight(parent, node)
+	{
+		var index = parent.table.length - 1;
+		parent.table[index] = node;
+		parent.lengths[index] = length(node)
+		parent.lengths[index] += index > 0 ? parent.lengths[index - 1] : 0;
+	}
+
+	function insertLeft(parent, node)
+	{
+		if (node.table.length > 0)
+		{
+			parent.table[0] = node;
+			parent.lengths[0] = length(node);
+
+			var len = length(parent.table[0]);
+			for (var i = 1; i < parent.lengths.length; i++)
+			{
+				len += length(parent.table[i]);
+				parent.lengths[i] = len;
+			}
+		}
+		else
+		{
+			parent.table.shift();
+			for (var i = 1; i < parent.lengths.length; i++)
+			{
+				parent.lengths[i] = parent.lengths[i] - parent.lengths[0];
+			}
+			parent.lengths.shift();
+		}
+	}
+
+	// Returns the extra search steps for E. Refer to the paper.
+	function calcToRemove(a, b)
+	{
+		var subLengths = 0;
+		for (var i = 0; i < a.table.length; i++)
+		{
+			subLengths += a.table[i].table.length;
+		}
+		for (var i = 0; i < b.table.length; i++)
+		{
+			subLengths += b.table[i].table.length;
+		}
+
+		var toRemove = a.table.length + b.table.length
+		return toRemove - (Math.floor((subLengths - 1) / M) + 1);
+	}
+
+	// get2, set2 and saveSlot are helpers for accessing elements over two arrays.
+	function get2(a, b, index)
+	{
+		return index < a.length
+			? a[index]
+			: b[index - a.length];
+	}
+
+	function set2(a, b, index, value)
+	{
+		if (index < a.length)
+		{
+			a[index] = value;
+		}
+		else
+		{
+			b[index - a.length] = value;
+		}
+	}
+
+	function saveSlot(a, b, index, slot)
+	{
+		set2(a.table, b.table, index, slot);
+
+		var l = (index == 0 || index == a.lengths.length)
+			? 0
+			: get2(a.lengths, a.lengths, index - 1);
+
+		set2(a.lengths, b.lengths, index, l + length(slot));
+	}
+
+	// Creates a node or leaf with a given length at their arrays for perfomance.
+	// Is only used by shuffle.
+	function createNode(h, length)
+	{
+		if (length < 0)
+		{
+			length = 0;
+		}
+		var a = {
+			ctor: "_Array",
+			height: h,
+			table: new Array(length)
+		};
+		if (h > 0)
+		{
+			a.lengths = new Array(length);
+		}
+		return a;
+	}
+
+	// Returns an array of two balanced nodes.
+	function shuffle(a, b, toRemove)
+	{
+		var newA = createNode(a.height, Math.min(M, a.table.length + b.table.length - toRemove));
+		var newB = createNode(a.height, newA.table.length - (a.table.length + b.table.length - toRemove));
+
+		// Skip the slots with size M. More precise: copy the slot references
+		// to the new node
+		var read = 0;
+		while (get2(a.table, b.table, read).table.length % M == 0)
+		{
+			set2(newA.table, newB.table, read, get2(a.table, b.table, read));
+			set2(newA.lengths, newB.lengths, read, get2(a.lengths, b.lengths, read));
+			read++;
+		}
+
+		// Pulling items from left to right, caching in a slot before writing
+		// it into the new nodes.
+		var write = read;
+		var slot = new createNode(a.height - 1, 0);
+		var from = 0;
+
+		// If the current slot is still containing data, then there will be at
+		// least one more write, so we do not break this loop yet.
+		while (read - write - (slot.table.length > 0 ? 1 : 0) < toRemove)
+		{
+			// Find out the max possible items for copying.
+			var source = get2(a.table, b.table, read);
+			var to = Math.min(M - slot.table.length, source.table.length)
+
+			// Copy and adjust size table.
+			slot.table = slot.table.concat(source.table.slice(from, to));
+			if (slot.height > 0)
+			{
+				var len = slot.lengths.length;
+				for (var i = len; i < len + to - from; i++)
+				{
+					slot.lengths[i] = length(slot.table[i]);
+					slot.lengths[i] += (i > 0 ? slot.lengths[i - 1] : 0);
+				}
+			}
+
+			from += to;
+
+			// Only proceed to next slots[i] if the current one was
+			// fully copied.
+			if (source.table.length <= to)
+			{
+				read++; from = 0;
+			}
+
+			// Only create a new slot if the current one is filled up.
+			if (slot.table.length == M)
+			{
+				saveSlot(newA, newB, write, slot);
+				slot = createNode(a.height - 1,0);
+				write++;
+			}
+		}
+
+		// Cleanup after the loop. Copy the last slot into the new nodes.
+		if (slot.table.length > 0)
+		{
+			saveSlot(newA, newB, write, slot);
+			write++;
+		}
+
+		// Shift the untouched slots to the left
+		while (read < a.table.length + b.table.length )
+		{
+			saveSlot(newA, newB, write, get2(a.table, b.table, read));
+			read++;
+			write++;
+		}
+
+		return [newA, newB];
+	}
+
+	// Navigation functions
+	function botRight(a)
+	{
+		return a.table[a.table.length - 1];
+	}
+	function botLeft(a)
+	{
+		return a.table[0];
+	}
+
+	// Copies a node for updating. Note that you should not use this if
+	// only updating only one of "table" or "lengths" for performance reasons.
+	function nodeCopy(a)
+	{
+		var newA = {
+			ctor: "_Array",
+			height: a.height,
+			table: a.table.slice()
+		};
+		if (a.height > 0)
+		{
+			newA.lengths = a.lengths.slice();
+		}
+		return newA;
+	}
+
+	// Returns how many items are in the tree.
+	function length(array)
+	{
+		if (array.height == 0)
+		{
+			return array.table.length;
+		}
+		else
+		{
+			return array.lengths[array.lengths.length - 1];
+		}
+	}
+
+	// Calculates in which slot of "table" the item probably is, then
+	// find the exact slot via forward searching in  "lengths". Returns the index.
+	function getSlot(i, a)
+	{
+		var slot = i >> (5 * a.height);
+		while (a.lengths[slot] <= i)
+		{
+			slot++;
+		}
+		return slot;
+	}
+
+	// Recursively creates a tree with a given height containing
+	// only the given item.
+	function create(item, h)
+	{
+		if (h == 0)
+		{
+			return {
+				ctor: "_Array",
+				height: 0,
+				table: [item]
+			};
+		}
+		return {
+			ctor: "_Array",
+			height: h,
+			table: [create(item, h - 1)],
+			lengths: [1]
+		};
+	}
+
+	// Recursively creates a tree that contains the given tree.
+	function parentise(tree, h)
+	{
+		if (h == tree.height)
+		{
+			return tree;
+		}
+
+		return {
+			ctor: "_Array",
+			height: h,
+			table: [parentise(tree, h - 1)],
+			lengths: [length(tree)]
+		};
+	}
+
+	// Emphasizes blood brotherhood beneath two trees.
+	function siblise(a, b)
+	{
+		return {
+			ctor: "_Array",
+			height: a.height + 1,
+			table: [a, b],
+			lengths: [length(a), length(a) + length(b)]
+		};
+	}
+
+	function toJSArray(a)
+	{
+		var jsArray = new Array(length(a));
+		toJSArray_(jsArray, 0, a);
+		return jsArray;
+	}
+
+	function toJSArray_(jsArray, i, a)
+	{
+		for (var t = 0; t < a.table.length; t++)
+		{
+			if (a.height == 0)
+			{
+				jsArray[i + t] = a.table[t];
+			}
+			else
+			{
+				var inc = t == 0 ? 0 : a.lengths[t - 1];
+				toJSArray_(jsArray, i + inc, a.table[t]);
+			}
+		}
+	}
+
+	function fromJSArray(jsArray)
+	{
+		if (jsArray.length == 0)
+		{
+			return empty;
+		}
+		var h = Math.floor(Math.log(jsArray.length) / Math.log(M));
+		return fromJSArray_(jsArray, h, 0, jsArray.length);
+	}
+
+	function fromJSArray_(jsArray, h, from, to)
+	{
+		if (h == 0)
+		{
+			return {
+				ctor: "_Array",
+				height: 0,
+				table: jsArray.slice(from, to)
+			};
+		}
+
+		var step = Math.pow(M, h);
+		var table = new Array(Math.ceil((to - from) / step));
+		var lengths = new Array(table.length);
+		for (var i = 0; i < table.length; i++)
+		{
+			table[i] = fromJSArray_(jsArray, h - 1, from + (i * step), Math.min(from + ((i + 1) * step), to));
+			lengths[i] = length(table[i]) + (i > 0 ? lengths[i-1] : 0);
+		}
+		return {
+			ctor: "_Array",
+			height: h,
+			table: table,
+			lengths: lengths
+		};
+	}
+
+	Elm.Native.Array.values = {
+		empty: empty,
+		fromList: fromList,
+		toList: toList,
+		initialize: F2(initialize),
+		append: F2(append),
+		push: F2(push),
+		slice: F3(slice),
+		get: F2(get),
+		set: F3(set),
+		map: F2(map),
+		indexedMap: F2(indexedMap),
+		foldl: F3(foldl),
+		foldr: F3(foldr),
+		length: length,
+
+		toJSArray:toJSArray,
+		fromJSArray:fromJSArray
+	};
+
+	return localRuntime.Native.Array.values = Elm.Native.Array.values;
+
+}
+
 Elm.Native.Basics = {};
 Elm.Native.Basics.make = function(localRuntime) {
 
@@ -2105,6 +4674,27 @@ Elm.Native.Basics.make = function(localRuntime) {
 		toFloat: function(x) { return x; },
 		isNaN: isNaN,
 		isInfinite: isInfinite
+	};
+};
+
+Elm.Native.Char = {};
+Elm.Native.Char.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Char = localRuntime.Native.Char || {};
+	if (localRuntime.Native.Char.values)
+	{
+		return localRuntime.Native.Char.values;
+	}
+
+	var Utils = Elm.Native.Utils.make(localRuntime);
+
+	return localRuntime.Native.Char.values = {
+		fromCode : function(c) { return Utils.chr(String.fromCharCode(c)); },
+		toCode   : function(c) { return c.charCodeAt(0); },
+		toUpper  : function(c) { return Utils.chr(c.toUpperCase()); },
+		toLower  : function(c) { return Utils.chr(c.toLowerCase()); },
+		toLocaleUpper : function(c) { return Utils.chr(c.toLocaleUpperCase()); },
+		toLocaleLower : function(c) { return Utils.chr(c.toLocaleLowerCase()); },
 	};
 };
 
@@ -3593,6 +6183,529 @@ Elm.Native.Graphics.Element.make = function(localRuntime) {
 
 };
 
+// setup
+Elm.Native = Elm.Native || {};
+Elm.Native.Graphics = Elm.Native.Graphics || {};
+Elm.Native.Graphics.Input = Elm.Native.Graphics.Input || {};
+
+// definition
+Elm.Native.Graphics.Input.make = function(localRuntime) {
+	'use strict';
+
+	// attempt to short-circuit
+	if ('values' in Elm.Native.Graphics.Input) {
+		return Elm.Native.Graphics.Input.values;
+	}
+
+	var Color = Elm.Native.Color.make(localRuntime);
+	var List = Elm.Native.List.make(localRuntime);
+	var Signal = Elm.Native.Signal.make(localRuntime);
+	var Text = Elm.Native.Text.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+
+	var Element = Elm.Native.Graphics.Element.make(localRuntime);
+
+
+	function renderDropDown(model)
+	{
+		var drop = Element.createNode('select');
+		drop.style.border = '0 solid';
+		drop.style.pointerEvents = 'auto';
+		drop.style.display = 'block';
+
+		drop.elm_values = List.toArray(model.values);
+		drop.elm_handler = model.handler;
+		var values = drop.elm_values;
+
+		for (var i = 0; i < values.length; ++i)
+		{
+			var option = Element.createNode('option');
+			var name = values[i]._0;
+			option.value = name;
+			option.innerHTML = name;
+			drop.appendChild(option);
+		}
+		drop.addEventListener('change', function() {
+			Signal.sendMessage(drop.elm_handler(drop.elm_values[drop.selectedIndex]._1));
+		});
+
+		return drop;
+	}
+
+	function updateDropDown(node, oldModel, newModel)
+	{
+		node.elm_values = List.toArray(newModel.values);
+		node.elm_handler = newModel.handler;
+
+		var values = node.elm_values;
+		var kids = node.childNodes;
+		var kidsLength = kids.length;
+
+		var i = 0;
+		for (; i < kidsLength && i < values.length; ++i)
+		{
+			var option = kids[i];
+			var name = values[i]._0;
+			option.value = name;
+			option.innerHTML = name;
+		}
+		for (; i < kidsLength; ++i)
+		{
+			node.removeChild(node.lastChild);
+		}
+		for (; i < values.length; ++i)
+		{
+			var option = Element.createNode('option');
+			var name = values[i]._0;
+			option.value = name;
+			option.innerHTML = name;
+			node.appendChild(option);
+		}
+		return node;
+	}
+
+	function dropDown(handler, values)
+	{
+		return A3(Element.newElement, 100, 24, {
+			ctor: 'Custom',
+			type: 'DropDown',
+			render: renderDropDown,
+			update: updateDropDown,
+			model: {
+				values: values,
+				handler: handler
+			}
+		});
+	}
+
+	function renderButton(model)
+	{
+		var node = Element.createNode('button');
+		node.style.display = 'block';
+		node.style.pointerEvents = 'auto';
+		node.elm_message = model.message;
+		function click()
+		{
+			Signal.sendMessage(node.elm_message);
+		}
+		node.addEventListener('click', click);
+		node.innerHTML = model.text;
+		return node;
+	}
+
+	function updateButton(node, oldModel, newModel)
+	{
+		node.elm_message = newModel.message;
+		var txt = newModel.text;
+		if (oldModel.text !== txt)
+		{
+			node.innerHTML = txt;
+		}
+		return node;
+	}
+
+	function button(message, text)
+	{
+		return A3(Element.newElement, 100, 40, {
+			ctor: 'Custom',
+			type: 'Button',
+			render: renderButton,
+			update: updateButton,
+			model: {
+				message: message,
+				text:text
+			}
+		});
+	}
+
+	function renderCustomButton(model)
+	{
+		var btn = Element.createNode('div');
+		btn.style.pointerEvents = 'auto';
+		btn.elm_message = model.message;
+
+		btn.elm_up    = Element.render(model.up);
+		btn.elm_hover = Element.render(model.hover);
+		btn.elm_down  = Element.render(model.down);
+
+		btn.elm_up.style.display = 'block';
+		btn.elm_hover.style.display = 'none';
+		btn.elm_down.style.display = 'none';
+
+		btn.appendChild(btn.elm_up);
+		btn.appendChild(btn.elm_hover);
+		btn.appendChild(btn.elm_down);
+
+		function swap(visibleNode, hiddenNode1, hiddenNode2)
+		{
+			visibleNode.style.display = 'block';
+			hiddenNode1.style.display = 'none';
+			hiddenNode2.style.display = 'none';
+		}
+
+		var overCount = 0;
+		function over(e)
+		{
+			if (overCount++ > 0) return;
+			swap(btn.elm_hover, btn.elm_down, btn.elm_up);
+		}
+		function out(e)
+		{
+			if (btn.contains(e.toElement || e.relatedTarget)) return;
+			overCount = 0;
+			swap(btn.elm_up, btn.elm_down, btn.elm_hover);
+		}
+		function up()
+		{
+			swap(btn.elm_hover, btn.elm_down, btn.elm_up);
+			Signal.sendMessage(btn.elm_message);
+		}
+		function down()
+		{
+			swap(btn.elm_down, btn.elm_hover, btn.elm_up);
+		}
+
+		btn.addEventListener('mouseover', over);
+		btn.addEventListener('mouseout' , out);
+		btn.addEventListener('mousedown', down);
+		btn.addEventListener('mouseup'  , up);
+
+		return btn;
+	}
+
+	function updateCustomButton(node, oldModel, newModel)
+	{
+		node.elm_message = newModel.message;
+
+		var kids = node.childNodes;
+		var styleUp    = kids[0].style.display;
+		var styleHover = kids[1].style.display;
+		var styleDown  = kids[2].style.display;
+
+		Element.updateAndReplace(kids[0], oldModel.up, newModel.up);
+		Element.updateAndReplace(kids[1], oldModel.hover, newModel.hover);
+		Element.updateAndReplace(kids[2], oldModel.down, newModel.down);
+
+		var kids = node.childNodes;
+		kids[0].style.display = styleUp;
+		kids[1].style.display = styleHover;
+		kids[2].style.display = styleDown;
+
+		return node;
+	}
+
+	function max3(a,b,c)
+	{
+		var ab = a > b ? a : b;
+		return ab > c ? ab : c;
+	}
+
+	function customButton(message, up, hover, down)
+	{
+		return A3(Element.newElement,
+				  max3(up.props.width, hover.props.width, down.props.width),
+				  max3(up.props.height, hover.props.height, down.props.height),
+				  { ctor: 'Custom',
+					type: 'CustomButton',
+					render: renderCustomButton,
+					update: updateCustomButton,
+					model: {
+						message: message,
+						up: up,
+						hover: hover,
+						down: down
+					}
+				  });
+	}
+
+	function renderCheckbox(model)
+	{
+		var node = Element.createNode('input');
+		node.type = 'checkbox';
+		node.checked = model.checked;
+		node.style.display = 'block';
+		node.style.pointerEvents = 'auto';
+		node.elm_handler = model.handler;
+		function change()
+		{
+			Signal.sendMessage(node.elm_handler(node.checked));
+		}
+		node.addEventListener('change', change);
+		return node;
+	}
+
+	function updateCheckbox(node, oldModel, newModel)
+	{
+		node.elm_handler = newModel.handler;
+		node.checked = newModel.checked;
+		return node;
+	}
+
+	function checkbox(handler, checked)
+	{
+		return A3(Element.newElement, 13, 13, {
+			ctor: 'Custom',
+			type: 'CheckBox',
+			render: renderCheckbox,
+			update: updateCheckbox,
+			model: { handler:handler, checked:checked }
+		});
+	}
+
+	function setRange(node, start, end, dir)
+	{
+		if (node.parentNode)
+		{
+			node.setSelectionRange(start, end, dir);
+		}
+		else
+		{
+			setTimeout(function(){node.setSelectionRange(start, end, dir);}, 0);
+		}
+	}
+
+	function updateIfNeeded(css, attribute, latestAttribute)
+	{
+		if (css[attribute] !== latestAttribute)
+		{
+			css[attribute] = latestAttribute;
+		}
+	}
+	function cssDimensions(dimensions)
+	{
+		return dimensions.top    + 'px ' +
+			   dimensions.right  + 'px ' +
+			   dimensions.bottom + 'px ' +
+			   dimensions.left   + 'px';
+	}
+	function updateFieldStyle(css, style)
+	{
+		updateIfNeeded(css, 'padding', cssDimensions(style.padding));
+
+		var outline = style.outline;
+		updateIfNeeded(css, 'border-width', cssDimensions(outline.width));
+		updateIfNeeded(css, 'border-color', Color.toCss(outline.color));
+		updateIfNeeded(css, 'border-radius', outline.radius + 'px');
+
+		var highlight = style.highlight;
+		if (highlight.width === 0)
+		{
+			css.outline = 'none';
+		}
+		else
+		{
+			updateIfNeeded(css, 'outline-width', highlight.width + 'px');
+			updateIfNeeded(css, 'outline-color', Color.toCss(highlight.color));
+		}
+
+		var textStyle = style.style;
+		updateIfNeeded(css, 'color', Color.toCss(textStyle.color));
+		if (textStyle.typeface.ctor !== '[]')
+		{
+			updateIfNeeded(css, 'font-family', Text.toTypefaces(textStyle.typeface));
+		}
+		if (textStyle.height.ctor !== "Nothing")
+		{
+			updateIfNeeded(css, 'font-size', textStyle.height._0 + 'px');
+		}
+		updateIfNeeded(css, 'font-weight', textStyle.bold ? 'bold' : 'normal');
+		updateIfNeeded(css, 'font-style', textStyle.italic ? 'italic' : 'normal');
+		if (textStyle.line.ctor !== 'Nothing')
+		{
+			updateIfNeeded(css, 'text-decoration', Text.toLine(textStyle.line._0));
+		}
+	}
+
+	function renderField(model)
+	{
+		var field = Element.createNode('input');
+		updateFieldStyle(field.style, model.style);
+		field.style.borderStyle = 'solid';
+		field.style.pointerEvents = 'auto';
+
+		field.type = model.type;
+		field.placeholder = model.placeHolder;
+		field.value = model.content.string;
+
+		field.elm_handler = model.handler;
+		field.elm_old_value = field.value;
+
+		function inputUpdate(event)
+		{
+			var curr = field.elm_old_value;
+			var next = field.value;
+			if (curr === next)
+			{
+				return;
+			}
+
+			var direction = field.selectionDirection === 'forward' ? 'Forward' : 'Backward';
+			var start = field.selectionStart;
+			var end = field.selectionEnd;
+			field.value = field.elm_old_value;
+
+			Signal.sendMessage(field.elm_handler({
+				_:{},
+				string: next,
+				selection: {
+					_:{},
+					start: start,
+					end: end,
+					direction: { ctor: direction }
+				}
+			}));
+		}
+
+		field.addEventListener('input', inputUpdate);
+		field.addEventListener('focus', function() {
+			field.elm_hasFocus = true;
+		});
+		field.addEventListener('blur', function() {
+			field.elm_hasFocus = false;
+		});
+
+		return field;
+	}
+
+	function updateField(field, oldModel, newModel)
+	{
+		if (oldModel.style !== newModel.style)
+		{
+			updateFieldStyle(field.style, newModel.style);
+		}
+		field.elm_handler = newModel.handler;
+
+		field.type = newModel.type;
+		field.placeholder = newModel.placeHolder;
+		var value = newModel.content.string;
+		field.value = value;
+		field.elm_old_value = value;
+		if (field.elm_hasFocus)
+		{
+			var selection = newModel.content.selection;
+			var direction = selection.direction.ctor === 'Forward' ? 'forward' : 'backward';
+			setRange(field, selection.start, selection.end, direction);
+		}
+		return field;
+	}
+
+	function mkField(type)
+	{
+		function field(style, handler, placeHolder, content)
+		{
+			var padding = style.padding;
+			var outline = style.outline.width;
+			var adjustWidth = padding.left + padding.right + outline.left + outline.right;
+			var adjustHeight = padding.top + padding.bottom + outline.top + outline.bottom;
+			return A3(Element.newElement, 200, 30, {
+				ctor: 'Custom',
+				type: type + 'Field',
+				adjustWidth: adjustWidth,
+				adjustHeight: adjustHeight,
+				render: renderField,
+				update: updateField,
+				model: {
+					handler:handler,
+					placeHolder:placeHolder,
+					content:content,
+					style:style,
+					type:type
+				}
+			});
+		}
+		return F4(field);
+	}
+
+	function hoverable(handler, elem)
+	{
+		function onHover(bool)
+		{
+			Signal.sendMessage(handler(bool));
+		}
+		var props = Utils.replace([['hover',onHover]], elem.props);
+		return {
+			props: props,
+			element: elem.element
+		};
+	}
+
+	function clickable(message, elem)
+	{
+		function onClick()
+		{
+			Signal.sendMessage(message);
+		}
+		var props = Utils.replace([['click',onClick]], elem.props);
+		return {
+			props: props,
+			element: elem.element
+		};
+	}
+
+	return Elm.Native.Graphics.Input.values = {
+		button: F2(button),
+		customButton: F4(customButton),
+		checkbox: F2(checkbox),
+		dropDown: F2(dropDown),
+		field: mkField('text'),
+		email: mkField('email'),
+		password: mkField('password'),
+		hoverable: F2(hoverable),
+		clickable: F2(clickable)
+	};
+
+};
+
+Elm.Native.Keyboard = {};
+Elm.Native.Keyboard.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Keyboard = localRuntime.Native.Keyboard || {};
+	if (localRuntime.Native.Keyboard.values)
+	{
+		return localRuntime.Native.Keyboard.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+
+
+	function keyEvent(event)
+	{
+		return {
+			_: {},
+			alt: event.altKey,
+			meta: event.metaKey,
+			keyCode: event.keyCode
+		};
+	}
+
+
+	function keyStream(node, eventName, handler)
+	{
+		var stream = NS.input(eventName, '\0');
+
+		localRuntime.addListener([stream.id], node, eventName, function(e) {
+			localRuntime.notify(stream.id, handler(e));
+		});
+
+		return stream;
+	}
+
+	var downs = keyStream(document, 'keydown', keyEvent);
+	var ups = keyStream(document, 'keyup', keyEvent);
+	var presses = keyStream(document, 'keypress', keyEvent);
+	var blurs = keyStream(window, 'blur', function() { return null; });
+
+
+	return localRuntime.Native.Keyboard.values = {
+		downs: downs,
+		ups: ups,
+		blurs: blurs,
+		presses: presses
+	};
+
+};
+
 Elm.Native.List = {};
 Elm.Native.List.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -3817,6 +6930,50 @@ Elm.Native.List.make = function(localRuntime) {
 	};
 	return localRuntime.Native.List.values = Elm.Native.List.values;
 
+};
+
+Elm.Native = Elm.Native || {};
+Elm.Native.Mouse = {};
+Elm.Native.Mouse.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Mouse = localRuntime.Native.Mouse || {};
+	if (localRuntime.Native.Mouse.values)
+	{
+		return localRuntime.Native.Mouse.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+
+	var position = NS.input('Mouse.position', Utils.Tuple2(0,0));
+
+	var isDown = NS.input('Mouse.isDown', false);
+
+	var clicks = NS.input('Mouse.clicks', Utils.Tuple0);
+
+	var node = localRuntime.isFullscreen()
+		? document
+		: localRuntime.node;
+
+	localRuntime.addListener([clicks.id], node, 'click', function click() {
+		localRuntime.notify(clicks.id, Utils.Tuple0);
+	});
+	localRuntime.addListener([isDown.id], node, 'mousedown', function down() {
+		localRuntime.notify(isDown.id, true);
+	});
+	localRuntime.addListener([isDown.id], node, 'mouseup', function up() {
+		localRuntime.notify(isDown.id, false);
+	});
+	localRuntime.addListener([position.id], node, 'mousemove', function move(e) {
+		localRuntime.notify(position.id, Utils.getXY(e));
+	});
+
+	return localRuntime.Native.Mouse.values = {
+		position: position,
+		isDown: isDown,
+		clicks: clicks
+	};
 };
 
 Elm.Native.Port = {};
@@ -5259,6 +8416,349 @@ Elm.Native.Signal.make = function(localRuntime) {
 	};
 };
 
+Elm.Native.String = {};
+Elm.Native.String.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.String = localRuntime.Native.String || {};
+	if (localRuntime.Native.String.values)
+	{
+		return localRuntime.Native.String.values;
+	}
+	if ('values' in Elm.Native.String)
+	{
+		return localRuntime.Native.String.values = Elm.Native.String.values;
+	}
+
+
+	var Char = Elm.Char.make(localRuntime);
+	var List = Elm.Native.List.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+	var Result = Elm.Result.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+
+	function isEmpty(str)
+	{
+		return str.length === 0;
+	}
+	function cons(chr,str)
+	{
+		return chr + str;
+	}
+	function uncons(str)
+	{
+		var hd;
+		return (hd = str[0])
+			? Maybe.Just(Utils.Tuple2(Utils.chr(hd), str.slice(1)))
+			: Maybe.Nothing;
+	}
+	function append(a,b)
+	{
+		return a + b;
+	}
+	function concat(strs)
+	{
+		return List.toArray(strs).join('');
+	}
+	function length(str)
+	{
+		return str.length;
+	}
+	function map(f,str)
+	{
+		var out = str.split('');
+		for (var i = out.length; i--; )
+		{
+			out[i] = f(Utils.chr(out[i]));
+		}
+		return out.join('');
+	}
+	function filter(pred,str)
+	{
+		return str.split('').map(Utils.chr).filter(pred).join('');
+	}
+	function reverse(str)
+	{
+		return str.split('').reverse().join('');
+	}
+	function foldl(f,b,str)
+	{
+		var len = str.length;
+		for (var i = 0; i < len; ++i)
+		{
+			b = A2(f, Utils.chr(str[i]), b);
+		}
+		return b;
+	}
+	function foldr(f,b,str)
+	{
+		for (var i = str.length; i--; )
+		{
+			b = A2(f, Utils.chr(str[i]), b);
+		}
+		return b;
+	}
+
+	function split(sep, str)
+	{
+		return List.fromArray(str.split(sep));
+	}
+	function join(sep, strs)
+	{
+		return List.toArray(strs).join(sep);
+	}
+	function repeat(n, str)
+	{
+		var result = '';
+		while (n > 0)
+		{
+			if (n & 1)
+			{
+				result += str;
+			}
+			n >>= 1, str += str;
+		}
+		return result;
+	}
+
+	function slice(start, end, str)
+	{
+		return str.slice(start,end);
+	}
+	function left(n, str)
+	{
+		return n < 1 ? "" : str.slice(0,n);
+	}
+	function right(n, str)
+	{
+		return n < 1 ? "" : str.slice(-n);
+	}
+	function dropLeft(n, str)
+	{
+		return n < 1 ? str : str.slice(n);
+	}
+	function dropRight(n, str)
+	{
+		return n < 1 ? str : str.slice(0,-n);
+	}
+
+	function pad(n,chr,str)
+	{
+		var half = (n - str.length) / 2;
+		return repeat(Math.ceil(half),chr) + str + repeat(half|0,chr);
+	}
+	function padRight(n,chr,str)
+	{
+		return str + repeat(n - str.length, chr);
+	}
+	function padLeft(n,chr,str)
+	{
+		return repeat(n - str.length, chr) + str;
+	}
+
+	function trim(str)
+	{
+		return str.trim();
+	}
+	function trimLeft(str)
+	{
+		return str.trimLeft();
+	}
+	function trimRight(str)
+	{
+		return str.trimRight();
+	}
+
+	function words(str)
+	{
+		return List.fromArray(str.trim().split(/\s+/g));
+	}
+	function lines(str)
+	{
+		return List.fromArray(str.split(/\r\n|\r|\n/g));
+	}
+
+	function toUpper(str)
+	{
+		return str.toUpperCase();
+	}
+	function toLower(str)
+	{
+		return str.toLowerCase();
+	}
+
+	function any(pred, str)
+	{
+		for (var i = str.length; i--; )
+		{
+			if (pred(Utils.chr(str[i])))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	function all(pred, str)
+	{
+		for (var i = str.length; i--; )
+		{
+			if (!pred(Utils.chr(str[i])))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function contains(sub, str)
+	{
+		return str.indexOf(sub) > -1;
+	}
+	function startsWith(sub, str)
+	{
+		return str.indexOf(sub) === 0;
+	}
+	function endsWith(sub, str)
+	{
+		return str.length >= sub.length &&
+			str.lastIndexOf(sub) === str.length - sub.length;
+	}
+	function indexes(sub, str)
+	{
+		var subLen = sub.length;
+		var i = 0;
+		var is = [];
+		while ((i = str.indexOf(sub, i)) > -1)
+		{
+			is.push(i);
+			i = i + subLen;
+		}
+		return List.fromArray(is);
+	}
+
+	function toInt(s)
+	{
+		var len = s.length;
+		if (len === 0)
+		{
+			return Result.Err("could not convert string '" + s + "' to an Int" );
+		}
+		var start = 0;
+		if (s[0] == '-')
+		{
+			if (len === 1)
+			{
+				return Result.Err("could not convert string '" + s + "' to an Int" );
+			}
+			start = 1;
+		}
+		for (var i = start; i < len; ++i)
+		{
+			if (!Char.isDigit(s[i]))
+			{
+				return Result.Err("could not convert string '" + s + "' to an Int" );
+			}
+		}
+		return Result.Ok(parseInt(s, 10));
+	}
+
+	function toFloat(s)
+	{
+		var len = s.length;
+		if (len === 0)
+		{
+			return Result.Err("could not convert string '" + s + "' to a Float" );
+		}
+		var start = 0;
+		if (s[0] == '-')
+		{
+			if (len === 1)
+			{
+				return Result.Err("could not convert string '" + s + "' to a Float" );
+			}
+			start = 1;
+		}
+		var dotCount = 0;
+		for (var i = start; i < len; ++i)
+		{
+			if (Char.isDigit(s[i]))
+			{
+				continue;
+			}
+			if (s[i] === '.')
+			{
+				dotCount += 1;
+				if (dotCount <= 1)
+				{
+					continue;
+				}
+			}
+			return Result.Err("could not convert string '" + s + "' to a Float" );
+		}
+		return Result.Ok(parseFloat(s));
+	}
+
+	function toList(str)
+	{
+		return List.fromArray(str.split('').map(Utils.chr));
+	}
+	function fromList(chars)
+	{
+		return List.toArray(chars).join('');
+	}
+
+	return Elm.Native.String.values = {
+		isEmpty: isEmpty,
+		cons: F2(cons),
+		uncons: uncons,
+		append: F2(append),
+		concat: concat,
+		length: length,
+		map: F2(map),
+		filter: F2(filter),
+		reverse: reverse,
+		foldl: F3(foldl),
+		foldr: F3(foldr),
+
+		split: F2(split),
+		join: F2(join),
+		repeat: F2(repeat),
+
+		slice: F3(slice),
+		left: F2(left),
+		right: F2(right),
+		dropLeft: F2(dropLeft),
+		dropRight: F2(dropRight),
+
+		pad: F3(pad),
+		padLeft: F3(padLeft),
+		padRight: F3(padRight),
+
+		trim: trim,
+		trimLeft: trimLeft,
+		trimRight: trimRight,
+
+		words: words,
+		lines: lines,
+
+		toUpper: toUpper,
+		toLower: toLower,
+
+		any: F2(any),
+		all: F2(all),
+
+		contains: F2(contains),
+		startsWith: F2(startsWith),
+		endsWith: F2(endsWith),
+		indexes: F2(indexes),
+
+		toInt: toInt,
+		toFloat: toFloat,
+		toList: toList,
+		fromList: fromList
+	};
+};
+
 Elm.Native.Task = {};
 Elm.Native.Task.make = function(localRuntime) {
 
@@ -6536,6 +10036,133 @@ Elm.Native.Utils.make = function(localRuntime) {
 	};
 };
 
+Elm.Native = Elm.Native || {};
+Elm.Native.Window = {};
+Elm.Native.Window.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Window = localRuntime.Native.Window || {};
+	if (localRuntime.Native.Window.values)
+	{
+		return localRuntime.Native.Window.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Tuple2 = Elm.Native.Utils.make(localRuntime).Tuple2;
+
+
+	function getWidth()
+	{
+		return localRuntime.node.clientWidth;
+	}
+
+
+	function getHeight()
+	{
+		if (localRuntime.isFullscreen())
+		{
+			return window.innerHeight;
+		}
+		return localRuntime.node.clientHeight;
+	}
+
+
+	var dimensions = NS.input('Window.dimensions', Tuple2(getWidth(), getHeight()));
+
+
+	function resizeIfNeeded()
+	{
+		// Do not trigger event if the dimensions have not changed.
+		// This should be most of the time.
+		var w = getWidth();
+		var h = getHeight();
+		if (dimensions.value._0 === w && dimensions.value._1 === h)
+		{
+			return;
+		}
+
+		setTimeout(function () {
+			// Check again to see if the dimensions have changed.
+			// It is conceivable that the dimensions have changed
+			// again while some other event was being processed.
+			var w = getWidth();
+			var h = getHeight();
+			if (dimensions.value._0 === w && dimensions.value._1 === h)
+			{
+				return;
+			}
+			localRuntime.notify(dimensions.id, Tuple2(w,h));
+		}, 0);
+	}
+
+
+	localRuntime.addListener([dimensions.id], window, 'resize', resizeIfNeeded);
+
+
+	return localRuntime.Native.Window.values = {
+		dimensions: dimensions,
+		resizeIfNeeded: resizeIfNeeded
+	};
+};
+
+Elm.Osm = Elm.Osm || {};
+Elm.Osm.make = function (_elm) {
+   "use strict";
+   _elm.Osm = _elm.Osm || {};
+   if (_elm.Osm.values)
+   return _elm.Osm.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Osm",
+   $Basics = Elm.Basics.make(_elm),
+   $CommonLocator = Elm.CommonLocator.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Types = Elm.Types.make(_elm);
+   var osmUrl = F2(function (z,t) {
+      return function () {
+         var wrap = F2(function (z,
+         c) {
+            return A2($Basics._op["%"],
+            c,
+            Math.pow(2,$Basics.floor(z)));
+         });
+         var $ = t.coordinate,
+         x = $._0,
+         y = $._1;
+         return A2($Basics._op["++"],
+         "http://tile.openstreetmap.org/",
+         A2($Basics._op["++"],
+         $Basics.toString($Basics.floor(z)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(A2(wrap,z,x)),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Basics.toString(y),
+         ".png"))))));
+      }();
+   });
+   var tileSize = 256;
+   var locate = $CommonLocator.common(tileSize);
+   var openStreetMap = A3($Types.TileSource,
+   tileSize,
+   locate,
+   osmUrl);
+   var simpleOsm = F2(function (zoom,
+   tc) {
+      return A2($Graphics$Element.image,
+      tileSize,
+      tileSize)(A2(osmUrl,zoom,tc));
+   });
+   _elm.Osm.values = {_op: _op
+                     ,openStreetMap: openStreetMap
+                     ,simpleOsm: simpleOsm};
+   return _elm.Osm.values;
+};
 Elm.Result = Elm.Result || {};
 Elm.Result.make = function (_elm) {
    "use strict";
@@ -6780,6 +10407,109 @@ Elm.Result.make = function (_elm) {
                         ,Err: Err};
    return _elm.Result.values;
 };
+Elm.Set = Elm.Set || {};
+Elm.Set.make = function (_elm) {
+   "use strict";
+   _elm.Set = _elm.Set || {};
+   if (_elm.Set.values)
+   return _elm.Set.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Set",
+   $Dict = Elm.Dict.make(_elm),
+   $List = Elm.List.make(_elm);
+   var partition = F2(function (p,
+   set) {
+      return A2($Dict.partition,
+      F2(function (k,_v0) {
+         return function () {
+            return p(k);
+         }();
+      }),
+      set);
+   });
+   var filter = F2(function (p,
+   set) {
+      return A2($Dict.filter,
+      F2(function (k,_v2) {
+         return function () {
+            return p(k);
+         }();
+      }),
+      set);
+   });
+   var foldr = F3(function (f,
+   b,
+   s) {
+      return A3($Dict.foldr,
+      F3(function (k,_v4,b) {
+         return function () {
+            return A2(f,k,b);
+         }();
+      }),
+      b,
+      s);
+   });
+   var foldl = F3(function (f,
+   b,
+   s) {
+      return A3($Dict.foldl,
+      F3(function (k,_v6,b) {
+         return function () {
+            return A2(f,k,b);
+         }();
+      }),
+      b,
+      s);
+   });
+   var toList = $Dict.keys;
+   var diff = $Dict.diff;
+   var intersect = $Dict.intersect;
+   var union = $Dict.union;
+   var member = $Dict.member;
+   var remove = $Dict.remove;
+   var insert = function (k) {
+      return A2($Dict.insert,
+      k,
+      {ctor: "_Tuple0"});
+   };
+   var singleton = function (k) {
+      return A2($Dict.singleton,
+      k,
+      {ctor: "_Tuple0"});
+   };
+   var empty = $Dict.empty;
+   var fromList = function (xs) {
+      return A3($List.foldl,
+      insert,
+      empty,
+      xs);
+   };
+   var map = F2(function (f,s) {
+      return fromList(A2($List.map,
+      f,
+      toList(s)));
+   });
+   _elm.Set.values = {_op: _op
+                     ,empty: empty
+                     ,singleton: singleton
+                     ,insert: insert
+                     ,remove: remove
+                     ,member: member
+                     ,foldl: foldl
+                     ,foldr: foldr
+                     ,map: map
+                     ,filter: filter
+                     ,partition: partition
+                     ,union: union
+                     ,intersect: intersect
+                     ,diff: diff
+                     ,toList: toList
+                     ,fromList: fromList};
+   return _elm.Set.values;
+};
 Elm.Signal = Elm.Signal || {};
 Elm.Signal.make = function (_elm) {
    "use strict";
@@ -6923,6 +10653,504 @@ Elm.Signal.make = function (_elm) {
                         ,forwardTo: forwardTo
                         ,Mailbox: Mailbox};
    return _elm.Signal.values;
+};
+Elm.SlippyMap = Elm.SlippyMap || {};
+Elm.SlippyMap.make = function (_elm) {
+   "use strict";
+   _elm.SlippyMap = _elm.SlippyMap || {};
+   if (_elm.SlippyMap.values)
+   return _elm.SlippyMap.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "SlippyMap",
+   $ArcGIS = Elm.ArcGIS.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $MapBox = Elm.MapBox.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Movement = Elm.Movement.make(_elm),
+   $Osm = Elm.Osm.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Text = Elm.Text.make(_elm),
+   $Tile = Elm.Tile.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $TouchParser = Elm.TouchParser.make(_elm),
+   $Tuple = Elm.Tuple.make(_elm),
+   $Types = Elm.Types.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var upC = A3($Color.rgb,
+   248,
+   248,
+   248);
+   var downC = A3($Color.rgb,
+   235,
+   235,
+   235);
+   var hoverC = A3($Color.rgb,
+   240,
+   240,
+   240);
+   var ourButton = F2(function (msg,
+   txt) {
+      return function () {
+         var el = $Graphics$Element.centered($Text.fromString(txt));
+         var cn = A4($Graphics$Element.container,
+         30,
+         30,
+         $Graphics$Element.middle,
+         el);
+         var up = A2($Graphics$Element.color,
+         upC,
+         cn);
+         var down = A2($Graphics$Element.color,
+         downC,
+         cn);
+         var hover = A2($Graphics$Element.color,
+         hoverC,
+         cn);
+         return A4($Graphics$Input.customButton,
+         msg,
+         up,
+         hover,
+         down);
+      }();
+   });
+   var accessToken = "pk.eyJ1IjoiZ3J1bXB5amFtZXMiLCJhIjoiNWQzZjdjMDY1YTI2MjExYTQ4ZWU4YjgwZGNmNjUzZmUifQ.BpRWJBEup08Z9DJzstigvg";
+   var tileSrc = $Signal.mailbox($Maybe.Nothing);
+   var tileSrcDropDown = A2($Graphics$Input.dropDown,
+   $Signal.message(tileSrc.address),
+   _L.fromArray([{ctor: "_Tuple2"
+                 ,_0: "OpenStreetMap"
+                 ,_1: $Maybe.Just($Osm.openStreetMap)}
+                ,{ctor: "_Tuple2"
+                 ,_0: "ArcGIS"
+                 ,_1: $Maybe.Just($ArcGIS.arcGIS)}
+                ,{ctor: "_Tuple2"
+                 ,_0: "MapBox"
+                 ,_1: $Maybe.Just(A2($MapBox.mapBox,
+                 "mapbox.run-bike-hike",
+                 accessToken))}]));
+   var move = F3(function (z,
+   gpt,
+   pixOff) {
+      return function () {
+         var $ = A2($Tuple.map,
+         function (t) {
+            return $Basics.toFloat(t) * 1.0 / $Basics.toFloat(Math.pow(2,
+            $Basics.floor(z)));
+         },
+         pixOff),
+         dlon = $._0,
+         dlat = $._1;
+         return A2($Types.GeoPoint,
+         gpt.lat + dlat,
+         gpt.lon + dlon);
+      }();
+   });
+   var isInt = function (z) {
+      return _U.eq($Basics.toFloat($Basics.round(z)),
+      z);
+   };
+   var applyDrag = F2(function (m,
+   drag) {
+      return _U.replace([["centre"
+                         ,A3(move,
+                         m.zoom,
+                         m.centre,
+                         drag)]],
+      m);
+   });
+   var applyKeys = applyDrag;
+   var applyMouse = F2(function (model,
+   _v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            switch (_v0._1.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var _v6 = model.mouseState;
+                      switch (_v6.ctor)
+                      {case "_Tuple2": switch (_v6._0)
+                           {case false:
+                              return _U.replace([["mouseState"
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: _v0._0
+                                                  ,_1: {ctor: "_Tuple2"
+                                                       ,_0: _v0._1._0
+                                                       ,_1: _v0._1._1}}]],
+                                model);
+                              case true: switch (_v6._1.ctor)
+                                {case "_Tuple2":
+                                   return function () {
+                                        var newModel = A2(applyDrag,
+                                        model,
+                                        {ctor: "_Tuple2"
+                                        ,_0: _v6._1._0 - _v0._1._0
+                                        ,_1: _v0._1._1 - _v6._1._1});
+                                        return _U.replace([["mouseState"
+                                                           ,{ctor: "_Tuple2"
+                                                            ,_0: _v0._0
+                                                            ,_1: {ctor: "_Tuple2"
+                                                                 ,_0: _v0._1._0
+                                                                 ,_1: _v0._1._1}}]],
+                                        newModel);
+                                     }();}
+                                break;}
+                           break;}
+                      _U.badCase($moduleName,
+                      "between lines 92 and 96");
+                   }();}
+              break;}
+         _U.badCase($moduleName,
+         "between lines 92 and 96");
+      }();
+   });
+   var applyTime = F2(function (m,
+   t) {
+      return function () {
+         var zoomAmount = 0.5 * ($Basics.toFloat($Basics.round(m.zoom)) - m.zoom);
+         var $ = _U.cmp($Basics.abs(zoomAmount),
+         1.0e-2) < 0 ? {ctor: "_Tuple2"
+                       ,_0: $Basics.toFloat($Basics.round(m.zoom))
+                       ,_1: true} : {ctor: "_Tuple2"
+                                    ,_0: m.zoom + zoomAmount
+                                    ,_1: false},
+         newZoom = $._0,
+         done = $._1;
+         return _U.replace([["zoom"
+                            ,newZoom]
+                           ,["dirty",$Basics.not(done)]],
+         m);
+      }();
+   });
+   var dirty = function (f) {
+      return _U.eq($Basics.toFloat($Basics.round(f)),
+      f);
+   };
+   var None = {ctor: "None"};
+   var zoomChange = $Signal.mailbox(None);
+   var Out = function (a) {
+      return {ctor: "Out",_0: a};
+   };
+   var zoomOut = A2(ourButton,
+   A2($Signal.message,
+   zoomChange.address,
+   Out(0.4)),
+   "-");
+   var In = function (a) {
+      return {ctor: "In",_0: a};
+   };
+   var zoomIn = A2(ourButton,
+   A2($Signal.message,
+   zoomChange.address,
+   In(0.52)),
+   "+");
+   var buttons = A2($Graphics$Element.flow,
+   $Graphics$Element.right,
+   _L.fromArray([zoomIn
+                ,zoomOut
+                ,tileSrcDropDown]));
+   var newZoom = F2(function (zc,
+   z) {
+      return function () {
+         switch (zc.ctor)
+         {case "In": return z + zc._0;
+            case "None": return z;
+            case "Out": return z - zc._0;}
+         _U.badCase($moduleName,
+         "between lines 64 and 67");
+      }();
+   });
+   var applyZoom = F2(function (m,
+   zc) {
+      return _U.replace([["zoom"
+                         ,A2(newZoom,zc,m.zoom)]],
+      m);
+   });
+   var applyGest = F2(function (m,
+   g) {
+      return function () {
+         var pct = function (aff) {
+            return $Basics.sqrt($Tuple.combine(F2(function (x,
+            y) {
+               return x + y;
+            }))(A2($Tuple.map,
+            function (ti) {
+               return Math.pow(ti,2);
+            },
+            aff.scale)));
+         };
+         var toZoomChange = function (aff) {
+            return _U.cmp(pct(aff),
+            1) > 0 ? In(pct(aff)) : Out(pct(aff));
+         };
+         return function () {
+            switch (g.ctor)
+            {case "Just":
+               return function () {
+                    switch (g._0.ctor)
+                    {case "Affine":
+                       return A2(applyZoom,
+                         m,
+                         toZoomChange(g._0._0));
+                       case "Drag":
+                       switch (g._0._0.ctor)
+                         {case "_Tuple2":
+                            return A2(applyDrag,
+                              m,
+                              {ctor: "_Tuple2"
+                              ,_0: -1 * g._0._0._0
+                              ,_1: g._0._0._1});}
+                         break;
+                       case "End":
+                       return _U.replace([["dirty"
+                                          ,$Basics.not(isInt(m.zoom))]],
+                         m);}
+                    return m;
+                 }();
+               case "Nothing": return m;}
+            _U.badCase($moduleName,
+            "between lines 111 and 118");
+         }();
+      }();
+   });
+   var appIfClean = F3(function (f,
+   m,
+   a) {
+      return m.dirty ? m : A2(f,
+      m,
+      a);
+   });
+   var appIfDirty = F3(function (f,
+   m,
+   a) {
+      return $Basics.not(m.dirty) ? m : A2(f,
+      m,
+      a);
+   });
+   var G = function (a) {
+      return {ctor: "G",_0: a};
+   };
+   var T = function (a) {
+      return {ctor: "T",_0: a};
+   };
+   var K = function (a) {
+      return {ctor: "K",_0: a};
+   };
+   var M = function (a) {
+      return {ctor: "M",_0: a};
+   };
+   var Z = function (a) {
+      return {ctor: "Z",_0: a};
+   };
+   var C = function (a) {
+      return {ctor: "C",_0: a};
+   };
+   var events = function () {
+      var clockTicks = A2($Signal.map,
+      C,
+      $Time.fps(25));
+      var gests = A2($Signal.map,
+      G,
+      $TouchParser.gestures);
+      var tileSource = A2($Signal.map,
+      T,
+      tileSrc.signal);
+      var mouse = A2($Signal.map,
+      M,
+      $Movement.mouseState);
+      var keys = $Signal.map(K)($Signal.map($Tuple.multiply({ctor: "_Tuple2"
+                                                            ,_0: 256
+                                                            ,_1: 256}))($Movement.keyState));
+      var zooms = $Signal.map(Z)(zoomChange.signal);
+      return $Signal.mergeMany(_L.fromArray([tileSource
+                                            ,clockTicks
+                                            ,zooms
+                                            ,gests
+                                            ,mouse
+                                            ,keys]));
+   }();
+   var defaultTileSrc = $Osm.openStreetMap;
+   var applyEvent = F2(function (e,
+   m) {
+      return function () {
+         switch (e.ctor)
+         {case "C": return A3(appIfDirty,
+              applyTime,
+              m,
+              e._0);
+            case "G": return A3(appIfClean,
+              applyGest,
+              m,
+              e._0);
+            case "K": return A3(appIfClean,
+              applyKeys,
+              m,
+              e._0);
+            case "M": return A3(appIfClean,
+              applyMouse,
+              m,
+              e._0);
+            case "T": return function () {
+                 switch (e._0.ctor)
+                 {case "Just":
+                    return _U.replace([["tileSource"
+                                       ,e._0._0]],
+                      m);
+                    case "Nothing":
+                    return _U.replace([["tileSource"
+                                       ,defaultTileSrc]],
+                      m);}
+                 _U.badCase($moduleName,
+                 "between lines 51 and 53");
+              }();
+            case "Z": return A3(appIfClean,
+              applyZoom,
+              m,
+              e._0);}
+         _U.badCase($moduleName,
+         "between lines 45 and 53");
+      }();
+   });
+   var main = function () {
+      var draw = F2(function (window,
+      model) {
+         return $Graphics$Element.layers(_L.fromArray([A2($Tile.render,
+                                                      window,
+                                                      model)
+                                                      ,buttons]));
+      });
+      var initialZoom = 15.0;
+      var greenwich = A2($Types.GeoPoint,
+      51.48,
+      0.0);
+      var initialModel = A5($Types.Model,
+      greenwich,
+      initialZoom,
+      {ctor: "_Tuple2"
+      ,_0: false
+      ,_1: {ctor: "_Tuple2"
+           ,_0: 0
+           ,_1: 0}},
+      defaultTileSrc,
+      false);
+      return A3($Signal.map2,
+      draw,
+      $Window.dimensions,
+      A3($Signal.foldp,
+      applyEvent,
+      initialModel,
+      events));
+   }();
+   _elm.SlippyMap.values = {_op: _op
+                           ,main: main};
+   return _elm.SlippyMap.values;
+};
+Elm.String = Elm.String || {};
+Elm.String.make = function (_elm) {
+   "use strict";
+   _elm.String = _elm.String || {};
+   if (_elm.String.values)
+   return _elm.String.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "String",
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$String = Elm.Native.String.make(_elm),
+   $Result = Elm.Result.make(_elm);
+   var fromList = $Native$String.fromList;
+   var toList = $Native$String.toList;
+   var toFloat = $Native$String.toFloat;
+   var toInt = $Native$String.toInt;
+   var indices = $Native$String.indexes;
+   var indexes = $Native$String.indexes;
+   var endsWith = $Native$String.endsWith;
+   var startsWith = $Native$String.startsWith;
+   var contains = $Native$String.contains;
+   var all = $Native$String.all;
+   var any = $Native$String.any;
+   var toLower = $Native$String.toLower;
+   var toUpper = $Native$String.toUpper;
+   var lines = $Native$String.lines;
+   var words = $Native$String.words;
+   var trimRight = $Native$String.trimRight;
+   var trimLeft = $Native$String.trimLeft;
+   var trim = $Native$String.trim;
+   var padRight = $Native$String.padRight;
+   var padLeft = $Native$String.padLeft;
+   var pad = $Native$String.pad;
+   var dropRight = $Native$String.dropRight;
+   var dropLeft = $Native$String.dropLeft;
+   var right = $Native$String.right;
+   var left = $Native$String.left;
+   var slice = $Native$String.slice;
+   var repeat = $Native$String.repeat;
+   var join = $Native$String.join;
+   var split = $Native$String.split;
+   var foldr = $Native$String.foldr;
+   var foldl = $Native$String.foldl;
+   var reverse = $Native$String.reverse;
+   var filter = $Native$String.filter;
+   var map = $Native$String.map;
+   var length = $Native$String.length;
+   var concat = $Native$String.concat;
+   var append = $Native$String.append;
+   var uncons = $Native$String.uncons;
+   var cons = $Native$String.cons;
+   var fromChar = function ($char) {
+      return A2(cons,$char,"");
+   };
+   var isEmpty = $Native$String.isEmpty;
+   _elm.String.values = {_op: _op
+                        ,isEmpty: isEmpty
+                        ,length: length
+                        ,reverse: reverse
+                        ,repeat: repeat
+                        ,cons: cons
+                        ,uncons: uncons
+                        ,fromChar: fromChar
+                        ,append: append
+                        ,concat: concat
+                        ,split: split
+                        ,join: join
+                        ,words: words
+                        ,lines: lines
+                        ,slice: slice
+                        ,left: left
+                        ,right: right
+                        ,dropLeft: dropLeft
+                        ,dropRight: dropRight
+                        ,contains: contains
+                        ,startsWith: startsWith
+                        ,endsWith: endsWith
+                        ,indexes: indexes
+                        ,indices: indices
+                        ,toInt: toInt
+                        ,toFloat: toFloat
+                        ,toList: toList
+                        ,fromList: fromList
+                        ,toUpper: toUpper
+                        ,toLower: toLower
+                        ,pad: pad
+                        ,padLeft: padLeft
+                        ,padRight: padRight
+                        ,trim: trim
+                        ,trimLeft: trimLeft
+                        ,trimRight: trimRight
+                        ,map: map
+                        ,filter: filter
+                        ,foldl: foldl
+                        ,foldr: foldr
+                        ,any: any
+                        ,all: all};
+   return _elm.String.values;
 };
 Elm.Task = Elm.Task || {};
 Elm.Task.make = function (_elm) {
@@ -7234,6 +11462,173 @@ Elm.Text.make = function (_elm) {
                       ,Over: Over
                       ,Through: Through};
    return _elm.Text.values;
+};
+Elm.Tile = Elm.Tile || {};
+Elm.Tile.make = function (_elm) {
+   "use strict";
+   _elm.Tile = _elm.Tile || {};
+   if (_elm.Tile.values)
+   return _elm.Tile.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Tile",
+   $Basics = Elm.Basics.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Tuple = Elm.Tuple.make(_elm),
+   $Types = Elm.Types.make(_elm);
+   var rows = F2(function (f,_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return A2($List.map,
+              function (y) {
+                 return A2($List.map,
+                 function (x) {
+                    return A2(f,x,y);
+                 },
+                 _v0._0);
+              },
+              _v0._1);}
+         _U.badCase($moduleName,
+         "on line 74, column 19 to 56");
+      }();
+   });
+   var range = F2(function (origin,
+   count) {
+      return _L.range(origin,
+      origin + count - 1);
+   });
+   var flipY = $Tuple.multiply({ctor: "_Tuple2"
+                               ,_0: 1
+                               ,_1: -1});
+   var lift2 = F3(function (g,
+   p1,
+   p2) {
+      return $Types.Position(A2(g,
+      p1.pixels,
+      p2.pixels));
+   });
+   var mer = $Basics.flip(F2(function (x,
+   y) {
+      return A2($Basics._op["%"],
+      x,
+      y);
+   }));
+   var vid = $Basics.flip(F2(function (x,
+   y) {
+      return x / y | 0;
+   }));
+   var addP = lift2($Tuple.add);
+   var flowTable = F2(function (renderer,
+   arr) {
+      return function () {
+         var flowRender = F3(function (dir,
+         r,
+         els) {
+            return $Graphics$Element.flow(dir)(A2($List.map,
+            r,
+            els));
+         });
+         return A3(flowRender,
+         $Graphics$Element.down,
+         A2(flowRender,
+         $Graphics$Element.right,
+         renderer),
+         arr);
+      }();
+   });
+   var originOffset = F3(function (tileSize,
+   tileCounts,
+   centrePixel) {
+      return function () {
+         var halfTile = tileSize / 2 | 0;
+         var pixelOffsets = A2($Tuple.subtract,
+         {ctor: "_Tuple2"
+         ,_0: halfTile
+         ,_1: halfTile},
+         centrePixel.pixels);
+         return $Types.Position(flipY(pixelOffsets));
+      }();
+   });
+   var origin = F2(function (centreTile,
+   tileCounts) {
+      return $Types.Tile(A2($Tuple.subtract,
+      centreTile.coordinate,
+      A2($Tuple.map,
+      vid(2),
+      tileCounts)));
+   });
+   var renderOneTile = F4(function (zoom,
+   tileSize,
+   url,
+   tile) {
+      return A2($Graphics$Element.image,
+      tileSize,
+      tileSize)(A2(url,zoom,tile));
+   });
+   var applyPosition = F2(function (el,
+   distance) {
+      return $Graphics$Collage.move(A2($Tuple.map,
+      $Basics.toFloat,
+      distance.pixels))($Graphics$Collage.toForm(el));
+   });
+   var calcTileSize = function (m) {
+      return function () {
+         var frac = function (f) {
+            return f - $Basics.toFloat($Basics.floor(f));
+         };
+         var digizoom = $Basics.floor(frac(m.zoom) * 256);
+         return m.tileSource.tileSize + digizoom;
+      }();
+   };
+   var render = F2(function (window,
+   m) {
+      return function () {
+         var mapCentre = A2(m.tileSource.locate,
+         m.zoom,
+         m.centre);
+         var requiredTiles = function (dim) {
+            return (3 * m.tileSource.tileSize + dim) / m.tileSource.tileSize | 0;
+         };
+         var tileCounts = A2($Tuple.map,
+         requiredTiles,
+         window);
+         var originTile = A2(origin,
+         mapCentre.tile,
+         tileCounts);
+         var tileRows = rows($Basics.curry($Types.Tile))(A3($Tuple.merge,
+         range,
+         originTile.coordinate,
+         tileCounts));
+         var tileSize = calcTileSize(m);
+         var offset = A3(originOffset,
+         tileSize,
+         tileCounts,
+         mapCentre.position);
+         var mapEl = A2(flowTable,
+         A3(renderOneTile,
+         m.zoom,
+         tileSize,
+         m.tileSource.tileUrl),
+         tileRows);
+         return $Graphics$Element.layers(_L.fromArray([A3($Basics.uncurry,
+                                                      $Graphics$Collage.collage,
+                                                      window,
+                                                      _L.fromArray([A2(applyPosition,
+                                                      mapEl,
+                                                      offset)]))
+                                                      ,A2($Basics.uncurry,
+                                                      $Graphics$Element.spacer,
+                                                      window)]));
+      }();
+   });
+   _elm.Tile.values = {_op: _op
+                      ,render: render};
+   return _elm.Tile.values;
 };
 Elm.Time = Elm.Time || {};
 Elm.Time.make = function (_elm) {
@@ -7686,18 +12081,12 @@ Elm.TouchParser.make = function (_elm) {
    $List.map(clone),
    $Touch.touches)));
    var main = $Signal.map($Graphics$Element.show)(A2($Signal.foldp,
-   F2(function (x,y) {
-      return A2($List._op["::"],
-      x,
-      y);
-   }),
-   _L.fromArray([]))(A2($Signal.foldp,
    parse,
    A2(TouchState,
    _L.fromArray([]),
    $Maybe.Nothing))(A2($Signal.map,
    $List.map(clone),
-   $Touch.touches))));
+   $Touch.touches)));
    _elm.TouchParser.values = {_op: _op
                              ,main: main
                              ,gestures: gestures
@@ -7855,4 +12244,87 @@ Elm.Tuple.make = function (_elm) {
                        ,subtract: subtract
                        ,combine: combine};
    return _elm.Tuple.values;
+};
+Elm.Types = Elm.Types || {};
+Elm.Types.make = function (_elm) {
+   "use strict";
+   _elm.Types = _elm.Types || {};
+   if (_elm.Types.values)
+   return _elm.Types.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Types";
+   var Model = F5(function (a,
+   b,
+   c,
+   d,
+   e) {
+      return {_: {}
+             ,centre: a
+             ,dirty: e
+             ,mouseState: c
+             ,tileSource: d
+             ,zoom: b};
+   });
+   var TileSource = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,locate: b
+             ,tileSize: a
+             ,tileUrl: c};
+   });
+   var TileOffset = F2(function (a,
+   b) {
+      return {_: {}
+             ,position: b
+             ,tile: a};
+   });
+   var Position = function (a) {
+      return {_: {},pixels: a};
+   };
+   var Tile = function (a) {
+      return {_: {},coordinate: a};
+   };
+   var GeoPoint = F2(function (a,
+   b) {
+      return {_: {},lat: a,lon: b};
+   });
+   _elm.Types.values = {_op: _op
+                       ,GeoPoint: GeoPoint
+                       ,Model: Model
+                       ,Position: Position
+                       ,TileOffset: TileOffset
+                       ,TileSource: TileSource
+                       ,Tile: Tile};
+   return _elm.Types.values;
+};
+Elm.Window = Elm.Window || {};
+Elm.Window.make = function (_elm) {
+   "use strict";
+   _elm.Window = _elm.Window || {};
+   if (_elm.Window.values)
+   return _elm.Window.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Window",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Window = Elm.Native.Window.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var dimensions = $Native$Window.dimensions;
+   var width = A2($Signal.map,
+   $Basics.fst,
+   dimensions);
+   var height = A2($Signal.map,
+   $Basics.snd,
+   dimensions);
+   _elm.Window.values = {_op: _op
+                        ,dimensions: dimensions
+                        ,width: width
+                        ,height: height};
+   return _elm.Window.values;
 };
