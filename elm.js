@@ -10764,40 +10764,84 @@ Elm.SlippyMap.make = function (_elm) {
                          drag)]],
       m);
    });
+   var applyGest = F2(function (m,
+   g) {
+      return function () {
+         var pct = function (aff) {
+            return $Tuple.combine(F2(function (x,
+            y) {
+               return x + y;
+            }))(A2($Tuple.map,
+            function (ti) {
+               return ti / 2;
+            },
+            aff.scale));
+         };
+         return function () {
+            switch (g.ctor)
+            {case "Just":
+               return function () {
+                    switch (g._0.ctor)
+                    {case "Affine":
+                       return _U.replace([["zoom"
+                                          ,m.zoom * pct(g._0._0)]],
+                         m);
+                       case "Drag":
+                       switch (g._0._0.ctor)
+                         {case "_Tuple2":
+                            return A2(applyDrag,
+                              m,
+                              {ctor: "_Tuple2"
+                              ,_0: -1 * g._0._0._0
+                              ,_1: g._0._0._1});}
+                         break;
+                       case "End":
+                       return _U.replace([["dirty"
+                                          ,$Basics.not(isInt(m.zoom))]],
+                         m);}
+                    return m;
+                 }();
+               case "Nothing": return m;}
+            _U.badCase($moduleName,
+            "between lines 110 and 117");
+         }();
+      }();
+   });
    var applyKeys = applyDrag;
    var applyMouse = F2(function (model,
-   _v0) {
+   _v7) {
       return function () {
-         switch (_v0.ctor)
+         switch (_v7.ctor)
          {case "_Tuple2":
-            switch (_v0._1.ctor)
+            switch (_v7._1.ctor)
               {case "_Tuple2":
                  return function () {
-                      var _v6 = model.mouseState;
-                      switch (_v6.ctor)
-                      {case "_Tuple2": switch (_v6._0)
+                      var _v13 = model.mouseState;
+                      switch (_v13.ctor)
+                      {case "_Tuple2":
+                         switch (_v13._0)
                            {case false:
                               return _U.replace([["mouseState"
                                                  ,{ctor: "_Tuple2"
-                                                  ,_0: _v0._0
+                                                  ,_0: _v7._0
                                                   ,_1: {ctor: "_Tuple2"
-                                                       ,_0: _v0._1._0
-                                                       ,_1: _v0._1._1}}]],
+                                                       ,_0: _v7._1._0
+                                                       ,_1: _v7._1._1}}]],
                                 model);
-                              case true: switch (_v6._1.ctor)
+                              case true: switch (_v13._1.ctor)
                                 {case "_Tuple2":
                                    return function () {
                                         var newModel = A2(applyDrag,
                                         model,
                                         {ctor: "_Tuple2"
-                                        ,_0: _v6._1._0 - _v0._1._0
-                                        ,_1: _v0._1._1 - _v6._1._1});
+                                        ,_0: _v13._1._0 - _v7._1._0
+                                        ,_1: _v7._1._1 - _v13._1._1});
                                         return _U.replace([["mouseState"
                                                            ,{ctor: "_Tuple2"
-                                                            ,_0: _v0._0
+                                                            ,_0: _v7._0
                                                             ,_1: {ctor: "_Tuple2"
-                                                                 ,_0: _v0._1._0
-                                                                 ,_1: _v0._1._1}}]],
+                                                                 ,_0: _v7._1._0
+                                                                 ,_1: _v7._1._1}}]],
                                         newModel);
                                      }();}
                                 break;}
@@ -10828,10 +10872,6 @@ Elm.SlippyMap.make = function (_elm) {
          m);
       }();
    });
-   var dirty = function (f) {
-      return _U.eq($Basics.toFloat($Basics.round(f)),
-      f);
-   };
    var None = {ctor: "None"};
    var zoomChange = $Signal.mailbox(None);
    var Out = function (a) {
@@ -10863,7 +10903,7 @@ Elm.SlippyMap.make = function (_elm) {
             case "None": return z;
             case "Out": return z - zc._0;}
          _U.badCase($moduleName,
-         "between lines 64 and 67");
+         "between lines 65 and 68");
       }();
    });
    var applyZoom = F2(function (m,
@@ -10871,53 +10911,6 @@ Elm.SlippyMap.make = function (_elm) {
       return _U.replace([["zoom"
                          ,A2(newZoom,zc,m.zoom)]],
       m);
-   });
-   var applyGest = F2(function (m,
-   g) {
-      return function () {
-         var pct = function (aff) {
-            return $Tuple.combine(F2(function (x,
-            y) {
-               return x + y;
-            }))(A2($Tuple.map,
-            function (ti) {
-               return ti / 2;
-            },
-            aff.scale));
-         };
-         var toZoomChange = function (aff) {
-            return _U.cmp(pct(aff),
-            1) > 0 ? In(pct(aff)) : Out(pct(aff));
-         };
-         return function () {
-            switch (g.ctor)
-            {case "Just":
-               return function () {
-                    switch (g._0.ctor)
-                    {case "Affine":
-                       return A2(applyZoom,
-                         m,
-                         toZoomChange(g._0._0));
-                       case "Drag":
-                       switch (g._0._0.ctor)
-                         {case "_Tuple2":
-                            return A2(applyDrag,
-                              m,
-                              {ctor: "_Tuple2"
-                              ,_0: -1 * g._0._0._0
-                              ,_1: g._0._0._1});}
-                         break;
-                       case "End":
-                       return _U.replace([["dirty"
-                                          ,$Basics.not(isInt(m.zoom))]],
-                         m);}
-                    return m;
-                 }();
-               case "Nothing": return m;}
-            _U.badCase($moduleName,
-            "between lines 111 and 118");
-         }();
-      }();
    });
    var appIfClean = F3(function (f,
    m,
@@ -11007,14 +11000,14 @@ Elm.SlippyMap.make = function (_elm) {
                                        ,defaultTileSrc]],
                       m);}
                  _U.badCase($moduleName,
-                 "between lines 51 and 53");
+                 "between lines 52 and 54");
               }();
             case "Z": return A3(appIfClean,
               applyZoom,
               m,
               e._0);}
          _U.badCase($moduleName,
-         "between lines 45 and 53");
+         "between lines 46 and 54");
       }();
    });
    var main = function () {
