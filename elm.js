@@ -10686,7 +10686,6 @@ Elm.SlippyMap.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Text = Elm.Text.make(_elm),
    $Tile = Elm.Tile.make(_elm),
-   $Time = Elm.Time.make(_elm),
    $TouchParser = Elm.TouchParser.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
    $Types = Elm.Types.make(_elm),
@@ -10729,20 +10728,21 @@ Elm.SlippyMap.make = function (_elm) {
       }();
    });
    var accessToken = "pk.eyJ1IjoiZ3J1bXB5amFtZXMiLCJhIjoiNWQzZjdjMDY1YTI2MjExYTQ4ZWU4YjgwZGNmNjUzZmUifQ.BpRWJBEup08Z9DJzstigvg";
-   var tileSrc = $Signal.mailbox($Maybe.Nothing);
-   var tileSrcDropDown = A2($Graphics$Input.dropDown,
-   $Signal.message(tileSrc.address),
-   _L.fromArray([{ctor: "_Tuple2"
-                 ,_0: "OpenStreetMap"
-                 ,_1: $Maybe.Just($Osm.openStreetMap)}
-                ,{ctor: "_Tuple2"
-                 ,_0: "ArcGIS"
-                 ,_1: $Maybe.Just($ArcGIS.arcGIS)}
-                ,{ctor: "_Tuple2"
-                 ,_0: "MapBox"
-                 ,_1: $Maybe.Just(A2($MapBox.mapBox,
-                 "mapbox.run-bike-hike",
-                 accessToken))}]));
+   var tileSrcDropDown = function (address) {
+      return A2($Graphics$Input.dropDown,
+      $Signal.message(address),
+      _L.fromArray([{ctor: "_Tuple2"
+                    ,_0: "OpenStreetMap"
+                    ,_1: $Maybe.Just($Osm.openStreetMap)}
+                   ,{ctor: "_Tuple2"
+                    ,_0: "ArcGIS"
+                    ,_1: $Maybe.Just($ArcGIS.arcGIS)}
+                   ,{ctor: "_Tuple2"
+                    ,_0: "MapBox"
+                    ,_1: $Maybe.Just(A2($MapBox.mapBox,
+                    "mapbox.run-bike-hike",
+                    accessToken))}]));
+   };
    var move = F3(function (z,
    gpt,
    pixOff) {
@@ -10793,7 +10793,7 @@ Elm.SlippyMap.make = function (_elm) {
               }();
             case "Nothing": return m;}
          _U.badCase($moduleName,
-         "between lines 109 and 114");
+         "between lines 101 and 106");
       }();
    });
    var applyKeys = applyDrag;
@@ -10836,67 +10836,21 @@ Elm.SlippyMap.make = function (_elm) {
                                 break;}
                            break;}
                       _U.badCase($moduleName,
-                      "between lines 92 and 96");
+                      "between lines 84 and 88");
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 92 and 96");
+         "between lines 84 and 88");
       }();
    });
-   var applyTime = F2(function (m,
-   t) {
-      return function () {
-         var zoomAmount = 0.5 * ($Basics.toFloat($Basics.round(m.zoom)) - m.zoom);
-         var $ = _U.cmp($Basics.abs(zoomAmount),
-         1.0e-2) < 0 ? {ctor: "_Tuple2"
-                       ,_0: $Basics.toFloat($Basics.round(m.zoom))
-                       ,_1: true} : {ctor: "_Tuple2"
-                                    ,_0: m.zoom + zoomAmount
-                                    ,_1: false},
-         newZoom = $._0,
-         done = $._1;
-         return _U.replace([["zoom"
-                            ,newZoom]
-                           ,["dirty",$Basics.not(done)]],
-         m);
-      }();
-   });
-   var dirty = function (f) {
-      return _U.eq($Basics.toFloat($Basics.round(f)),
-      f);
-   };
-   var None = {ctor: "None"};
-   var zoomChange = $Signal.mailbox(None);
-   var Out = function (a) {
-      return {ctor: "Out",_0: a};
-   };
-   var zoomOut = A2(ourButton,
-   A2($Signal.message,
-   zoomChange.address,
-   Out(1)),
-   "-");
-   var In = function (a) {
-      return {ctor: "In",_0: a};
-   };
-   var zoomIn = A2(ourButton,
-   A2($Signal.message,
-   zoomChange.address,
-   In(1)),
-   "+");
-   var buttons = A2($Graphics$Element.flow,
-   $Graphics$Element.right,
-   _L.fromArray([zoomIn
-                ,zoomOut
-                ,tileSrcDropDown]));
    var newZoom = F2(function (zc,
    z) {
       return function () {
          switch (zc.ctor)
          {case "In": return z + zc._0;
-            case "None": return z;
             case "Out": return z - zc._0;}
          _U.badCase($moduleName,
-         "between lines 64 and 67");
+         "between lines 71 and 73");
       }();
    });
    var applyZoom = F2(function (m,
@@ -10934,13 +10888,37 @@ Elm.SlippyMap.make = function (_elm) {
    var Z = function (a) {
       return {ctor: "Z",_0: a};
    };
-   var C = function (a) {
-      return {ctor: "C",_0: a};
+   var Out = function (a) {
+      return {ctor: "Out",_0: a};
    };
+   var zoomOut = function (address) {
+      return A2(ourButton,
+      A2($Signal.message,
+      address,
+      Out(1)),
+      "-");
+   };
+   var In = function (a) {
+      return {ctor: "In",_0: a};
+   };
+   var zoomIn = function (address) {
+      return A2(ourButton,
+      A2($Signal.message,
+      address,
+      In(1)),
+      "+");
+   };
+   var buttons = F2(function (zoomAddress,
+   tileSrcAddress) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.right,
+      _L.fromArray([zoomIn(zoomAddress)
+                   ,zoomOut(zoomAddress)
+                   ,tileSrcDropDown(tileSrcAddress)]));
+   });
+   var tileSrc = $Signal.mailbox($Maybe.Nothing);
+   var zoomChange = $Signal.mailbox(In(0));
    var events = function () {
-      var clockTicks = A2($Signal.map,
-      C,
-      $Time.fps(25));
       var gests = A2($Signal.map,
       G,
       $TouchParser.gestures);
@@ -10955,31 +10933,32 @@ Elm.SlippyMap.make = function (_elm) {
                                                             ,_1: 256}))($Movement.keyState));
       var zooms = $Signal.map(Z)(zoomChange.signal);
       return $Signal.mergeMany(_L.fromArray([tileSource
-                                            ,clockTicks
                                             ,zooms
                                             ,gests
                                             ,mouse
                                             ,keys]));
    }();
+   var view = F2(function (window,
+   model) {
+      return $Graphics$Element.layers(_L.fromArray([A2($Tile.render,
+                                                   window,
+                                                   model)
+                                                   ,A2(buttons,
+                                                   zoomChange.address,
+                                                   tileSrc.address)]));
+   });
    var defaultTileSrc = $Osm.openStreetMap;
    var applyEvent = F2(function (e,
    m) {
       return function () {
          switch (e.ctor)
-         {case "C": return A3(appIfDirty,
-              applyTime,
+         {case "G": return A2(applyGest,
               m,
               e._0);
-            case "G": return A3(appIfClean,
-              applyGest,
+            case "K": return A2(applyKeys,
               m,
               e._0);
-            case "K": return A3(appIfClean,
-              applyKeys,
-              m,
-              e._0);
-            case "M": return A3(appIfClean,
-              applyMouse,
+            case "M": return A2(applyMouse,
               m,
               e._0);
             case "T": return function () {
@@ -10993,24 +10972,16 @@ Elm.SlippyMap.make = function (_elm) {
                                        ,defaultTileSrc]],
                       m);}
                  _U.badCase($moduleName,
-                 "between lines 51 and 53");
+                 "between lines 58 and 60");
               }();
-            case "Z": return A3(appIfClean,
-              applyZoom,
+            case "Z": return A2(applyZoom,
               m,
               e._0);}
          _U.badCase($moduleName,
-         "between lines 45 and 53");
+         "between lines 53 and 60");
       }();
    });
    var main = function () {
-      var draw = F2(function (window,
-      model) {
-         return $Graphics$Element.layers(_L.fromArray([A2($Tile.render,
-                                                      window,
-                                                      model)
-                                                      ,buttons]));
-      });
       var initialZoom = 15.0;
       var greenwich = A2($Types.GeoPoint,
       51.48,
@@ -11026,7 +10997,7 @@ Elm.SlippyMap.make = function (_elm) {
       defaultTileSrc,
       false);
       return A3($Signal.map2,
-      draw,
+      view,
       $Window.dimensions,
       A3($Signal.foldp,
       applyEvent,
