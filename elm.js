@@ -10707,8 +10707,8 @@ Elm.SlippyMap.make = function (_elm) {
       return function () {
          var el = $Graphics$Element.centered($Text.fromString(txt));
          var cn = A4($Graphics$Element.container,
-         30,
-         30,
+         100,
+         100,
          $Graphics$Element.middle,
          el);
          var up = A2($Graphics$Element.color,
@@ -10793,7 +10793,7 @@ Elm.SlippyMap.make = function (_elm) {
               }();
             case "Nothing": return m;}
          _U.badCase($moduleName,
-         "between lines 101 and 106");
+         "between lines 95 and 100");
       }();
    });
    var applyKeys = applyDrag;
@@ -10836,11 +10836,11 @@ Elm.SlippyMap.make = function (_elm) {
                                 break;}
                            break;}
                       _U.badCase($moduleName,
-                      "between lines 84 and 88");
+                      "between lines 78 and 82");
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 84 and 88");
+         "between lines 78 and 82");
       }();
    });
    var newZoom = F2(function (zc,
@@ -10850,7 +10850,7 @@ Elm.SlippyMap.make = function (_elm) {
          {case "In": return z + zc._0;
             case "Out": return z - zc._0;}
          _U.badCase($moduleName,
-         "between lines 71 and 73");
+         "between lines 65 and 67");
       }();
    });
    var applyZoom = F2(function (m,
@@ -10858,20 +10858,6 @@ Elm.SlippyMap.make = function (_elm) {
       return _U.replace([["zoom"
                          ,A2(newZoom,zc,m.zoom)]],
       m);
-   });
-   var appIfClean = F3(function (f,
-   m,
-   a) {
-      return m.dirty ? m : A2(f,
-      m,
-      a);
-   });
-   var appIfDirty = F3(function (f,
-   m,
-   a) {
-      return $Basics.not(m.dirty) ? m : A2(f,
-      m,
-      a);
    });
    var G = function (a) {
       return {ctor: "G",_0: a};
@@ -10986,7 +10972,7 @@ Elm.SlippyMap.make = function (_elm) {
       var greenwich = A2($Types.GeoPoint,
       51.48,
       0.0);
-      var initialModel = A5($Types.Model,
+      var initialModel = A4($Types.Model,
       greenwich,
       initialZoom,
       {ctor: "_Tuple2"
@@ -10994,8 +10980,7 @@ Elm.SlippyMap.make = function (_elm) {
       ,_1: {ctor: "_Tuple2"
            ,_0: 0
            ,_1: 0}},
-      defaultTileSrc,
-      false);
+      defaultTileSrc);
       return A3($Signal.map2,
       view,
       $Window.dimensions,
@@ -11853,20 +11838,24 @@ Elm.TouchParser.make = function (_elm) {
    var parse = F2(function (newTs,
    oldState) {
       return function () {
-         var _v15 = oldState.oldTouches;
-         switch (_v15.ctor)
+         switch (newTs.ctor)
          {case "::":
-            switch (_v15._1.ctor)
+            switch (newTs._1.ctor)
               {case "::": return oldState;}
-              break;
-            case "[]": return A2(TouchState,
-              A2($List.map,clone,newTs),
-              $Maybe.Just(Start));}
-         return A2(TouchState,
-         A2($List.map,clone,newTs),
-         A2(maybeParse,
-         oldState.oldTouches,
-         newTs));
+              break;}
+         return function () {
+            var _v20 = oldState.oldTouches;
+            switch (_v20.ctor)
+            {case "[]":
+               return A2(TouchState,
+                 A2($List.map,clone,newTs),
+                 $Maybe.Just(Start));}
+            return A2(TouchState,
+            A2($List.map,clone,newTs),
+            A2(maybeParse,
+            oldState.oldTouches,
+            newTs));
+         }();
       }();
    });
    var gestures = $Signal.map(function (t) {
@@ -12058,14 +12047,12 @@ Elm.Types.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Types";
-   var Model = F5(function (a,
+   var Model = F4(function (a,
    b,
    c,
-   d,
-   e) {
+   d) {
       return {_: {}
              ,centre: a
-             ,dirty: e
              ,mouseState: c
              ,tileSource: d
              ,zoom: b};
