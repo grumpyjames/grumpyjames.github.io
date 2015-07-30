@@ -4476,13 +4476,14 @@ Elm.MapBox.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $CommonLocator = Elm.CommonLocator.make(_elm),
    $Types = Elm.Types.make(_elm);
-   var mapBoxUrl = F4(function (id,
+   var mapBoxUrl = F5(function (hdpi,
+   id,
    token,
    z,
    t) {
       return function () {
-         var wrap = F2(function (z,
-         c) {
+         var extra = hdpi ? "@2x" : "";
+         var wrap = F2(function (z,c) {
             return A2($Basics._op["%"],
             c,
             Math.pow(2,$Basics.floor(z)));
@@ -4507,18 +4508,25 @@ Elm.MapBox.make = function (_elm) {
          A2($Basics._op["++"],
          $Basics.toString(y),
          A2($Basics._op["++"],
+         extra,
+         A2($Basics._op["++"],
          ".png?access_token=",
-         token)))))))));
+         token))))))))));
       }();
    });
-   var tileSize = 256;
-   var locate = $CommonLocator.common(tileSize);
-   var mapBox = F2(function (identifier,
+   var mapBox = F3(function (hdpi,
+   identifier,
    token) {
-      return A3($Types.TileSource,
-      tileSize,
-      $CommonLocator.common(tileSize),
-      A2(mapBoxUrl,identifier,token));
+      return function () {
+         var tileSize = hdpi ? 512 : 256;
+         return A3($Types.TileSource,
+         tileSize,
+         $CommonLocator.common(tileSize),
+         A3(mapBoxUrl,
+         hdpi,
+         identifier,
+         token));
+      }();
    });
    _elm.MapBox.values = {_op: _op
                         ,mapBox: mapBox};
@@ -4597,36 +4605,346 @@ Elm.Maybe.make = function (_elm) {
                        ,Nothing: Nothing};
    return _elm.Maybe.values;
 };
-Elm.Mouse = Elm.Mouse || {};
-Elm.Mouse.make = function (_elm) {
+Elm.Metacarpal = Elm.Metacarpal || {};
+Elm.Metacarpal.make = function (_elm) {
    "use strict";
-   _elm.Mouse = _elm.Mouse || {};
-   if (_elm.Mouse.values)
-   return _elm.Mouse.values;
+   _elm.Metacarpal = _elm.Metacarpal || {};
+   if (_elm.Metacarpal.values)
+   return _elm.Metacarpal.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   $moduleName = "Mouse",
+   $moduleName = "Metacarpal",
    $Basics = Elm.Basics.make(_elm),
-   $Native$Mouse = Elm.Native.Mouse.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var clicks = $Native$Mouse.clicks;
-   var isDown = $Native$Mouse.isDown;
-   var position = $Native$Mouse.position;
-   var x = A2($Signal.map,
-   $Basics.fst,
-   position);
-   var y = A2($Signal.map,
-   $Basics.snd,
-   position);
-   _elm.Mouse.values = {_op: _op
-                       ,position: position
-                       ,x: x
-                       ,y: y
-                       ,isDown: isDown
-                       ,clicks: clicks};
-   return _elm.Mouse.values;
+   $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Tuple = Elm.Tuple.make(_elm);
+   var floatyPnDecoder = $Json$Decode.map($Tuple.map($Basics.floor))(A3($Json$Decode.object2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   A2($Json$Decode._op[":="],
+   "pageX",
+   $Json$Decode.$float),
+   A2($Json$Decode._op[":="],
+   "pageY",
+   $Json$Decode.$float)));
+   var positionDecoder = A3($Json$Decode.object2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   A2($Json$Decode._op[":="],
+   "pageX",
+   $Json$Decode.$int),
+   A2($Json$Decode._op[":="],
+   "pageY",
+   $Json$Decode.$int));
+   var prev = A2($Html$Events.Options,
+   true,
+   true);
+   var find = F2(function (feature,
+   needle) {
+      return function ($) {
+         return $List.head($List.filter(function (x) {
+            return _U.eq(feature(x),
+            needle);
+         })($));
+      };
+   });
+   var pairBy = F3(function (f,
+   xs,
+   ys) {
+      return function () {
+         var pairOf = function (x) {
+            return A3(find,f,f(x),ys);
+         };
+         var maybeMatch = function (x) {
+            return $Maybe.map(function (y) {
+               return {ctor: "_Tuple2"
+                      ,_0: x
+                      ,_1: y};
+            })(pairOf(x));
+         };
+         return A2($List.filterMap,
+         maybeMatch,
+         xs);
+      }();
+   });
+   var Metacarpal = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,attr: b
+             ,sign: a
+             ,zero: c};
+   });
+   var Clean = {ctor: "Clean"};
+   var InGesture = function (a) {
+      return {ctor: "InGesture"
+             ,_0: a};
+   };
+   var InDrag = function (a) {
+      return {ctor: "InDrag"
+             ,_0: a};
+   };
+   var Touches = function (a) {
+      return {ctor: "Touches"
+             ,_0: a};
+   };
+   var DblClick = function (a) {
+      return {ctor: "DblClick"
+             ,_0: a};
+   };
+   var MouseUp = function (a) {
+      return {ctor: "MouseUp"
+             ,_0: a};
+   };
+   var MouseOut = function (a) {
+      return {ctor: "MouseOut"
+             ,_0: a};
+   };
+   var MouseMove = function (a) {
+      return {ctor: "MouseMove"
+             ,_0: a};
+   };
+   var MouseDown = function (a) {
+      return {ctor: "MouseDown"
+             ,_0: a};
+   };
+   var Touch = F2(function (a,b) {
+      return {_: {}
+             ,id: b
+             ,position: a};
+   });
+   var touchDecoder = function () {
+      var oneTouch = $Json$Decode.map(function (t) {
+         return _L.fromArray([t]);
+      })(A3($Json$Decode.object2,
+      Touch,
+      floatyPnDecoder,
+      A2($Json$Decode._op[":="],
+      "identifier",
+      $Json$Decode.$int)));
+      return A2($Json$Decode._op[":="],
+      "touches",
+      A2($Json$Decode._op[":="],
+      "0",
+      oneTouch));
+   }();
+   var interactions = function (addr) {
+      return _L.fromArray([A3($Html$Events.on,
+                          "mousedown",
+                          positionDecoder,
+                          function (posn) {
+                             return A2($Signal.message,
+                             addr,
+                             MouseDown(posn));
+                          })
+                          ,A3($Html$Events.on,
+                          "mouseup",
+                          positionDecoder,
+                          function (posn) {
+                             return A2($Signal.message,
+                             addr,
+                             MouseOut(posn));
+                          })
+                          ,A3($Html$Events.on,
+                          "mouseout",
+                          positionDecoder,
+                          function (posn) {
+                             return A2($Signal.message,
+                             addr,
+                             MouseOut(posn));
+                          })
+                          ,A3($Html$Events.on,
+                          "mousemove",
+                          positionDecoder,
+                          function (posn) {
+                             return A2($Signal.message,
+                             addr,
+                             MouseMove(posn));
+                          })
+                          ,A3($Html$Events.on,
+                          "dblclick",
+                          positionDecoder,
+                          function (posn) {
+                             return A2($Signal.message,
+                             addr,
+                             DblClick(posn));
+                          })
+                          ,A3($Html$Events.on,
+                          "touchstart",
+                          touchDecoder,
+                          function (ts) {
+                             return A2($Signal.message,
+                             addr,
+                             Touches(ts));
+                          })
+                          ,A4($Html$Events.onWithOptions,
+                          "touchmove",
+                          prev,
+                          touchDecoder,
+                          function (ts) {
+                             return A2($Signal.message,
+                             addr,
+                             Touches(ts));
+                          })
+                          ,A4($Html$Events.onWithOptions,
+                          "touchend",
+                          prev,
+                          $Json$Decode.succeed(1),
+                          function (t) {
+                             return A2($Signal.message,
+                             addr,
+                             Touches(_L.fromArray([])));
+                          })
+                          ,A4($Html$Events.onWithOptions,
+                          "touchleave",
+                          prev,
+                          $Json$Decode.succeed(1),
+                          function (t) {
+                             return A2($Signal.message,
+                             addr,
+                             Touches(_L.fromArray([])));
+                          })]);
+   };
+   var LongPress = function (a) {
+      return {ctor: "LongPress"
+             ,_0: a};
+   };
+   var DoubleClick = function (a) {
+      return {ctor: "DoubleClick"
+             ,_0: a};
+   };
+   var Drag = function (a) {
+      return {ctor: "Drag",_0: a};
+   };
+   var parseDrag = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return Drag(A2($Tuple.subtract,
+              _v0._1.position,
+              _v0._0.position));}
+         _U.badCase($moduleName,
+         "on line 88, column 22 to 64");
+      }();
+   };
+   var parseOne = function (ts) {
+      return function () {
+         switch (ts.ctor)
+         {case "::": switch (ts._1.ctor)
+              {case "[]":
+                 return $Maybe.Just(parseDrag(ts._0));}
+              break;}
+         return $Maybe.Nothing;
+      }();
+   };
+   var parseEvent = F2(function (oldTs,
+   newTs) {
+      return function () {
+         var matches = A3(pairBy,
+         function (t) {
+            return t.id;
+         },
+         oldTs,
+         newTs);
+         return parseOne(matches);
+      }();
+   });
+   var parseTouchEvent = F2(function (newTouches,
+   oldTouches) {
+      return _U.eq($List.length(oldTouches),
+      1) && _U.eq($List.length(newTouches),
+      1) ? A2(parseEvent,
+      newTouches,
+      oldTouches) : $Maybe.Nothing;
+   });
+   var parse = F2(function (ie,s) {
+      return function () {
+         var _v7 = {ctor: "_Tuple2"
+                   ,_0: ie
+                   ,_1: $Basics.fst(s)};
+         switch (_v7.ctor)
+         {case "_Tuple2":
+            switch (_v7._0.ctor)
+              {case "DblClick":
+                 return {ctor: "_Tuple2"
+                        ,_0: Clean
+                        ,_1: $Maybe.Just(DoubleClick(_v7._0._0))};
+                 case "MouseDown":
+                 return {ctor: "_Tuple2"
+                        ,_0: InDrag(_v7._0._0)
+                        ,_1: $Maybe.Nothing};
+                 case "MouseMove":
+                 switch (_v7._1.ctor)
+                   {case "InDrag":
+                      return {ctor: "_Tuple2"
+                             ,_0: InDrag(_v7._0._0)
+                             ,_1: $Maybe.Just(Drag(A2($Tuple.subtract,
+                             _v7._1._0,
+                             _v7._0._0)))};}
+                   return {ctor: "_Tuple2"
+                          ,_0: _v7._1
+                          ,_1: $Maybe.Nothing};
+                 case "MouseOut":
+                 switch (_v7._1.ctor)
+                   {case "InDrag":
+                      return {ctor: "_Tuple2"
+                             ,_0: Clean
+                             ,_1: $Maybe.Just(Drag(A2($Tuple.subtract,
+                             _v7._1._0,
+                             _v7._0._0)))};}
+                   return {ctor: "_Tuple2"
+                          ,_0: Clean
+                          ,_1: $Maybe.Nothing};
+                 case "Touches":
+                 switch (_v7._1.ctor)
+                   {case "InGesture":
+                      return {ctor: "_Tuple2"
+                             ,_0: InGesture(_v7._0._0)
+                             ,_1: A2(parseTouchEvent,
+                             _v7._0._0,
+                             _v7._1._0)};}
+                   return {ctor: "_Tuple2"
+                          ,_0: InGesture(_v7._0._0)
+                          ,_1: $Maybe.Nothing};}
+              break;}
+         return {ctor: "_Tuple2"
+                ,_0: Clean
+                ,_1: $Maybe.Nothing};
+      }();
+   });
+   var sgn = function (sie) {
+      return $Signal.map($Basics.snd)(A3($Signal.foldp,
+      parse,
+      {ctor: "_Tuple2"
+      ,_0: Clean
+      ,_1: $Maybe.Nothing},
+      sie));
+   };
+   var index = A3(Metacarpal,
+   sgn,
+   interactions,
+   MouseOut({ctor: "_Tuple2"
+            ,_0: 0
+            ,_1: 0}));
+   _elm.Metacarpal.values = {_op: _op
+                            ,index: index
+                            ,Metacarpal: Metacarpal
+                            ,Drag: Drag
+                            ,DoubleClick: DoubleClick
+                            ,LongPress: LongPress};
+   return _elm.Metacarpal.values;
 };
 Elm.Movement = Elm.Movement || {};
 Elm.Movement.make = function (_elm) {
@@ -4640,16 +4958,7 @@ Elm.Movement.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Movement",
    $Keyboard = Elm.Keyboard.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $Signal = Elm.Signal.make(_elm);
-   var mouseState = A3($Signal.map2,
-   F2(function (v0,v1) {
-      return {ctor: "_Tuple2"
-             ,_0: v0
-             ,_1: v1};
-   }),
-   $Mouse.isDown,
-   $Mouse.position);
    var keyState = function () {
       var toTuple = function (a) {
          return {ctor: "_Tuple2"
@@ -4661,7 +4970,6 @@ Elm.Movement.make = function (_elm) {
       $Keyboard.arrows);
    }();
    _elm.Movement.values = {_op: _op
-                          ,mouseState: mouseState
                           ,keyState: keyState};
    return _elm.Movement.values;
 };
@@ -8527,50 +8835,6 @@ Elm.Native.List.make = function(localRuntime) {
 
 };
 
-Elm.Native = Elm.Native || {};
-Elm.Native.Mouse = {};
-Elm.Native.Mouse.make = function(localRuntime) {
-
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Mouse = localRuntime.Native.Mouse || {};
-	if (localRuntime.Native.Mouse.values)
-	{
-		return localRuntime.Native.Mouse.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Utils = Elm.Native.Utils.make(localRuntime);
-
-	var position = NS.input('Mouse.position', Utils.Tuple2(0,0));
-
-	var isDown = NS.input('Mouse.isDown', false);
-
-	var clicks = NS.input('Mouse.clicks', Utils.Tuple0);
-
-	var node = localRuntime.isFullscreen()
-		? document
-		: localRuntime.node;
-
-	localRuntime.addListener([clicks.id], node, 'click', function click() {
-		localRuntime.notify(clicks.id, Utils.Tuple0);
-	});
-	localRuntime.addListener([isDown.id], node, 'mousedown', function down() {
-		localRuntime.notify(isDown.id, true);
-	});
-	localRuntime.addListener([isDown.id], node, 'mouseup', function up() {
-		localRuntime.notify(isDown.id, false);
-	});
-	localRuntime.addListener([position.id], node, 'mousemove', function move(e) {
-		localRuntime.notify(position.id, Utils.getXY(e));
-	});
-
-	return localRuntime.Native.Mouse.values = {
-		position: position,
-		isDown: isDown,
-		clicks: clicks
-	};
-};
-
 Elm.Native.Port = {};
 Elm.Native.Port.make = function(localRuntime) {
 
@@ -10862,295 +11126,6 @@ Elm.Native.Text.make = function(localRuntime) {
 		toLine: toLine,
 		renderHtml: renderHtml
 	};
-};
-
-Elm.Native.Time = {};
-Elm.Native.Time.make = function(localRuntime)
-{
-
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Time = localRuntime.Native.Time || {};
-	if (localRuntime.Native.Time.values)
-	{
-		return localRuntime.Native.Time.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Maybe = Elm.Maybe.make(localRuntime);
-
-
-	// FRAMES PER SECOND
-
-	function fpsWhen(desiredFPS, isOn)
-	{
-		var msPerFrame = 1000 / desiredFPS;
-		var ticker = NS.input('fps-' + desiredFPS, null);
-
-		function notifyTicker()
-		{
-			localRuntime.notify(ticker.id, null);
-		}
-
-		function firstArg(x, y)
-		{
-			return x;
-		}
-
-		// input fires either when isOn changes, or when ticker fires.
-		// Its value is a tuple with the current timestamp, and the state of isOn
-		var input = NS.timestamp(A3(NS.map2, F2(firstArg), NS.dropRepeats(isOn), ticker));
-
-		var initialState = {
-			isOn: false,
-			time: localRuntime.timer.programStart,
-			delta: 0
-		};
-
-		var timeoutId;
-
-		function update(input,state)
-		{
-			var currentTime = input._0;
-			var isOn = input._1;
-			var wasOn = state.isOn;
-			var previousTime = state.time;
-
-			if (isOn)
-			{
-				timeoutId = localRuntime.setTimeout(notifyTicker, msPerFrame);
-			}
-			else if (wasOn)
-			{
-				clearTimeout(timeoutId);
-			}
-
-			return {
-				isOn: isOn,
-				time: currentTime,
-				delta: (isOn && !wasOn) ? 0 : currentTime - previousTime
-			};
-		}
-
-		return A2(
-			NS.map,
-			function(state) { return state.delta; },
-			A3(NS.foldp, F2(update), update(input.value,initialState), input)
-		);
-	}
-
-
-	// EVERY
-
-	function every(t)
-	{
-		var ticker = NS.input('every-' + t, null);
-		function tellTime()
-		{
-			localRuntime.notify(ticker.id, null);
-		}
-		var clock = A2( NS.map, fst, NS.timestamp(ticker) );
-		setInterval(tellTime, t);
-		return clock;
-	}
-
-
-	function fst(pair)
-	{
-		return pair._0;
-	}
-
-
-	function read(s)
-	{
-		var t = Date.parse(s);
-		return isNaN(t) ? Maybe.Nothing : Maybe.Just(t);
-	}
-
-	return localRuntime.Native.Time.values = {
-		fpsWhen: F2(fpsWhen),
-		every: every,
-		toDate: function(t) { return new window.Date(t); },
-		read: read
-	};
-
-};
-
-Elm.Native = Elm.Native || {};
-Elm.Native.Touch = {};
-Elm.Native.Touch.make = function(localRuntime) {
-
-    localRuntime.Native = localRuntime.Native || {};
-    localRuntime.Native.Touch = localRuntime.Native.Touch || {};
-    if (localRuntime.Native.Touch.values)
-    {
-        return localRuntime.Native.Touch.values;
-    }
-
-    var Signal = Elm.Signal.make(localRuntime);
-    var NS = Elm.Native.Signal.make(localRuntime);
-    var List = Elm.Native.List.make(localRuntime);
-    var Utils = Elm.Native.Utils.make(localRuntime);
-
-    function Dict() {
-        this.keys = [];
-        this.values = [];
-
-        this.insert = function(key,value) {
-            this.keys.push(key);
-            this.values.push(value);
-        };
-        this.lookup = function(key) {
-            var i = this.keys.indexOf(key)
-            return i >= 0 ? this.values[i] : {x:0,y:0,t:0};
-        };
-        this.remove = function(key) {
-            var i = this.keys.indexOf(key);
-            if (i < 0) return;
-            var t = this.values[i];
-            this.keys.splice(i,1);
-            this.values.splice(i,1);
-            return t;
-        };
-        this.clear = function() {
-            this.keys = [];
-            this.values = [];
-        };
-    }
-
-    var root = NS.input('touch', []),
-    tapTime = 500,
-    hasTap = false,
-    tap = {_:{},x:0,y:0},
-    dict = new Dict();
-
-    function touch(t) {
-        var r = dict.lookup(t.identifier);
-        var point = Utils.getXY(t);
-        return {
-            _ : {},
-            id: t.identifier,
-            x : point._0,
-            y : point._1,
-            x0: r.x,
-            y0: r.y,
-            t0: r.t
-         };
-    }
-
-    var node = localRuntime.isFullscreen()
-        ? document
-        : localRuntime.node;
-
-    function start(e) {
-        var point = Utils.getXY(e);
-        dict.insert(e.identifier, {
-            x: point._0,
-            y: point._1,
-            t: localRuntime.timer.now()
-        });
-    }
-    function end(e) {
-        var t = dict.remove(e.identifier);
-        if (localRuntime.timer.now() - t.t < tapTime)
-        {
-            hasTap = true;
-            tap = {
-                _: {},
-                x: t.x,
-                y: t.y
-            };
-        }
-    }
-
-    function listen(name, f) {
-        function update(e) {
-            for (var i = e.changedTouches.length; i--; ) {
-                f(e.changedTouches[i]);
-            }
-            var ts = new Array(e.touches.length);
-            for (var i = e.touches.length; i--; ) {
-                ts[i] = touch(e.touches[i]);
-            }
-            localRuntime.notify(root.id, ts);
-            e.preventDefault();
-        }
-        localRuntime.addListener([root.id], node, name, update);
-    }
-
-    listen("touchstart", start);
-    listen("touchmove", function(_){});
-    listen("touchend", end);
-    listen("touchcancel", end);
-    listen("touchleave", end);
-
-    var mouseID = -1;
-    function move(e) {
-        var point = Utils.getXY(e);
-        for (var i = root.value.length; i--; ) {
-            if (root.value[i].id === mouseID)
-            {
-                root.value[i].x = point._0;
-                root.value[i].y = point._1;
-                localRuntime.notify(root.id, root.value);
-                break;
-            }
-        }
-    }
-    localRuntime.addListener([root.id], node, "mousedown", function down(e) {
-        node.addEventListener("mousemove", move);
-        e.identifier = mouseID;
-        start(e);
-        root.value.push(touch(e));
-        localRuntime.notify(root.id, root.value);
-    });
-    localRuntime.addListener([root.id], document, "mouseup", function up(e) {
-        node.removeEventListener("mousemove", move);
-        e.identifier = mouseID;
-        end(e);
-        for (var i = root.value.length; i--; ) {
-            if (root.value[i].id === mouseID)
-            {
-                root.value.splice(i, 1);
-                --mouseID;
-                break;
-            }
-        }
-        localRuntime.notify(root.id, root.value);
-    });
-    localRuntime.addListener([root.id], node, "blur", function blur(e) {
-        node.removeEventListener("mousemove", move);
-        if (root.value.length > 0)
-        {
-            localRuntime.notify(root.id, []);
-            --mouseID;
-        }
-        dict.clear();
-    });
-
-    function dependency(f) {
-        var sig = A2( Signal.map, f, root );
-        root.defaultNumberOfKids += 1;
-        sig.defaultNumberOfKids = 0;
-        return sig;
-    }
-
-    var touches = dependency(List.fromArray);
-
-    var taps = function() {
-        var sig = dependency(function(_) { return tap; });
-        sig.defaultNumberOfKids = 1;
-        function pred(_) {
-            var b = hasTap;
-            hasTap = false;
-            return b;
-        }
-        var sig2 = A3( Signal.filter, pred, {_:{},x:0,y:0}, sig);
-        sig2.defaultNumberOfKids = 0;
-        return sig2;
-    }();
-
-    return localRuntime.Native.Touch.values = { touches: touches, taps: taps };
-
 };
 
 Elm.Native.Transform2D = {};
@@ -13790,11 +13765,12 @@ Elm.SlippyMap.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $MapBox = Elm.MapBox.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
+   $Metacarpal = Elm.Metacarpal.make(_elm),
    $Movement = Elm.Movement.make(_elm),
    $Osm = Elm.Osm.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $Styles = Elm.Styles.make(_elm),
    $Tile = Elm.Tile.make(_elm),
-   $TouchParser = Elm.TouchParser.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
    $Types = Elm.Types.make(_elm),
    $Window = Elm.Window.make(_elm);
@@ -13838,48 +13814,6 @@ Elm.SlippyMap.make = function (_elm) {
    240,
    240);
    var accessToken = "pk.eyJ1IjoiZ3J1bXB5amFtZXMiLCJhIjoiNWQzZjdjMDY1YTI2MjExYTQ4ZWU4YjgwZGNmNjUzZmUifQ.BpRWJBEup08Z9DJzstigvg";
-   var ons = function (add) {
-      return function () {
-         var toMsg = function (v) {
-            return function () {
-               switch (v)
-               {case "ArcGIS":
-                  return $Maybe.Just($ArcGIS.arcGIS);
-                  case "MapBox":
-                  return $Maybe.Just(A2($MapBox.mapBox,
-                    "mapbox.run-bike-hike",
-                    accessToken));
-                  case "OpenStreetMap":
-                  return $Maybe.Just($Osm.openStreetMap);}
-               return $Maybe.Nothing;
-            }();
-         };
-         return A3($Html$Events.on,
-         "change",
-         $Html$Events.targetValue,
-         function (v) {
-            return A2($Signal.message,
-            add,
-            toMsg(v));
-         });
-      }();
-   };
-   var tileSrcDropDown = function (address) {
-      return function () {
-         var onChange = ons(address);
-         return A2($Html.select,
-         _L.fromArray([onChange]),
-         _L.fromArray([A2($Html.option,
-                      _L.fromArray([]),
-                      _L.fromArray([$Html.text("OpenStreetMap")]))
-                      ,A2($Html.option,
-                      _L.fromArray([]),
-                      _L.fromArray([$Html.text("ArcGIS")]))
-                      ,A2($Html.option,
-                      _L.fromArray([]),
-                      _L.fromArray([$Html.text("MapBox")]))]));
-      }();
-   };
    var move = F3(function (z,
    gpt,
    pixOff) {
@@ -13910,75 +13844,12 @@ Elm.SlippyMap.make = function (_elm) {
                          drag)]],
       m);
    });
-   var applyGest = F2(function (m,
-   g) {
-      return function () {
-         switch (g.ctor)
-         {case "Just":
-            return function () {
-                 switch (g._0.ctor)
-                 {case "Drag":
-                    switch (g._0._0.ctor)
-                      {case "_Tuple2":
-                         return A2(applyDrag,
-                           m,
-                           {ctor: "_Tuple2"
-                           ,_0: -1 * g._0._0._0
-                           ,_1: g._0._0._1});}
-                      break;}
-                 return m;
-              }();
-            case "Nothing": return m;}
-         _U.badCase($moduleName,
-         "between lines 105 and 110");
-      }();
-   });
    var applyKeys = applyDrag;
-   var applyMouse = F2(function (model,
-   _v9) {
-      return function () {
-         switch (_v9.ctor)
-         {case "_Tuple2":
-            switch (_v9._1.ctor)
-              {case "_Tuple2":
-                 return function () {
-                      var _v15 = model.mouseState;
-                      switch (_v15.ctor)
-                      {case "_Tuple2":
-                         switch (_v15._0)
-                           {case false:
-                              return _U.replace([["mouseState"
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: _v9._0
-                                                  ,_1: {ctor: "_Tuple2"
-                                                       ,_0: _v9._1._0
-                                                       ,_1: _v9._1._1}}]],
-                                model);
-                              case true: switch (_v15._1.ctor)
-                                {case "_Tuple2":
-                                   return function () {
-                                        var newModel = A2(applyDrag,
-                                        model,
-                                        {ctor: "_Tuple2"
-                                        ,_0: _v15._1._0 - _v9._1._0
-                                        ,_1: _v9._1._1 - _v15._1._1});
-                                        return _U.replace([["mouseState"
-                                                           ,{ctor: "_Tuple2"
-                                                            ,_0: _v9._0
-                                                            ,_1: {ctor: "_Tuple2"
-                                                                 ,_0: _v9._1._0
-                                                                 ,_1: _v9._1._1}}]],
-                                        newModel);
-                                     }();}
-                                break;}
-                           break;}
-                      _U.badCase($moduleName,
-                      "between lines 88 and 92");
-                   }();}
-              break;}
-         _U.badCase($moduleName,
-         "between lines 88 and 92");
-      }();
+   var applyClick = F2(function (m,
+   c) {
+      return _U.replace([["clicked"
+                         ,c]],
+      m);
    });
    var newZoom = F2(function (zc,
    z) {
@@ -13987,7 +13858,7 @@ Elm.SlippyMap.make = function (_elm) {
          {case "In": return z + zc._0;
             case "Out": return z - zc._0;}
          _U.badCase($moduleName,
-         "between lines 75 and 77");
+         "between lines 132 and 134");
       }();
    });
    var applyZoom = F2(function (m,
@@ -13996,17 +13867,38 @@ Elm.SlippyMap.make = function (_elm) {
                          ,A2(newZoom,zc,m.zoom)]],
       m);
    });
-   var G = function (a) {
-      return {ctor: "G",_0: a};
+   var applyO = F2(function (m,o) {
+      return function () {
+         switch (o.ctor)
+         {case "Just":
+            return function () {
+                 switch (o._0.ctor)
+                 {case "DoubleClick":
+                    return A2(applyClick,
+                      m,
+                      $Maybe.Just(o._0._0));
+                    case "Drag":
+                    return A2(applyDrag,
+                      m,
+                      A2($Tuple.multiply,
+                      {ctor: "_Tuple2",_0: 1,_1: -1},
+                      o._0._0));}
+                 return m;
+              }();}
+         return m;
+      }();
+   });
+   var O = function (a) {
+      return {ctor: "O",_0: a};
+   };
+   var C = function (a) {
+      return {ctor: "C",_0: a};
    };
    var T = function (a) {
       return {ctor: "T",_0: a};
    };
    var K = function (a) {
       return {ctor: "K",_0: a};
-   };
-   var M = function (a) {
-      return {ctor: "M",_0: a};
    };
    var Z = function (a) {
       return {ctor: "Z",_0: a};
@@ -14029,85 +13921,175 @@ Elm.SlippyMap.make = function (_elm) {
       In(1),
       "+");
    };
-   var buttons = F3(function (attrs,
-   zoomAddress,
-   tileSrcAddress) {
-      return A2($Html.div,
-      attrs,
-      _L.fromArray([zoomIn(zoomAddress)
-                   ,zoomOut(zoomAddress)
-                   ,tileSrcDropDown(tileSrcAddress)]));
-   });
    var tileSrc = $Signal.mailbox($Maybe.Nothing);
    var zoomChange = $Signal.mailbox(In(0));
+   var metacarpal = $Signal.mailbox($Metacarpal.index.zero);
+   var clicks = $Signal.mailbox($Maybe.Nothing);
    var events = function () {
-      var gests = A2($Signal.map,
-      G,
-      $TouchParser.gestures);
+      var ot = $Signal.map(O)($Metacarpal.index.sign(metacarpal.signal));
+      var klix = A2($Signal.map,
+      C,
+      clicks.signal);
       var tileSource = A2($Signal.map,
       T,
       tileSrc.signal);
-      var mouse = A2($Signal.map,
-      M,
-      $Movement.mouseState);
       var keys = $Signal.map(K)($Signal.map($Tuple.multiply({ctor: "_Tuple2"
                                                             ,_0: 256
                                                             ,_1: 256}))($Movement.keyState));
       var zooms = $Signal.map(Z)(zoomChange.signal);
       return $Signal.mergeMany(_L.fromArray([tileSource
                                             ,zooms
-                                            ,gests
-                                            ,mouse
-                                            ,keys]));
+                                            ,klix
+                                            ,keys
+                                            ,ot]));
    }();
-   var view = F2(function (window,
-   model) {
+   var circleDiv = function (clickPoint) {
       return function () {
-         var px = function (n) {
-            return A2($Basics._op["++"],
-            $Basics.toString(n),
-            "px");
-         };
-         var styles = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                           ,_0: "position"
-                                                           ,_1: "absolute"}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "width"
-                                                           ,_1: px($Basics.fst(window))}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "height"
-                                                           ,_1: px($Basics.snd(window))}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "padding"
-                                                           ,_1: px(0)}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "margin"
-                                                           ,_1: px(0)}]));
-         var controls = A3(buttons,
-         _L.fromArray([styles]),
-         zoomChange.address,
-         tileSrc.address);
-         var mapLayer = A2($Tile.render,
-         window,
-         model);
+         var radius = 15;
+         var diameter = 2 * radius;
+         var dims = {ctor: "_Tuple2"
+                    ,_0: diameter
+                    ,_1: diameter};
+         var realPosition = A2($Tuple.subtract,
+         clickPoint,
+         {ctor: "_Tuple2"
+         ,_0: radius
+         ,_1: radius});
          return A2($Html.div,
-         _L.fromArray([styles]),
-         _L.fromArray([mapLayer
-                      ,controls]));
+         _L.fromArray([$Html$Attributes.style(A2($Basics._op["++"],
+         $Styles.absolute,
+         A2($Basics._op["++"],
+         $Styles.position(realPosition),
+         A2($Basics._op["++"],
+         $Styles.dimensions(dims),
+         _L.fromArray([{ctor: "_Tuple2"
+                       ,_0: "border-style"
+                       ,_1: "inset"}
+                      ,{ctor: "_Tuple2"
+                       ,_0: "border-radius"
+                       ,_1: $Styles.px(radius)}
+                      ,{ctor: "_Tuple2"
+                       ,_0: "border-color"
+                       ,_1: "indigo"}
+                      ,{ctor: "_Tuple2"
+                       ,_0: "border-width"
+                       ,_1: "thin"}])))))]),
+         _L.fromArray([]));
+      }();
+   };
+   var vcentred = F3(function (attrs,
+   size,
+   content) {
+      return function () {
+         var cell = A2($Html.div,
+         _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                            ,_0: "display"
+                                                            ,_1: "table-cell"}
+                                                           ,{ctor: "_Tuple2"
+                                                            ,_0: "vertical-align"
+                                                            ,_1: "middle"}]))]),
+         _L.fromArray([content]));
+         return A2($Html.div,
+         A2($Basics._op["++"],
+         attrs,
+         _L.fromArray([$Html$Attributes.style(A2($Basics._op["++"],
+         $Styles.absolute,
+         A2($Basics._op["++"],
+         $Styles.dimensions(size),
+         _L.fromArray([{ctor: "_Tuple2"
+                       ,_0: "overflow"
+                       ,_1: "hidden"}
+                      ,{ctor: "_Tuple2"
+                       ,_0: "display"
+                       ,_1: "table"}]))))])),
+         _L.fromArray([cell]));
       }();
    });
-   var defaultTileSrc = $Osm.openStreetMap;
+   var spotLayers = F3(function (addr,
+   size,
+   clickPoint) {
+      return function () {
+         var location = A2($Html.input,
+         _L.fromArray([$Html$Attributes.type$("text")
+                      ,$Html$Attributes.value($Basics.toString(clickPoint))
+                      ,$Html$Attributes.disabled(true)]),
+         _L.fromArray([]));
+         var at = $Html.text(" at ");
+         var bird = A2($Html.input,
+         _L.fromArray([$Html$Attributes.id("species")
+                      ,$Html$Attributes.type$("text")
+                      ,$Html$Attributes.placeholder("Puffin")]),
+         _L.fromArray([]));
+         var count = A2($Html.input,
+         _L.fromArray([$Html$Attributes.id("count")
+                      ,$Html$Attributes.type$("number")
+                      ,$Html$Attributes.placeholder("1")]),
+         _L.fromArray([]));
+         var saw = $Html.text("Spotted: ");
+         var cancel = A2($Html$Events.onClick,
+         addr,
+         $Maybe.Nothing);
+         var submit = A2($Html.input,
+         _L.fromArray([$Html$Attributes.type$("submit")
+                      ,cancel]),
+         _L.fromArray([$Html.text("Save")]));
+         var theForm = A2($Html.form,
+         _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                            ,_0: "opacity"
+                                                            ,_1: "0.8"}]))]),
+         _L.fromArray([saw
+                      ,count
+                      ,bird
+                      ,at
+                      ,location
+                      ,submit]));
+         var content = A2($Html.div,
+         _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                            ,_0: "text-align"
+                                                            ,_1: "center"}]))]),
+         _L.fromArray([theForm]));
+         var indicator = circleDiv(clickPoint);
+         return _L.fromArray([indicator
+                             ,A3(vcentred,
+                             _L.fromArray([cancel]),
+                             size,
+                             content)]);
+      }();
+   });
+   var clickDecoder = $Json$Decode.map($Maybe.Just)(A3($Json$Decode.object2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   A2($Json$Decode._op[":="],
+   "pageX",
+   $Json$Decode.$int),
+   A2($Json$Decode._op[":="],
+   "pageY",
+   $Json$Decode.$int)));
+   var hdpi = Elm.Native.Port.make(_elm).inbound("hdpi",
+   "Bool",
+   function (v) {
+      return typeof v === "boolean" ? v : _U.badPort("a boolean (true or false)",
+      v);
+   });
+   var mapBoxSource = A3($MapBox.mapBox,
+   hdpi,
+   "mapbox.run-bike-hike",
+   accessToken);
+   var defaultTileSrc = mapBoxSource;
    var applyEvent = F2(function (e,
    m) {
       return function () {
          switch (e.ctor)
-         {case "G": return A2(applyGest,
+         {case "C": return A2(applyClick,
               m,
               e._0);
             case "K": return A2(applyKeys,
               m,
               e._0);
-            case "M": return A2(applyMouse,
+            case "O": return A2(applyO,
               m,
               e._0);
             case "T": return function () {
@@ -14121,13 +14103,102 @@ Elm.SlippyMap.make = function (_elm) {
                                        ,defaultTileSrc]],
                       m);}
                  _U.badCase($moduleName,
-                 "between lines 68 and 70");
+                 "between lines 111 and 113");
               }();
             case "Z": return A2(applyZoom,
               m,
               e._0);}
          _U.badCase($moduleName,
-         "between lines 63 and 70");
+         "between lines 106 and 113");
+      }();
+   });
+   var ons = function (add) {
+      return function () {
+         var toMsg = function (v) {
+            return function () {
+               switch (v)
+               {case "ArcGIS":
+                  return $Maybe.Just($ArcGIS.arcGIS);
+                  case "MapBox":
+                  return $Maybe.Just(mapBoxSource);
+                  case "OpenStreetMap":
+                  return $Maybe.Just($Osm.openStreetMap);}
+               return $Maybe.Nothing;
+            }();
+         };
+         return A3($Html$Events.on,
+         "change",
+         $Html$Events.targetValue,
+         function (v) {
+            return A2($Signal.message,
+            add,
+            toMsg(v));
+         });
+      }();
+   };
+   var tileSrcDropDown = function (address) {
+      return function () {
+         var onChange = ons(address);
+         return A2($Html.select,
+         _L.fromArray([onChange]),
+         _L.fromArray([A2($Html.option,
+                      _L.fromArray([]),
+                      _L.fromArray([$Html.text("MapBox")]))
+                      ,A2($Html.option,
+                      _L.fromArray([]),
+                      _L.fromArray([$Html.text("OpenStreetMap")]))
+                      ,A2($Html.option,
+                      _L.fromArray([]),
+                      _L.fromArray([$Html.text("ArcGIS")]))]));
+      }();
+   };
+   var buttons = F3(function (attrs,
+   zoomAddress,
+   tileSrcAddress) {
+      return A2($Html.div,
+      attrs,
+      _L.fromArray([zoomIn(zoomAddress)
+                   ,zoomOut(zoomAddress)
+                   ,tileSrcDropDown(tileSrcAddress)]));
+   });
+   var view = F2(function (window,
+   model) {
+      return function () {
+         var dblClick = $Metacarpal.index.attr(metacarpal.address);
+         var spottedLayers = A2($Maybe.withDefault,
+         _L.fromArray([]),
+         A2($Maybe.map,
+         function (clicked) {
+            return A3(spotLayers,
+            clicks.address,
+            window,
+            clicked);
+         },
+         model.clicked));
+         var controls = A3(buttons,
+         _L.fromArray([$Html$Attributes.style($Styles.absolute)]),
+         zoomChange.address,
+         tileSrc.address);
+         var styles = $Html$Attributes.style(A2($Basics._op["++"],
+         $Styles.absolute,
+         A2($Basics._op["++"],
+         $Styles.dimensions(window),
+         $Styles.zeroMargin)));
+         var clickCatcher = A2($Html.div,
+         A2($Basics._op["++"],
+         dblClick,
+         _L.fromArray([styles])),
+         _L.fromArray([]));
+         var mapLayer = A2($Tile.render,
+         window,
+         model);
+         return A2($Html.div,
+         _L.fromArray([styles]),
+         A2($Basics._op["++"],
+         _L.fromArray([mapLayer
+                      ,clickCatcher
+                      ,controls]),
+         spottedLayers));
       }();
    });
    var main = function () {
@@ -14135,7 +14206,7 @@ Elm.SlippyMap.make = function (_elm) {
       var greenwich = A2($Types.GeoPoint,
       51.48,
       0.0);
-      var initialModel = A4($Types.Model,
+      var initialModel = A5($Types.Model,
       greenwich,
       initialZoom,
       {ctor: "_Tuple2"
@@ -14143,7 +14214,8 @@ Elm.SlippyMap.make = function (_elm) {
       ,_1: {ctor: "_Tuple2"
            ,_0: 0
            ,_1: 0}},
-      defaultTileSrc);
+      defaultTileSrc,
+      $Maybe.Nothing);
       return A3($Signal.map2,
       view,
       $Window.dimensions,
@@ -14256,6 +14328,68 @@ Elm.String.make = function (_elm) {
                         ,any: any
                         ,all: all};
    return _elm.String.values;
+};
+Elm.Styles = Elm.Styles || {};
+Elm.Styles.make = function (_elm) {
+   "use strict";
+   _elm.Styles = _elm.Styles || {};
+   if (_elm.Styles.values)
+   return _elm.Styles.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Styles",
+   $Basics = Elm.Basics.make(_elm);
+   var absolute = _L.fromArray([{ctor: "_Tuple2"
+                                ,_0: "position"
+                                ,_1: "absolute"}]);
+   var px = function (n) {
+      return A2($Basics._op["++"],
+      $Basics.toString(n),
+      "px");
+   };
+   var position = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return _L.fromArray([{ctor: "_Tuple2"
+                                 ,_0: "top"
+                                 ,_1: px(_v0._1)}
+                                ,{ctor: "_Tuple2"
+                                 ,_0: "left"
+                                 ,_1: px(_v0._0)}]);}
+         _U.badCase($moduleName,
+         "on line 12, column 19 to 50");
+      }();
+   };
+   var dimensions = function (_v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return _L.fromArray([{ctor: "_Tuple2"
+                                 ,_0: "width"
+                                 ,_1: px(_v4._0)}
+                                ,{ctor: "_Tuple2"
+                                 ,_0: "height"
+                                 ,_1: px(_v4._1)}]);}
+         _U.badCase($moduleName,
+         "on line 15, column 30 to 74");
+      }();
+   };
+   var zeroMargin = _L.fromArray([{ctor: "_Tuple2"
+                                  ,_0: "padding"
+                                  ,_1: px(0)}
+                                 ,{ctor: "_Tuple2"
+                                  ,_0: "margin"
+                                  ,_1: px(0)}]);
+   _elm.Styles.values = {_op: _op
+                        ,absolute: absolute
+                        ,px: px
+                        ,position: position
+                        ,dimensions: dimensions
+                        ,zeroMargin: zeroMargin};
+   return _elm.Styles.values;
 };
 Elm.Task = Elm.Task || {};
 Elm.Task.make = function (_elm) {
@@ -14779,322 +14913,6 @@ Elm.Tile.make = function (_elm) {
                       ,render: render};
    return _elm.Tile.values;
 };
-Elm.Time = Elm.Time || {};
-Elm.Time.make = function (_elm) {
-   "use strict";
-   _elm.Time = _elm.Time || {};
-   if (_elm.Time.values)
-   return _elm.Time.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Time",
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Signal = Elm.Native.Signal.make(_elm),
-   $Native$Time = Elm.Native.Time.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var delay = $Native$Signal.delay;
-   var since = F2(function (time,
-   signal) {
-      return function () {
-         var stop = A2($Signal.map,
-         $Basics.always(-1),
-         A2(delay,time,signal));
-         var start = A2($Signal.map,
-         $Basics.always(1),
-         signal);
-         var delaydiff = A3($Signal.foldp,
-         F2(function (x,y) {
-            return x + y;
-         }),
-         0,
-         A2($Signal.merge,start,stop));
-         return A2($Signal.map,
-         F2(function (x,y) {
-            return !_U.eq(x,y);
-         })(0),
-         delaydiff);
-      }();
-   });
-   var timestamp = $Native$Signal.timestamp;
-   var every = $Native$Time.every;
-   var fpsWhen = $Native$Time.fpsWhen;
-   var fps = function (targetFrames) {
-      return A2(fpsWhen,
-      targetFrames,
-      $Signal.constant(true));
-   };
-   var inMilliseconds = function (t) {
-      return t;
-   };
-   var millisecond = 1;
-   var second = 1000 * millisecond;
-   var minute = 60 * second;
-   var hour = 60 * minute;
-   var inHours = function (t) {
-      return t / hour;
-   };
-   var inMinutes = function (t) {
-      return t / minute;
-   };
-   var inSeconds = function (t) {
-      return t / second;
-   };
-   _elm.Time.values = {_op: _op
-                      ,millisecond: millisecond
-                      ,second: second
-                      ,minute: minute
-                      ,hour: hour
-                      ,inMilliseconds: inMilliseconds
-                      ,inSeconds: inSeconds
-                      ,inMinutes: inMinutes
-                      ,inHours: inHours
-                      ,fps: fps
-                      ,fpsWhen: fpsWhen
-                      ,every: every
-                      ,timestamp: timestamp
-                      ,delay: delay
-                      ,since: since};
-   return _elm.Time.values;
-};
-Elm.Touch = Elm.Touch || {};
-Elm.Touch.make = function (_elm) {
-   "use strict";
-   _elm.Touch = _elm.Touch || {};
-   if (_elm.Touch.values)
-   return _elm.Touch.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Touch",
-   $Native$Touch = Elm.Native.Touch.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var taps = $Native$Touch.taps;
-   var touches = $Native$Touch.touches;
-   var Touch = F6(function (a,
-   b,
-   c,
-   d,
-   e,
-   f) {
-      return {_: {}
-             ,id: c
-             ,t0: f
-             ,x: a
-             ,x0: d
-             ,y: b
-             ,y0: e};
-   });
-   _elm.Touch.values = {_op: _op
-                       ,touches: touches
-                       ,taps: taps
-                       ,Touch: Touch};
-   return _elm.Touch.values;
-};
-Elm.TouchParser = Elm.TouchParser || {};
-Elm.TouchParser.make = function (_elm) {
-   "use strict";
-   _elm.TouchParser = _elm.TouchParser || {};
-   if (_elm.TouchParser.values)
-   return _elm.TouchParser.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "TouchParser",
-   $Basics = Elm.Basics.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Touch = Elm.Touch.make(_elm),
-   $Tuple = Elm.Tuple.make(_elm);
-   var find = F2(function (feature,
-   needle) {
-      return function ($) {
-         return $List.head($List.filter(function (x) {
-            return _U.eq(feature(x),
-            needle);
-         })($));
-      };
-   });
-   var pairBy = F3(function (f,
-   xs,
-   ys) {
-      return function () {
-         var pairOf = function (x) {
-            return A3(find,f,f(x),ys);
-         };
-         var maybeMatch = function (x) {
-            return $Maybe.map(function (y) {
-               return {ctor: "_Tuple2"
-                      ,_0: x
-                      ,_1: y};
-            })(pairOf(x));
-         };
-         return A2($List.filterMap,
-         maybeMatch,
-         xs);
-      }();
-   });
-   var size = function (_v0) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return $Basics.sqrt(Math.pow(_v0._0,
-              2) + Math.pow(_v0._1,2));}
-         _U.badCase($moduleName,
-         "on line 62, column 15 to 30");
-      }();
-   };
-   var point = function (t) {
-      return A2($Tuple.map,
-      $Basics.toFloat,
-      {ctor: "_Tuple2"
-      ,_0: t.x
-      ,_1: t.y});
-   };
-   var pt = function (t) {
-      return {ctor: "_Tuple2"
-             ,_0: t.x * 1
-             ,_1: t.y * 1};
-   };
-   var End = {ctor: "End"};
-   var Drag = function (a) {
-      return {ctor: "Drag",_0: a};
-   };
-   var parseDrag = function (_v4) {
-      return function () {
-         switch (_v4.ctor)
-         {case "_Tuple2":
-            return Drag({ctor: "_Tuple2"
-                        ,_0: _v4._1.x - _v4._0.x
-                        ,_1: _v4._1.y - _v4._0.y});}
-         _U.badCase($moduleName,
-         "on line 66, column 22 to 52");
-      }();
-   };
-   var parseOne = function (ts) {
-      return function () {
-         switch (ts.ctor)
-         {case "::": switch (ts._1.ctor)
-              {case "[]":
-                 return $Maybe.Just(parseDrag(ts._0));}
-              break;}
-         return $Maybe.Nothing;
-      }();
-   };
-   var parseEvent = F2(function (oldTs,
-   newTs) {
-      return function () {
-         var matches = A3(pairBy,
-         function (t) {
-            return t.id;
-         },
-         oldTs,
-         newTs);
-         return parseOne(matches);
-      }();
-   });
-   var Start = {ctor: "Start"};
-   var maybeParse = F2(function (oldTs,
-   newTs) {
-      return function () {
-         var newLen = $List.length(newTs);
-         var oldLen = $List.length(oldTs);
-         return _U.cmp(oldLen,
-         newLen) > 0 ? $Maybe.Just(End) : _U.cmp(newLen,
-         oldLen) > 0 ? $Maybe.Just(Start) : A2(parseEvent,
-         oldTs,
-         newTs);
-      }();
-   });
-   var t = F2(function (_v11,id) {
-      return function () {
-         switch (_v11.ctor)
-         {case "_Tuple2":
-            return A6($Touch.Touch,
-              _v11._0,
-              _v11._1,
-              id,
-              0,
-              0,
-              0);}
-         _U.badCase($moduleName,
-         "on line 25, column 15 to 33");
-      }();
-   });
-   var clone = function (t) {
-      return A6($Touch.Touch,
-      t.x * 1,
-      t.y * 1,
-      t.id * 1,
-      0,
-      0,
-      0);
-   };
-   var TouchState = F2(function (a,
-   b) {
-      return {_: {}
-             ,maybeGesture: b
-             ,oldTouches: a};
-   });
-   var parse = F2(function (newTs,
-   oldState) {
-      return function () {
-         switch (newTs.ctor)
-         {case "::":
-            switch (newTs._1.ctor)
-              {case "::": return oldState;}
-              break;}
-         return function () {
-            var _v20 = oldState.oldTouches;
-            switch (_v20.ctor)
-            {case "[]":
-               return A2(TouchState,
-                 A2($List.map,clone,newTs),
-                 $Maybe.Just(Start));}
-            return A2(TouchState,
-            A2($List.map,clone,newTs),
-            A2(maybeParse,
-            oldState.oldTouches,
-            newTs));
-         }();
-      }();
-   });
-   var gestures = $Signal.map(function (t) {
-      return t.maybeGesture;
-   })(A2($Signal.foldp,
-   parse,
-   A2(TouchState,
-   _L.fromArray([]),
-   $Maybe.Nothing))(A2($Signal.map,
-   $List.map(clone),
-   $Touch.touches)));
-   var main = $Signal.map($Graphics$Element.show)(A2($Signal.foldp,
-   F2(function (x,y) {
-      return A2($List._op["::"],
-      x,
-      y);
-   }),
-   _L.fromArray([]))(A2($Signal.foldp,
-   parse,
-   A2(TouchState,
-   _L.fromArray([]),
-   $Maybe.Nothing))(A2($Signal.map,
-   $List.map(clone),
-   $Touch.touches))));
-   _elm.TouchParser.values = {_op: _op
-                             ,main: main
-                             ,gestures: gestures
-                             ,Start: Start
-                             ,Drag: Drag
-                             ,End: End};
-   return _elm.TouchParser.values;
-};
 Elm.Transform2D = Elm.Transform2D || {};
 Elm.Transform2D.make = function (_elm) {
    "use strict";
@@ -15253,13 +15071,16 @@ Elm.Types.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   $moduleName = "Types";
-   var Model = F4(function (a,
+   $moduleName = "Types",
+   $Maybe = Elm.Maybe.make(_elm);
+   var Model = F5(function (a,
    b,
    c,
-   d) {
+   d,
+   e) {
       return {_: {}
              ,centre: a
+             ,clicked: e
              ,mouseState: c
              ,tileSource: d
              ,zoom: b};
