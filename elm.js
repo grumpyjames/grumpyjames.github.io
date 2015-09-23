@@ -21,7 +21,7 @@ Elm.ArcGIS.make = function (_elm) {
          c) {
             return A2($Basics._op["%"],
             c,
-            Math.pow(2,$Basics.floor(z)));
+            Math.pow(2,z));
          });
          var $ = t.coordinate,
          x = $._0,
@@ -29,7 +29,7 @@ Elm.ArcGIS.make = function (_elm) {
          return A2($Basics._op["++"],
          arcGISBase,
          A2($Basics._op["++"],
-         $Basics.toString($Basics.floor(z)),
+         $Basics.toString(z),
          A2($Basics._op["++"],
          "/",
          A2($Basics._op["++"],
@@ -4760,7 +4760,7 @@ Elm.MapBox.make = function (_elm) {
          var wrap = F2(function (z,c) {
             return A2($Basics._op["%"],
             c,
-            Math.pow(2,$Basics.floor(z)));
+            Math.pow(2,z));
          });
          var $ = t.coordinate,
          x = $._0,
@@ -4772,7 +4772,7 @@ Elm.MapBox.make = function (_elm) {
          A2($Basics._op["++"],
          "/",
          A2($Basics._op["++"],
-         $Basics.toString($Basics.floor(z)),
+         $Basics.toString(z),
          A2($Basics._op["++"],
          "/",
          A2($Basics._op["++"],
@@ -5291,12 +5291,53 @@ Elm.Model.make = function (_elm) {
    $Time = Elm.Time.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
    $Types = Elm.Types.make(_elm);
+   var findLast = F2(function (pred,
+   l) {
+      return function () {
+         var foldFn = F2(function (a,
+         b) {
+            return pred(a) ? $Maybe.Just(a) : b;
+         });
+         return A3($List.foldr,
+         foldFn,
+         $Maybe.Nothing,
+         l);
+      }();
+   });
+   var pickZoom = function (z) {
+      return function () {
+         switch (z.ctor)
+         {case "Between": return z._1;
+            case "Constant": return z._0;}
+         _U.badCase($moduleName,
+         "between lines 158 and 160");
+      }();
+   };
+   var move = F3(function (z,
+   gpt,
+   pixOff) {
+      return function () {
+         var zoomInt = pickZoom(z);
+         var $ = A2($Tuple.map,
+         function (t) {
+            return $Basics.toFloat(t) * 1.0 / $Basics.toFloat(Math.pow(2,
+            zoomInt));
+         },
+         pixOff),
+         dlon = $._0,
+         dlat = $._1;
+         return A2($Types.GeoPoint,
+         gpt.lat + dlat,
+         gpt.lon + dlon);
+      }();
+   });
    var toGeopoint = F2(function (model,
    clk) {
       return function () {
+         var z = $Basics.toFloat(pickZoom(model.zoom));
          var tileSize = model.tileSource.tileSize;
          var centrePix = $CommonLocator.toPixels(tileSize)(A2(model.tileSource.locate,
-         model.zoom,
+         z,
          model.centre));
          var centre = model.centre;
          var win = model.windowSize;
@@ -5313,40 +5354,10 @@ Elm.Model.make = function (_elm) {
          return A2($Types.GeoPoint,
          A2($CommonLocator.tiley2lat,
          $Basics.snd(clickPix),
-         model.zoom),
+         z),
          A2($CommonLocator.tilex2long,
          $Basics.fst(clickPix),
-         model.zoom));
-      }();
-   });
-   var findLast = F2(function (pred,
-   l) {
-      return function () {
-         var foldFn = F2(function (a,
-         b) {
-            return pred(a) ? $Maybe.Just(a) : b;
-         });
-         return A3($List.foldr,
-         foldFn,
-         $Maybe.Nothing,
-         l);
-      }();
-   });
-   var move = F3(function (z,
-   gpt,
-   pixOff) {
-      return function () {
-         var $ = A2($Tuple.map,
-         function (t) {
-            return $Basics.toFloat(t) * 1.0 / $Basics.toFloat(Math.pow(2,
-            $Basics.floor(z)));
-         },
-         pixOff),
-         dlon = $._0,
-         dlat = $._1;
-         return A2($Types.GeoPoint,
-         gpt.lat + dlat,
-         gpt.lon + dlon);
+         z));
       }();
    });
    var applyDrag = F2(function (m,
@@ -5361,17 +5372,41 @@ Elm.Model.make = function (_elm) {
    var applyKeys = F2(function (m,
    k) {
       return function () {
-         var _v0 = m.formState;
-         switch (_v0.ctor)
+         var _v4 = m.formState;
+         switch (_v4.ctor)
          {case "Nothing":
             return A2(applyDrag,m,k);}
          return m;
       }();
    });
+   var newZoom = F2(function (z,
+   f) {
+      return function () {
+         var zm = F2(function (a,b) {
+            return _U.eq(a,
+            b) ? $Types.Constant(a) : A2($Types.Between,
+            a,
+            b);
+         });
+         var intF = $Basics.floor(f);
+         return function () {
+            switch (z.ctor)
+            {case "Between": return A2(zm,
+                 z._0,
+                 z._1 + intF);
+               case "Constant":
+               return A2($Types.Between,
+                 z._0,
+                 z._0 + intF);}
+            _U.badCase($moduleName,
+            "between lines 139 and 142");
+         }();
+      }();
+   });
    var applyZoom = F2(function (m,
    f) {
       return _U.replace([["zoom"
-                         ,f + m.zoom]],
+                         ,A2(newZoom,m.zoom,f)]],
       m);
    });
    var applyRecordChange = F2(function (m,
@@ -5382,6 +5417,21 @@ Elm.Model.make = function (_elm) {
                          m.recordings)]
                         ,["formState",$Maybe.Nothing]],
       m);
+   });
+   var maybeUpdateZoom = F2(function (m,
+   readyLevel) {
+      return function () {
+         var _v9 = m.zoom;
+         switch (_v9.ctor)
+         {case "Between":
+            return _U.eq(_v9._1,
+              readyLevel) ? _U.replace([["zoom"
+                                        ,$Types.Constant(readyLevel)]],
+              m) : m;
+            case "Constant": return m;}
+         _U.badCase($moduleName,
+         "between lines 104 and 106");
+      }();
    });
    var applyMaybe = F3(function (f,
    b,
@@ -5458,7 +5508,7 @@ Elm.Model.make = function (_elm) {
             case "PendingAmend":
             return sf._0;}
          _U.badCase($moduleName,
-         "between lines 40 and 43");
+         "between lines 41 and 44");
       }();
    };
    var Amending = function (a) {
@@ -5485,7 +5535,7 @@ Elm.Model.make = function (_elm) {
                                      ,fc._0]],
                     fs);}
                _U.badCase($moduleName,
-               "between lines 110 and 113");
+               "between lines 118 and 121");
             }();
          });
          return function () {
@@ -5503,7 +5553,7 @@ Elm.Model.make = function (_elm) {
                  sf._0,
                  fc));}
             _U.badCase($moduleName,
-            "between lines 114 and 118");
+            "between lines 122 and 126");
          }();
       }();
    });
@@ -5540,7 +5590,7 @@ Elm.Model.make = function (_elm) {
             case "LongPress":
             return A3(applyClick,m,t,e._0);}
          _U.badCase($moduleName,
-         "between lines 144 and 150");
+         "between lines 170 and 176");
       }();
    });
    var PendingAmend = function (a) {
@@ -5563,7 +5613,7 @@ Elm.Model.make = function (_elm) {
                {case "Amend": return r._0;
                   case "New": return r._0;}
                _U.badCase($moduleName,
-               "between lines 164 and 167");
+               "between lines 190 and 193");
             }();
          };
          return $Maybe.map(PendingAmend)($Maybe.map(fs)(A2($Maybe.map,
@@ -5582,7 +5632,7 @@ Elm.Model.make = function (_elm) {
                   case "New":
                   return _U.eq(r._0.id,id);}
                _U.badCase($moduleName,
-               "between lines 155 and 158");
+               "between lines 181 and 184");
             }();
          };
          var record = A2(findLast,
@@ -5593,52 +5643,56 @@ Elm.Model.make = function (_elm) {
          m);
       }();
    });
-   var applyEvent = F2(function (_v22,
+   var applyEvent = F2(function (_v34,
    m) {
       return function () {
-         switch (_v22.ctor)
+         switch (_v34.ctor)
          {case "_Tuple2":
             return function () {
-                 switch (_v22._1.ctor)
+                 switch (_v34._1.ctor)
                  {case "AmendRecord":
                     return A2(prepareToAmend,
                       m,
-                      _v22._1._0);
+                      _v34._1._0);
                     case "ArrowPress":
                     return A2(applyKeys,
                       m,
-                      _v22._1._0);
+                      _v34._1._0);
                     case "Click":
                     return A3(applyClick,
                       m,
-                      _v22._0,
-                      _v22._1._0);
+                      _v34._0,
+                      _v34._1._0);
                     case "DismissModal":
                     return _U.replace([["message"
                                        ,$Maybe.Nothing]
                                       ,["formState",$Maybe.Nothing]],
                       m);
+                    case "LayerReady":
+                    return A2(maybeUpdateZoom,
+                      m,
+                      _v34._1._0);
                     case "LocationReceived":
                     return A3(applyMaybe,
-                      F2(function (m,_v38) {
+                      F2(function (m,_v51) {
                          return function () {
-                            switch (_v38.ctor)
+                            switch (_v51.ctor)
                             {case "_Tuple2":
                                return _U.replace([["centre"
                                                   ,A2($Types.GeoPoint,
-                                                  _v38._0,
-                                                  _v38._1)]
+                                                  _v51._0,
+                                                  _v51._1)]
                                                  ,["locationProgress",false]],
                                  m);}
                             _U.badCase($moduleName,
-                            "on line 91, column 61 to 118");
+                            "on line 92, column 61 to 118");
                          }();
                       }),
                       m,
-                      _v22._1._0);
+                      _v34._1._0);
                     case "LocationRequestError":
                     return _U.replace([["message"
-                                       ,_v22._1._0]
+                                       ,_v34._1._0]
                                       ,["locationProgress",false]],
                       m);
                     case "LocationRequestStarted":
@@ -5648,40 +5702,40 @@ Elm.Model.make = function (_elm) {
                     case "RecordChange":
                     return A2(applyRecordChange,
                       m,
-                      _v22._1._0);
+                      _v34._1._0);
                     case "SightingChange":
                     return _U.replace([["formState"
                                        ,A2($Maybe.map,
                                        function (fs) {
                                           return A2(applyFormChange,
                                           fs,
-                                          _v22._1._0);
+                                          _v34._1._0);
                                        },
                                        m.formState)]],
                       m);
                     case "StartingUp": return m;
                     case "TileSourceChange":
                     return _U.replace([["tileSource"
-                                       ,_v22._1._0]],
+                                       ,_v34._1._0]],
                       m);
                     case "TouchEvent":
                     return A3(applyMaybe,
-                      applyTouchEvent(_v22._0),
+                      applyTouchEvent(_v34._0),
                       m,
-                      _v22._1._0);
+                      _v34._1._0);
                     case "WindowSize":
                     return _U.replace([["windowSize"
-                                       ,_v22._1._0]],
+                                       ,_v34._1._0]],
                       m);
                     case "ZoomChange":
                     return A2(applyZoom,
                       m,
-                      _v22._1._0);}
+                      _v34._1._0);}
                  _U.badCase($moduleName,
-                 "between lines 81 and 95");
+                 "between lines 82 and 97");
               }();}
          _U.badCase($moduleName,
-         "between lines 81 and 95");
+         "between lines 82 and 97");
       }();
    });
    var Count = function (a) {
@@ -5689,6 +5743,10 @@ Elm.Model.make = function (_elm) {
    };
    var Species = function (a) {
       return {ctor: "Species"
+             ,_0: a};
+   };
+   var LayerReady = function (a) {
+      return {ctor: "LayerReady"
              ,_0: a};
    };
    var LocationRequestStarted = {ctor: "LocationRequestStarted"};
@@ -5763,6 +5821,7 @@ Elm.Model.make = function (_elm) {
                        ,LocationReceived: LocationReceived
                        ,LocationRequestError: LocationRequestError
                        ,LocationRequestStarted: LocationRequestStarted
+                       ,LayerReady: LayerReady
                        ,Species: Species
                        ,Count: Count
                        ,New: New
@@ -13824,7 +13883,7 @@ Elm.Osm.make = function (_elm) {
          c) {
             return A2($Basics._op["%"],
             c,
-            Math.pow(2,$Basics.floor(z)));
+            Math.pow(2,z));
          });
          var $ = t.coordinate,
          x = $._0,
@@ -13832,7 +13891,7 @@ Elm.Osm.make = function (_elm) {
          return A2($Basics._op["++"],
          "http://tile.openstreetmap.org/",
          A2($Basics._op["++"],
-         $Basics.toString($Basics.floor(z)),
+         $Basics.toString(z),
          A2($Basics._op["++"],
          "/",
          A2($Basics._op["++"],
@@ -14391,15 +14450,26 @@ Elm.SlippyMap.make = function (_elm) {
    $Types = Elm.Types.make(_elm),
    $Ui = Elm.Ui.make(_elm),
    $Window = Elm.Window.make(_elm);
+   var pickZoom = function (zoom) {
+      return function () {
+         switch (zoom.ctor)
+         {case "Between": return zoom._1;
+            case "Constant":
+            return zoom._0;}
+         _U.badCase($moduleName,
+         "between lines 222 and 224");
+      }();
+   };
    var fromGeopoint = F2(function (model,
    loc) {
       return function () {
-         var tileOffPx = $CommonLocator.toPixels(model.tileSource.tileSize)(A2(model.tileSource.locate,
-         model.zoom,
-         loc));
+         var z = $Basics.toFloat(pickZoom(model.zoom));
          var centreOffPx = $CommonLocator.toPixels(model.tileSource.tileSize)(A2(model.tileSource.locate,
-         model.zoom,
+         z,
          model.centre));
+         var tileOffPx = $CommonLocator.toPixels(model.tileSource.tileSize)(A2(model.tileSource.locate,
+         z,
+         loc));
          var offPix = A2($Tuple.subtract,
          tileOffPx,
          centreOffPx);
@@ -14433,14 +14503,13 @@ Elm.SlippyMap.make = function (_elm) {
    msg,
    txt) {
       return function () {
-         var events = _L.fromArray([$Html$Events.onMouseDown
-                                   ,$Html$Events.onClick
+         var events = _L.fromArray([$Html$Events.onClick
                                    ,F2(function (ad,ms) {
                                       return A4($Html$Events.onWithOptions,
                                       "touchend",
                                       $Ui.stopEverything,
                                       $Json$Decode.value,
-                                      function (_v0) {
+                                      function (_v4) {
                                          return function () {
                                             return A2($Signal.message,
                                             ad,
@@ -14527,7 +14596,7 @@ Elm.SlippyMap.make = function (_elm) {
                     r._0,
                     d);}
                _U.badCase($moduleName,
-               "between lines 170 and 173");
+               "between lines 171 and 174");
             }();
          });
          return $Dict.values(A3($List.foldl,
@@ -14608,7 +14677,7 @@ Elm.SlippyMap.make = function (_elm) {
                       _L.fromArray([A3($Html$Events.on,
                       "click",
                       $Json$Decode.succeed(""),
-                      function (_v7) {
+                      function (_v11) {
                          return function () {
                             return A2($Signal.message,
                             addr,
@@ -14618,7 +14687,7 @@ Elm.SlippyMap.make = function (_elm) {
                       _L.fromArray([$Html.text("Ok...")]))]));
          var dismissAddr = A2($Signal.forwardTo,
          addr,
-         function (_v9) {
+         function (_v13) {
             return function () {
                return $Model.DismissModal;
             }();
@@ -14638,7 +14707,7 @@ Elm.SlippyMap.make = function (_elm) {
          {case "Err": return f(r._0);
             case "Ok": return g(r._0);}
          _U.badCase($moduleName,
-         "between lines 96 and 98");
+         "between lines 97 and 99");
       }();
    });
    var mapError = F2(function (g,
@@ -14650,7 +14719,7 @@ Elm.SlippyMap.make = function (_elm) {
             case "Ok":
             return $Result.Ok(r._0);}
          _U.badCase($moduleName,
-         "between lines 90 and 92");
+         "between lines 91 and 93");
       }();
    });
    var toSighting = function (sf) {
@@ -14696,7 +14765,7 @@ Elm.SlippyMap.make = function (_elm) {
                  $Model.Amend,
                  validate(sf._0));}
             _U.badCase($moduleName,
-            "between lines 114 and 117");
+            "between lines 115 and 118");
          }();
       }();
    };
@@ -14777,7 +14846,7 @@ Elm.SlippyMap.make = function (_elm) {
          _L.fromArray([]));
          var dismissAddr = A2($Signal.forwardTo,
          addr,
-         function (_v21) {
+         function (_v25) {
             return function () {
                return $Model.DismissModal;
             }();
@@ -14825,13 +14894,13 @@ Elm.SlippyMap.make = function (_elm) {
    var spotLayers = F2(function (addr,
    model) {
       return function () {
-         var _v23 = model.message;
-         switch (_v23.ctor)
+         var _v27 = model.message;
+         switch (_v27.ctor)
          {case "Just":
             return A3(modalMessage,
               addr,
               model,
-              _v23._0);
+              _v27._0);
             case "Nothing":
             return $Maybe.withDefault(_L.fromArray([]))(A2($Maybe.map,
               function (fs) {
@@ -14842,7 +14911,7 @@ Elm.SlippyMap.make = function (_elm) {
               },
               model.formState));}
          _U.badCase($moduleName,
-         "between lines 102 and 105");
+         "between lines 103 and 106");
       }();
    });
    var keyState = function () {
@@ -14942,7 +15011,7 @@ Elm.SlippyMap.make = function (_elm) {
                   case "OpenStreetMap":
                   return $Osm.openStreetMap;}
                _U.badCase($moduleName,
-               "between lines 183 and 187");
+               "between lines 184 and 188");
             }();
          };
          return A3($Html$Events.on,
@@ -15008,7 +15077,17 @@ Elm.SlippyMap.make = function (_elm) {
          $Metacarpal.index.attr,
          _L.fromArray([styles])),
          _L.fromArray([]));
-         var mapLayer = $Tile.render(model);
+         var layerReady = A2($Signal.forwardTo,
+         actions.address,
+         function (r) {
+            return $Model.LayerReady(r);
+         });
+         var mapLayer = A5($Tile.render,
+         layerReady,
+         model.centre,
+         model.windowSize,
+         model.zoom,
+         model.tileSource);
          return A2($Html.div,
          _L.fromArray([styles]),
          A2($Basics._op["++"],
@@ -15029,7 +15108,7 @@ Elm.SlippyMap.make = function (_elm) {
       var initialWindow = {ctor: "_Tuple2"
                           ,_0: initialWinX
                           ,_1: initialWinY};
-      var initialZoom = 15.0;
+      var initialZoom = $Types.Constant(15);
       var initialModel = $Model.Model(hdpi)(greenwich)(initialWindow)(initialZoom)(initialMouse)(defaultTileSrc)($Maybe.Nothing)(_L.fromArray([]))(false)($Maybe.Nothing)(0);
       return A2($Signal.map,
       view,
@@ -15528,11 +15607,13 @@ Elm.Tile.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Tile",
    $Basics = Elm.Basics.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
-   $Model = Elm.Model.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
    $Styles = Elm.Styles.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
    $Types = Elm.Types.make(_elm);
@@ -15550,7 +15631,7 @@ Elm.Tile.make = function (_elm) {
               },
               _v0._1);}
          _U.badCase($moduleName,
-         "on line 83, column 19 to 56");
+         "on line 106, column 19 to 56");
       }();
    });
    var range = F2(function (origin,
@@ -15579,50 +15660,38 @@ Elm.Tile.make = function (_elm) {
       return x / y | 0;
    }));
    var addP = lift2($Tuple.add);
-   var flowTable = F2(function (renderer,
+   var flowTable = F3(function (tileSize,
+   renderer,
    arr) {
       return function () {
-         var flowRender = F3(function (dir,
-         r,
-         els) {
-            return $Graphics$Element.flow(dir)(A2($List.map,
-            r,
-            els));
-         });
-         return A3(flowRender,
-         $Graphics$Element.down,
-         A2(flowRender,
-         $Graphics$Element.right,
-         renderer),
-         arr);
+         var row = function (els) {
+            return A2($Html.div,
+            _L.fromArray([$Html$Attributes.style(A2($Basics._op["++"],
+            $Styles.zeroMargin,
+            _L.fromArray([{ctor: "_Tuple2"
+                          ,_0: "white-space"
+                          ,_1: "nowrap"}
+                         ,{ctor: "_Tuple2"
+                          ,_0: "height"
+                          ,_1: $Styles.px(tileSize)}])))]),
+            A2($List.map,renderer,els));
+         };
+         return A2($Html.div,
+         _L.fromArray([]),
+         A2($List.map,row,arr));
       }();
    });
-   var originOffset = F4(function (window,
-   tileSize,
-   tileCounts,
-   centrePixel) {
+   var originOffset = F2(function (window,
+   centreOffset) {
       return function () {
-         var halfTile = tileSize / 2 | 0;
-         var pixelOffsets = A2($Tuple.subtract,
-         {ctor: "_Tuple2"
-         ,_0: halfTile
-         ,_1: halfTile},
-         centrePixel.pixels);
-         var totalTilingSize = A2($Tuple.map,
-         F2(function (x,y) {
-            return x * y;
-         })(tileSize),
-         tileCounts);
-         var centerInWindow = A2($Tuple.map,
+         var halfWindow = A2($Tuple.map,
          function (pix) {
-            return pix / -2 | 0;
+            return pix / 2 | 0;
          },
-         A2($Tuple.subtract,
-         totalTilingSize,
-         window));
-         return $Types.Position(A2($Tuple.add,
-         centerInWindow,
-         pixelOffsets));
+         window);
+         return A2($Tuple.subtract,
+         halfWindow,
+         centreOffset);
       }();
    });
    var origin = F2(function (centreTile,
@@ -15633,82 +15702,184 @@ Elm.Tile.make = function (_elm) {
       vid(2),
       tileCounts)));
    });
-   var renderOneTile = F4(function (zoom,
+   var renderOneTile = F5(function (attrs,
+   zoom,
    tileSize,
    url,
    tile) {
-      return A2($Graphics$Element.image,
-      tileSize,
-      tileSize)(A2(url,zoom,tile));
+      return A2($Html.img,
+      A2($Basics._op["++"],
+      attrs,
+      _L.fromArray([$Html$Attributes.src(A2(url,
+                   zoom,
+                   tile))
+                   ,$Html$Attributes.style(A2($List._op["::"],
+                   {ctor: "_Tuple2"
+                   ,_0: "display"
+                   ,_1: "inline-block"},
+                   $Styles.dimensions({ctor: "_Tuple2"
+                                      ,_0: tileSize
+                                      ,_1: tileSize})))])),
+      _L.fromArray([]));
    });
    var applyPosition = F2(function (el,
-   distance) {
+   pixels) {
       return function () {
          var attr = $Html$Attributes.style(A2($Basics._op["++"],
-         $Styles.position(distance.pixels),
+         $Styles.position(pixels),
          $Styles.absolute));
          return A2($Html.div,
          _L.fromArray([attr]),
-         _L.fromArray([$Html.fromElement(el)]));
+         _L.fromArray([el]));
       }();
    });
-   var calcTileSize = function (m) {
+   var pickZoom = function (zoom) {
       return function () {
-         var frac = function (f) {
-            return f - $Basics.toFloat($Basics.floor(f));
-         };
-         var tileSize = m.tileSource.tileSize;
-         var digizoom = $Basics.floor(frac(m.zoom) * $Basics.toFloat(tileSize));
-         return tileSize + digizoom;
+         switch (zoom.ctor)
+         {case "Between": return zoom._1;
+            case "Constant":
+            return zoom._0;}
+         _U.badCase($moduleName,
+         "between lines 58 and 60");
       }();
    };
-   var render = function (m) {
+   var scale = F2(function (dz,a) {
+      return _U.cmp(dz,
+      0) > 0 ? a / Math.pow(2,
+      dz) | 0 : a * Math.pow(2,
+      -1 * dz);
+   });
+   var oneLayer = F6(function (attrs,
+   centre,
+   tileSource,
+   window,
+   dz,
+   zoom) {
       return function () {
-         var mapCentre = A2(m.tileSource.locate,
-         m.zoom,
-         m.centre);
+         var scl = scale(dz);
+         var zoomWindow = A2($Tuple.map,
+         scl,
+         window);
+         var zoomOffset = $Tuple.map(function (a) {
+            return a / 2 | 0;
+         })(A2($Tuple.subtract,
+         window,
+         zoomWindow));
+         var zoomTileSize = scl(tileSource.tileSize);
+         var mapCentre = A2(tileSource.locate,
+         $Basics.toFloat(zoom),
+         centre);
          var requiredTiles = function (dim) {
-            return (3 * m.tileSource.tileSize + dim) / m.tileSource.tileSize | 0;
+            return (3 * tileSource.tileSize + dim) / tileSource.tileSize | 0;
          };
-         var tileSize = calcTileSize(m);
-         var window = m.windowSize;
          var tileCounts = A2($Tuple.map,
          requiredTiles,
          window);
          var originTile = A2(origin,
          mapCentre.tile,
          tileCounts);
+         var centreTileOffset = A2($Tuple.subtract,
+         mapCentre.tile.coordinate,
+         originTile.coordinate);
+         var relativeCentre = A2($Tuple.add,
+         A2($Tuple.map,
+         scl,
+         mapCentre.position.pixels),
+         A2($Tuple.map,
+         F2(function (x,y) {
+            return x * y;
+         })(zoomTileSize),
+         centreTileOffset));
+         var offset = A2(originOffset,
+         window,
+         relativeCentre);
          var tileRows = rows($Basics.curry($Types.Tile))(A3($Tuple.merge,
          range,
          originTile.coordinate,
          tileCounts));
-         var mapEl = A2(flowTable,
-         A3(renderOneTile,
-         m.zoom,
-         tileSize,
-         m.tileSource.tileUrl),
+         var mapEl = A3(flowTable,
+         zoomTileSize,
+         A4(renderOneTile,
+         attrs,
+         zoom,
+         zoomTileSize,
+         tileSource.tileUrl),
          tileRows);
-         var offset = A4(originOffset,
-         window,
-         tileSize,
-         tileCounts,
-         mapCentre.position);
-         var attr = $Html$Attributes.style(A2($Basics._op["++"],
-         _L.fromArray([{ctor: "_Tuple2"
-                       ,_0: "overflow"
-                       ,_1: "hidden"}]),
-         A2($Basics._op["++"],
-         $Styles.absolute,
-         A2($Basics._op["++"],
-         $Styles.dimensions(window),
-         $Styles.zeroMargin))));
-         return A2($Html.div,
-         _L.fromArray([attr]),
-         _L.fromArray([A2(applyPosition,
+         return A2(applyPosition,
          mapEl,
-         offset)]));
+         offset);
       }();
-   };
+   });
+   var r = F2(function (a,b) {
+      return _U.cmp(a,
+      b) > 0 ? $List.reverse(_L.range(b,
+      a)) : _L.range(a,b);
+   });
+   var render = F5(function (addr,
+   centre,
+   window,
+   zoom,
+   tileSource) {
+      return function () {
+         var onLoad = function (zoomLayer) {
+            return A3($Html$Events.on,
+            "load",
+            $Json$Decode.succeed(zoomLayer),
+            function (z) {
+               return A2($Signal.message,
+               addr,
+               zoomLayer);
+            });
+         };
+         var wrapper = function (content) {
+            return A2($Html.div,
+            _L.fromArray([$Html$Attributes.style(A2($Basics._op["++"],
+            _L.fromArray([{ctor: "_Tuple2"
+                          ,_0: "overflow"
+                          ,_1: "hidden"}]),
+            A2($Basics._op["++"],
+            $Styles.absolute,
+            A2($Basics._op["++"],
+            $Styles.dimensions(window),
+            $Styles.zeroMargin))))]),
+            content);
+         };
+         return function () {
+            var _v8 = A2($Debug.log,
+            "zoom",
+            zoom);
+            switch (_v8.ctor)
+            {case "Between":
+               return wrapper(_L.fromArray([A6(oneLayer,
+                                           _L.fromArray([]),
+                                           centre,
+                                           tileSource,
+                                           window,
+                                           _v8._0 - _v8._1,
+                                           _v8._0)
+                                           ,A6(oneLayer,
+                                           _L.fromArray([onLoad(_v8._1)
+                                                        ,$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                                                              ,_0: "display"
+                                                                                              ,_1: "none"}]))]),
+                                           centre,
+                                           tileSource,
+                                           window,
+                                           0,
+                                           _v8._1)]));
+               case "Constant":
+               return wrapper(_L.fromArray([A6(oneLayer,
+                 _L.fromArray([]),
+                 centre,
+                 tileSource,
+                 window,
+                 0,
+                 _v8._0)]));}
+            _U.badCase($moduleName,
+            "between lines 24 and 27");
+         }();
+      }();
+   });
    _elm.Tile.values = {_op: _op
                       ,render: render};
    return _elm.Tile.values;
@@ -15959,6 +16130,16 @@ Elm.Types.make = function (_elm) {
              ,tileSize: a
              ,tileUrl: c};
    });
+   var Between = F2(function (a,
+   b) {
+      return {ctor: "Between"
+             ,_0: a
+             ,_1: b};
+   });
+   var Constant = function (a) {
+      return {ctor: "Constant"
+             ,_0: a};
+   };
    var TileOffset = F2(function (a,
    b) {
       return {_: {}
@@ -15980,7 +16161,9 @@ Elm.Types.make = function (_elm) {
                        ,Position: Position
                        ,TileOffset: TileOffset
                        ,TileSource: TileSource
-                       ,Tile: Tile};
+                       ,Tile: Tile
+                       ,Constant: Constant
+                       ,Between: Between};
    return _elm.Types.values;
 };
 Elm.Ui = Elm.Ui || {};
@@ -16070,8 +16253,9 @@ Elm.Ui.make = function (_elm) {
    var targetWithId = F3(function (msg,
    event,
    id) {
-      return A3($Html$Events.on,
+      return A4($Html$Events.onWithOptions,
       event,
+      stopEverything,
       isTargetId(id),
       msg);
    });
