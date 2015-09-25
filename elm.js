@@ -5310,7 +5310,7 @@ Elm.Model.make = function (_elm) {
          {case "Between": return z._1;
             case "Constant": return z._0;}
          _U.badCase($moduleName,
-         "between lines 158 and 160");
+         "between lines 165 and 167");
       }();
    };
    var move = F3(function (z,
@@ -5372,8 +5372,8 @@ Elm.Model.make = function (_elm) {
    var applyKeys = F2(function (m,
    k) {
       return function () {
-         var _v4 = m.formState;
-         switch (_v4.ctor)
+         var _v5 = m.formState;
+         switch (_v5.ctor)
          {case "Nothing":
             return A2(applyDrag,m,k);}
          return m;
@@ -5384,9 +5384,10 @@ Elm.Model.make = function (_elm) {
       return function () {
          var zm = F2(function (a,b) {
             return _U.eq(a,
-            b) ? $Types.Constant(a) : A2($Types.Between,
+            b) ? $Types.Constant(a) : A3($Types.Between,
             a,
-            b);
+            b,
+            0.0);
          });
          var intF = $Basics.floor(f);
          return function () {
@@ -5395,11 +5396,12 @@ Elm.Model.make = function (_elm) {
                  z._0,
                  z._1 + intF);
                case "Constant":
-               return A2($Types.Between,
+               return A3($Types.Between,
                  z._0,
-                 z._0 + intF);}
+                 z._0 + intF,
+                 0.0);}
             _U.badCase($moduleName,
-            "between lines 139 and 142");
+            "between lines 146 and 149");
          }();
       }();
    });
@@ -5419,18 +5421,30 @@ Elm.Model.make = function (_elm) {
       m);
    });
    var maybeUpdateZoom = F2(function (m,
-   readyLevel) {
+   _v11) {
       return function () {
-         var _v9 = m.zoom;
-         switch (_v9.ctor)
-         {case "Between":
-            return _U.eq(_v9._1,
-              readyLevel) ? _U.replace([["zoom"
-                                        ,$Types.Constant(readyLevel)]],
-              m) : m;
-            case "Constant": return m;}
+         switch (_v11.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var _v15 = m.zoom;
+                 switch (_v15.ctor)
+                 {case "Between":
+                    return _U.eq(_v15._1,
+                      _v11._0) ? _U.cmp(_v15._2 + _v11._1,
+                      0.75) > 0 ? _U.replace([["zoom"
+                                              ,$Types.Constant(_v15._1)]],
+                      m) : _U.replace([["zoom"
+                                       ,A3($Types.Between,
+                                       _v15._0,
+                                       _v15._1,
+                                       _v15._2 + _v11._1)]],
+                      m) : m;
+                    case "Constant": return m;}
+                 _U.badCase($moduleName,
+                 "between lines 104 and 113");
+              }();}
          _U.badCase($moduleName,
-         "between lines 104 and 106");
+         "between lines 104 and 113");
       }();
    });
    var applyMaybe = F3(function (f,
@@ -5535,7 +5549,7 @@ Elm.Model.make = function (_elm) {
                                      ,fc._0]],
                     fs);}
                _U.badCase($moduleName,
-               "between lines 118 and 121");
+               "between lines 125 and 128");
             }();
          });
          return function () {
@@ -5553,7 +5567,7 @@ Elm.Model.make = function (_elm) {
                  sf._0,
                  fc));}
             _U.badCase($moduleName,
-            "between lines 122 and 126");
+            "between lines 129 and 133");
          }();
       }();
    });
@@ -5590,7 +5604,7 @@ Elm.Model.make = function (_elm) {
             case "LongPress":
             return A3(applyClick,m,t,e._0);}
          _U.badCase($moduleName,
-         "between lines 170 and 176");
+         "between lines 177 and 183");
       }();
    });
    var PendingAmend = function (a) {
@@ -5613,7 +5627,7 @@ Elm.Model.make = function (_elm) {
                {case "Amend": return r._0;
                   case "New": return r._0;}
                _U.badCase($moduleName,
-               "between lines 190 and 193");
+               "between lines 197 and 200");
             }();
          };
          return $Maybe.map(PendingAmend)($Maybe.map(fs)(A2($Maybe.map,
@@ -5632,7 +5646,7 @@ Elm.Model.make = function (_elm) {
                   case "New":
                   return _U.eq(r._0.id,id);}
                _U.badCase($moduleName,
-               "between lines 181 and 184");
+               "between lines 188 and 191");
             }();
          };
          var record = A2(findLast,
@@ -5643,26 +5657,26 @@ Elm.Model.make = function (_elm) {
          m);
       }();
    });
-   var applyEvent = F2(function (_v34,
+   var applyEvent = F2(function (_v41,
    m) {
       return function () {
-         switch (_v34.ctor)
+         switch (_v41.ctor)
          {case "_Tuple2":
             return function () {
-                 switch (_v34._1.ctor)
+                 switch (_v41._1.ctor)
                  {case "AmendRecord":
                     return A2(prepareToAmend,
                       m,
-                      _v34._1._0);
+                      _v41._1._0);
                     case "ArrowPress":
                     return A2(applyKeys,
                       m,
-                      _v34._1._0);
+                      _v41._1._0);
                     case "Click":
                     return A3(applyClick,
                       m,
-                      _v34._0,
-                      _v34._1._0);
+                      _v41._0,
+                      _v41._1._0);
                     case "DismissModal":
                     return _U.replace([["message"
                                        ,$Maybe.Nothing]
@@ -5671,17 +5685,17 @@ Elm.Model.make = function (_elm) {
                     case "LayerReady":
                     return A2(maybeUpdateZoom,
                       m,
-                      _v34._1._0);
+                      _v41._1._0);
                     case "LocationReceived":
                     return A3(applyMaybe,
-                      F2(function (m,_v51) {
+                      F2(function (m,_v58) {
                          return function () {
-                            switch (_v51.ctor)
+                            switch (_v58.ctor)
                             {case "_Tuple2":
                                return _U.replace([["centre"
                                                   ,A2($Types.GeoPoint,
-                                                  _v51._0,
-                                                  _v51._1)]
+                                                  _v58._0,
+                                                  _v58._1)]
                                                  ,["locationProgress",false]],
                                  m);}
                             _U.badCase($moduleName,
@@ -5689,10 +5703,10 @@ Elm.Model.make = function (_elm) {
                          }();
                       }),
                       m,
-                      _v34._1._0);
+                      _v41._1._0);
                     case "LocationRequestError":
                     return _U.replace([["message"
-                                       ,_v34._1._0]
+                                       ,_v41._1._0]
                                       ,["locationProgress",false]],
                       m);
                     case "LocationRequestStarted":
@@ -5702,35 +5716,35 @@ Elm.Model.make = function (_elm) {
                     case "RecordChange":
                     return A2(applyRecordChange,
                       m,
-                      _v34._1._0);
+                      _v41._1._0);
                     case "SightingChange":
                     return _U.replace([["formState"
                                        ,A2($Maybe.map,
                                        function (fs) {
                                           return A2(applyFormChange,
                                           fs,
-                                          _v34._1._0);
+                                          _v41._1._0);
                                        },
                                        m.formState)]],
                       m);
                     case "StartingUp": return m;
                     case "TileSourceChange":
                     return _U.replace([["tileSource"
-                                       ,_v34._1._0]],
+                                       ,_v41._1._0]],
                       m);
                     case "TouchEvent":
                     return A3(applyMaybe,
-                      applyTouchEvent(_v34._0),
+                      applyTouchEvent(_v41._0),
                       m,
-                      _v34._1._0);
+                      _v41._1._0);
                     case "WindowSize":
                     return _U.replace([["windowSize"
-                                       ,_v34._1._0]],
+                                       ,_v41._1._0]],
                       m);
                     case "ZoomChange":
                     return A2(applyZoom,
                       m,
-                      _v34._1._0);}
+                      _v41._1._0);}
                  _U.badCase($moduleName,
                  "between lines 82 and 97");
               }();}
@@ -14509,7 +14523,7 @@ Elm.SlippyMap.make = function (_elm) {
                                       "touchend",
                                       $Ui.stopEverything,
                                       $Json$Decode.value,
-                                      function (_v4) {
+                                      function (_v5) {
                                          return function () {
                                             return A2($Signal.message,
                                             ad,
@@ -14677,7 +14691,7 @@ Elm.SlippyMap.make = function (_elm) {
                       _L.fromArray([A3($Html$Events.on,
                       "click",
                       $Json$Decode.succeed(""),
-                      function (_v11) {
+                      function (_v12) {
                          return function () {
                             return A2($Signal.message,
                             addr,
@@ -14687,7 +14701,7 @@ Elm.SlippyMap.make = function (_elm) {
                       _L.fromArray([$Html.text("Ok...")]))]));
          var dismissAddr = A2($Signal.forwardTo,
          addr,
-         function (_v13) {
+         function (_v14) {
             return function () {
                return $Model.DismissModal;
             }();
@@ -14846,7 +14860,7 @@ Elm.SlippyMap.make = function (_elm) {
          _L.fromArray([]));
          var dismissAddr = A2($Signal.forwardTo,
          addr,
-         function (_v25) {
+         function (_v26) {
             return function () {
                return $Model.DismissModal;
             }();
@@ -14894,13 +14908,13 @@ Elm.SlippyMap.make = function (_elm) {
    var spotLayers = F2(function (addr,
    model) {
       return function () {
-         var _v27 = model.message;
-         switch (_v27.ctor)
+         var _v28 = model.message;
+         switch (_v28.ctor)
          {case "Just":
             return A3(modalMessage,
               addr,
               model,
-              _v27._0);
+              _v28._0);
             case "Nothing":
             return $Maybe.withDefault(_L.fromArray([]))(A2($Maybe.map,
               function (fs) {
@@ -15234,6 +15248,9 @@ Elm.Styles.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Styles",
    $Basics = Elm.Basics.make(_elm);
+   var noDisplay = _L.fromArray([{ctor: "_Tuple2"
+                                 ,_0: "display"
+                                 ,_1: "none"}]);
    var absolute = _L.fromArray([{ctor: "_Tuple2"
                                 ,_0: "position"
                                 ,_1: "absolute"}]);
@@ -15278,6 +15295,7 @@ Elm.Styles.make = function (_elm) {
                                   ,_1: px(0)}]);
    _elm.Styles.values = {_op: _op
                         ,absolute: absolute
+                        ,noDisplay: noDisplay
                         ,px: px
                         ,position: position
                         ,dimensions: dimensions
@@ -15607,12 +15625,12 @@ Elm.Tile.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Tile",
    $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Styles = Elm.Styles.make(_elm),
    $Tuple = Elm.Tuple.make(_elm),
@@ -15631,23 +15649,13 @@ Elm.Tile.make = function (_elm) {
               },
               _v0._1);}
          _U.badCase($moduleName,
-         "on line 106, column 19 to 56");
+         "on line 96, column 19 to 56");
       }();
    });
    var range = F2(function (origin,
    count) {
       return _L.range(origin,
       origin + count - 1);
-   });
-   var flipY = $Tuple.multiply({ctor: "_Tuple2"
-                               ,_0: 1
-                               ,_1: -1});
-   var lift2 = F3(function (g,
-   p1,
-   p2) {
-      return $Types.Position(A2(g,
-      p1.pixels,
-      p2.pixels));
    });
    var mer = $Basics.flip(F2(function (x,
    y) {
@@ -15659,7 +15667,6 @@ Elm.Tile.make = function (_elm) {
    y) {
       return x / y | 0;
    }));
-   var addP = lift2($Tuple.add);
    var flowTable = F3(function (tileSize,
    renderer,
    arr) {
@@ -15733,23 +15740,40 @@ Elm.Tile.make = function (_elm) {
          _L.fromArray([el]));
       }();
    });
-   var pickZoom = function (zoom) {
-      return function () {
-         switch (zoom.ctor)
-         {case "Between": return zoom._1;
-            case "Constant":
-            return zoom._0;}
-         _U.badCase($moduleName,
-         "between lines 58 and 60");
-      }();
-   };
    var scale = F2(function (dz,a) {
       return _U.cmp(dz,
       0) > 0 ? a / Math.pow(2,
       dz) | 0 : a * Math.pow(2,
       -1 * dz);
    });
-   var oneLayer = F6(function (attrs,
+   var onLoad = F3(function (addr,
+   zoom,
+   prog) {
+      return A3($Html$Events.on,
+      "load",
+      $Json$Decode.succeed({ctor: "_Tuple2"
+                           ,_0: zoom
+                           ,_1: prog}),
+      $Signal.message(addr));
+   });
+   var loadingAttrs = F3(function (maybAddr,
+   tileCounts,
+   zoom) {
+      return $Maybe.withDefault(_L.fromArray([]))(A2($Maybe.map,
+      function (addr) {
+         return _L.fromArray([A3(onLoad,
+                             addr,
+                             zoom,
+                             1.0 / $Basics.toFloat(A2($Tuple.combine,
+                             F2(function (x,y) {
+                                return x * y;
+                             }),
+                             tileCounts)))
+                             ,$Html$Attributes.style($Styles.noDisplay)]);
+      },
+      maybAddr));
+   });
+   var oneLayer = F6(function (maybAddr,
    centre,
    tileSource,
    window,
@@ -15760,11 +15784,6 @@ Elm.Tile.make = function (_elm) {
          var zoomWindow = A2($Tuple.map,
          scl,
          window);
-         var zoomOffset = $Tuple.map(function (a) {
-            return a / 2 | 0;
-         })(A2($Tuple.subtract,
-         window,
-         zoomWindow));
          var zoomTileSize = scl(tileSource.tileSize);
          var mapCentre = A2(tileSource.locate,
          $Basics.toFloat(zoom),
@@ -15797,6 +15816,10 @@ Elm.Tile.make = function (_elm) {
          range,
          originTile.coordinate,
          tileCounts));
+         var attrs = A3(loadingAttrs,
+         maybAddr,
+         tileCounts,
+         zoom);
          var mapEl = A3(flowTable,
          zoomTileSize,
          A4(renderOneTile,
@@ -15810,27 +15833,12 @@ Elm.Tile.make = function (_elm) {
          offset);
       }();
    });
-   var r = F2(function (a,b) {
-      return _U.cmp(a,
-      b) > 0 ? $List.reverse(_L.range(b,
-      a)) : _L.range(a,b);
-   });
    var render = F5(function (addr,
    centre,
    window,
    zoom,
    tileSource) {
       return function () {
-         var onLoad = function (zoomLayer) {
-            return A3($Html$Events.on,
-            "load",
-            $Json$Decode.succeed(zoomLayer),
-            function (z) {
-               return A2($Signal.message,
-               addr,
-               zoomLayer);
-            });
-         };
          var wrapper = function (content) {
             return A2($Html.div,
             _L.fromArray([$Html$Attributes.style(A2($Basics._op["++"],
@@ -15845,38 +15853,32 @@ Elm.Tile.make = function (_elm) {
             content);
          };
          return function () {
-            var _v8 = A2($Debug.log,
-            "zoom",
-            zoom);
-            switch (_v8.ctor)
+            switch (zoom.ctor)
             {case "Between":
                return wrapper(_L.fromArray([A6(oneLayer,
-                                           _L.fromArray([]),
+                                           $Maybe.Nothing,
                                            centre,
                                            tileSource,
                                            window,
-                                           _v8._0 - _v8._1,
-                                           _v8._0)
+                                           zoom._0 - zoom._1,
+                                           zoom._0)
                                            ,A6(oneLayer,
-                                           _L.fromArray([onLoad(_v8._1)
-                                                        ,$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                                                              ,_0: "display"
-                                                                                              ,_1: "none"}]))]),
+                                           $Maybe.Just(addr),
                                            centre,
                                            tileSource,
                                            window,
                                            0,
-                                           _v8._1)]));
+                                           zoom._1)]));
                case "Constant":
                return wrapper(_L.fromArray([A6(oneLayer,
-                 _L.fromArray([]),
+                 $Maybe.Nothing,
                  centre,
                  tileSource,
                  window,
                  0,
-                 _v8._0)]));}
+                 zoom._0)]));}
             _U.badCase($moduleName,
-            "between lines 24 and 27");
+            "between lines 23 and 27");
          }();
       }();
    });
@@ -16130,11 +16132,13 @@ Elm.Types.make = function (_elm) {
              ,tileSize: a
              ,tileUrl: c};
    });
-   var Between = F2(function (a,
-   b) {
+   var Between = F3(function (a,
+   b,
+   c) {
       return {ctor: "Between"
              ,_0: a
-             ,_1: b};
+             ,_1: b
+             ,_2: c};
    });
    var Constant = function (a) {
       return {ctor: "Constant"
