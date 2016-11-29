@@ -1,0 +1,138 @@
+<h3>Previously, on misguided elm experiments:</h3>
+
+<p>I wrote a mapping library! Why? Because interop is always a pain, and
+I wanted to write an elm application that was heavily dependent on
+geographic data.</p>
+
+<p>At the time, I got the implementation to 'good enough' and then got on
+with writing the app. In case anyone was interested, I stuck a
+<a href="old-and-bad.html">demo</a> on the internet and left a link
+on the elm mailing list. A great lack of interest followed.</p>
+
+<p>A year or so later, I find myself again wanting an elm map layer. Elm
+has moved quite a long way in that time though, and all the horrible
+hacks I used to get things working in 0.15 are now long gone. In
+addition, I distinctly remember some odd rendering issues in the
+initial implementation.</p>
+
+<h3>Time for a rewrite</h3>
+
+<p>Let's start by fixing the most annoying issue I can find in the
+original implementation. When moving across the map, when a tile is
+slow to load, the previous tile continues to be shown.</p>
+
+<p>This is obvious, in retrospect. What the runtime will end up doing in
+the original implementation is reusing the same image tags in the DOM,
+but updating their 'src' attribute. It's only natural that the browser
+continues to show the previous src until the new one is loaded.</p>
+
+<h3>Step one: a simple proof on concept</h3>
+
+<p>The problem here is one of state. Elm will helpfully force us to be
+explicit about it. Let's consider a much simpler case than a movable
+tiled map, and just consider the problem of lazily showing a loaded
+image.</p>
+
+<p>Here's the representation of our state:</p>
+
+<pre>
+<code>
+
+type alias Url = String
+
+type LazyImage = Loading Url
+               | Ready Url
+
+type alias Model =
+    List LazyImage
+
+</code>
+</pre>
+
+<p>Here are the events we expect to be dealing with, and how we'll update
+our state based on them. This is a very simple declaration; the only
+event we'll be sending lets us know that a particular url has finished
+loading.</p>
+
+<pre>
+<code>
+type Msg = Complete Url
+</code>
+</pre>
+
+<p>Here's how we'll update our model - when a 'Complete' event, arrives,
+we'll update any <code>Loading</code> image that matches that url to be <code>Ready</code>.</p>
+
+<pre>
+<code>
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    Complete url -> complete url model
+
+complete : Url -> Model -> Model
+complete url model = 
+    let f lazyImage = 
+        case lazyImage of 
+          Ready _ -> lazyImage
+          Loading loadingUrl -> if loadingUrl == url then Ready url else lazyImage
+    in map f model
+</code>
+</pre>
+
+<p>...and here's how we'll render our state. The parts to show the ready
+images are simple enough:</p>
+
+<pre>
+<code>
+view : Model -> Html Msg
+view model = 
+    let f lazyImage =
+        case lazyImage of
+          Ready url -> readyImage url
+          Loading url -> loadingImage url
+    in node "div" [] (map f model)
+
+readyImage : Url -> Html Msg
+readyImage url =
+    let attrs = [ src url, style [ ( "float", "left" ) ] ]
+    in img attrs [] 
+</code>
+</pre>
+
+<p>...it's only when we deal with the loading images that things get a
+little crafty. We choose to generate two <code>img</code> tags. Only the first, a
+loading gif, is visible. We cunningly keep the real image right next
+to it, but don't display it. Finally, we hook into that image's <code>load</code>
+event, converting it into an event that our elm application can
+understand.</p>
+
+<pre>
+<code>
+loadingImage : Url -> Html Msg
+loadingImage url =
+    let 
+        loadingGifAttrs = 
+            [ src "loading.gif"
+            , style [ ( "float", "left" ) ]
+            ]
+        loadingImageAttrs = 
+            [ src url
+            , style [ ("display", "none" ) ]
+            , onWithOptions "load" (Options False False) (succeed (Complete url))
+            ]
+    in node "div" [] [(img loadingGifAttrs []), (img loadingImageAttrs [])]
+</code>
+</pre>
+
+<p>Finally, we tie together our model, events and view into an application:</p>
+
+<pre
+<code>
+main =
+  App.beginnerProgram { model = model, view = view, update = update }
+</code>
+</pre>
+
+<p>...and we're done. Next time, we'll break off another piece we'll need
+to rebuild: a tiling function.</p>
