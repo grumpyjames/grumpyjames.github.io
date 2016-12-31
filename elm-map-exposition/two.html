@@ -1,128 +1,122 @@
-<h3>A generic tiling function in elm</h3>
-
-<p>Typically in map applications, the world (as represented by a
-<a href="https://en.wikipedia.org/wiki/Web_Mercator">web mercator projection</a>)
-is split into a number of square tiles, the precise number depending
-on how closely we're looking at the map.</p>
-
-<p>Each tile is a separate image (although there are movements towards
-serving vector information and rendering to SVG, this is far too
-modern for my tiny brain so I will deny their existence for now) -
-drawing a large map usually means requesting several images and tiling
-them.</p>
-
-<p>We've written a lazy loader for these tiled images; today we'll write
-a tiny tiling implementation to form the next step.</p>
-
-<h3>Abstractions I made earlier</h3>
-
-<pre>
-<code>
-type alias Tile =
-    { x: Int
-    , y: Int
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+</head>
+<body>
+<h3 id="a-generic-tiling-function-in-elm">A generic tiling function in elm</h3>
+<p>Typically in map applications, the world (as represented by a <a href="https://en.wikipedia.org/wiki/Web_Mercator">web mercator projection</a>) is split into a number of square tiles, the precise number depending on how closely we're looking at the map.</p>
+<p>Each tile is a separate image (although there are movements towards serving vector information and rendering to SVG, this is far too modern for my tiny brain so I will deny their existence for now) - drawing a large map usually means requesting several images and tiling them.</p>
+<p>We've written a lazy loader for these tiled images; today we'll write a tiny tiling implementation to form the next step.</p>
+<h3 id="abstractions-i-made-earlier">Abstractions I made earlier</h3>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="kw">type</span> alias <span class="dt">Tile</span> <span class="fu">=</span>
+    { x<span class="fu">:</span> <span class="dt">Int</span>
+    , y<span class="fu">:</span> <span class="dt">Int</span>
     }
 
-type alias TilingInstruction a = 
-    { rowCount: Int
-    , columnCount: Int
-    , origin: Tile
-    , view: Tile -> Html a
-    }
-</code>
-</pre>
-
-<p>We don't necessarily want our tiler to know precisely what tiles it is
-going to be arranging, so we create this generic definition of a tile,
-and allow our instructions to specify how a tile should be rendered.</p>
-
-<p>This has the handy side effect of allowing us to write a very simple
-demonstration program to give us confidence that our tiler is doing
-the right thing. Writing tests would help too, but there's something
-strangely satisfying about looking at output in a web browser.</p>
-
-<h3>Implementation</h3>
-
+<span class="kw">type</span> alias <span class="dt">TilingInstruction</span> a <span class="fu">=</span> 
+    { rowCount<span class="fu">:</span> <span class="dt">Int</span>
+    , columnCount<span class="fu">:</span> <span class="dt">Int</span>
+    , origin<span class="fu">:</span> <span class="dt">Tile</span>
+    , view<span class="fu">:</span> <span class="dt">Tile</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> a
+    }</code></pre></div>
+<p>We don't necessarily want our tiler to know precisely what tiles it is going to be arranging, so we create this generic definition of a tile, and allow our instructions to specify how a tile should be rendered.</p>
+<p>This has the handy side effect of allowing us to write a very simple demonstration program to give us confidence that our tiler is doing the right thing. Writing tests would help too, but there's something strangely satisfying about looking at output in a web browser.</p>
+<h3 id="implementation">Implementation</h3>
 <p>It is small:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+tile <span class="fu">:</span> <span class="dt">TilingInstruction</span> a <span class="ot">-&gt;</span> <span class="dt">Html</span> a
+tile instruction <span class="fu">=</span> 
+    Html.div [] (List.map (viewRow instruction<span class="fu">.</span>view) (rows instruction))
 
-<pre>
-<code>
-tile : TilingInstruction a -> Html a
-tile instruction = 
-    Html.div [] (List.map (viewRow instruction.view) (rows instruction))
-
-viewRow : (Tile -> Html a) -> List Tile -> Html a
-viewRow view tiles =
+viewRow <span class="fu">:</span> (<span class="dt">Tile</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> a) <span class="ot">-&gt;</span> <span class="dt">List</span> <span class="dt">Tile</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> a
+viewRow view tiles <span class="fu">=</span>
     Html.div [] (List.map view tiles)
 
-rows : TilingInstruction a -> List (List Tile)
-rows instruction =
-    let rowRange = range instruction.origin.y instruction.rowCount
-        columnRange = range instruction.origin.x instruction.columnCount
-    in mapTwo Tile columnRange rowRange
+rows <span class="fu">:</span> <span class="dt">TilingInstruction</span> a <span class="ot">-&gt;</span> <span class="dt">List</span> (<span class="dt">List</span> <span class="dt">Tile</span>)
+rows instruction <span class="fu">=</span>
+    <span class="kw">let</span> rowRange <span class="fu">=</span> range instruction<span class="fu">.</span>origin<span class="fu">.</span>y instruction<span class="fu">.</span>rowCount
+        columnRange <span class="fu">=</span> range instruction<span class="fu">.</span>origin<span class="fu">.</span>x instruction<span class="fu">.</span>columnCount
+    <span class="kw">in</span> mapTwo <span class="dt">Tile</span> columnRange rowRange
+    
+range <span class="fu">:</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">List</span> <span class="dt">Int</span>
+range origin count <span class="fu">=</span> [origin<span class="fu">..</span>(origin <span class="fu">+</span> count <span class="fu">-</span> <span class="dv">1</span>)]
 
-range : Int -> Int -> List Int
-range origin count = [origin..(origin + count - 1)]
+mapTwo <span class="fu">:</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> <span class="dt">List</span> a <span class="ot">-&gt;</span> <span class="dt">List</span> b <span class="ot">-&gt;</span> <span class="dt">List</span> (<span class="dt">List</span> c)
+mapTwo f xs ys <span class="fu">=</span>
+    List.map (\y <span class="ot">-&gt;</span> List.map (\x <span class="ot">-&gt;</span> (f x y)) xs) ys</code></pre></div>
+<p>Mostly the implementation is list functions (I admit, I stole mapTwo from an elm mailing list suggestion; neat, isn't it?), with a little bit of arranging the results of <code>view</code> into appropriate <code>div</code>s. This makes me feel like the choice of abstractions was either excellent, or too low; only time will tell.</p>
+<h3 id="a-simple-proof-of-concept">A simple proof of concept</h3>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Html</span> exposing (<span class="dt">Html</span>)
+<span class="kw">import </span><span class="dt">Html.App</span> <span class="kw">as</span> <span class="dt">App</span>
 
-mapTwo : (a -> b -> c) -> List a -> List b -> List (List c)
-mapTwo f xs ys =
-    List.map (\y -> List.map (\x -> (f x y)) xs) ys
-</code>
-</pre>
+<span class="kw">import </span><span class="dt">Tiler</span> exposing (<span class="dt">TilingInstruction</span>)
 
-<p>Mostly the implementation is list functions (I admit, I stole mapTwo
-from an elm mailing list suggestion; neat, isn't it?), with a little
-bit of arranging the results of <code>view</code> into appropriate <code>div</code>s. This
-makes me feel like the choice of abstractions was either excellent, or
-too low; only time will tell.</p>
+<span class="kw">type</span> alias <span class="dt">Model</span> <span class="fu">=</span> <span class="dt">TilingInstruction</span> <span class="dt">Msg</span>
 
-<h3>A simple proof of concept</h3>
+<span class="kw">type</span> <span class="dt">Msg</span> <span class="fu">=</span> <span class="dt">NoOp</span>
 
-<pre>
-<code>
-import Html exposing (Html)
-import Html.App as App
+describe <span class="fu">:</span> <span class="dt">Tiler.Tile</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+describe tile <span class="fu">=</span>
+    Html.text (<span class="st">&quot;(&quot;</span> <span class="fu">++</span> (toString tile<span class="fu">.</span>x) <span class="fu">++</span> <span class="st">&quot;, &quot;</span> <span class="fu">++</span> (toString tile<span class="fu">.</span>y) <span class="fu">++</span> <span class="st">&quot;)&quot;</span>) 
 
-import Tiler exposing (TilingInstruction)
+model <span class="fu">=</span>
+    <span class="dt">TilingInstruction</span> <span class="dv">3</span> <span class="dv">5</span> (<span class="dt">Tiler.Tile</span> <span class="dv">3</span> <span class="dv">5</span>) describe
 
-type alias Model = TilingInstruction Msg
+update <span class="fu">:</span> <span class="dt">Msg</span> <span class="ot">-&gt;</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Model</span>
+update message model <span class="fu">=</span> model
 
-type Msg = NoOp
-
-describe : Tiler.Tile -> Html Msg
-describe tile =
-    Html.text ("(" ++ (toString tile.x) ++ ", " ++ (toString tile.y) ++ ")") 
-
-model =
-    TilingInstruction 3 5 (Tiler.Tile 3 5) describe
-
-update : Msg -> Model -> Model
-update message model = model
-
-main = 
-    App.beginnerProgram { model = model
-                        , view = Tiler.tile
-                        , update = update
-                        }
-</code>
-</pre>
-
-<p>The vast majority of this code is ceremonial - most of our view
-function is already implemented in <code>Tiler</code>, so we just create a tile
-view function that lets us know the co-ordinates of a given tile, so
-we can quickly check that things are working. Our demo doesn't have
-any events, so a single <code>NoOp</code> <code>Msg</code> type alias is all we'll need
-there.</p>
-
+main <span class="fu">=</span> 
+    App.beginnerProgram { model <span class="fu">=</span> model
+                        , view <span class="fu">=</span> Tiler.tile
+                        , update <span class="fu">=</span> update
+                        }</code></pre></div>
+<p>The vast majority of this code is ceremonial - most of our view function is already implemented in <code>Tiler</code>, so we just create a tile view function that lets us know the co-ordinates of a given tile, so we can quickly check that things are working. Our demo doesn't have any events, so a single <code>NoOp</code> <code>Msg</code> type alias is all we'll need there.</p>
 <p>We can see the results <a href="demo-2.1.html">here</a></p>
-
-<p>Barring the rather crude coordinate system (sorry, fellow
-mathematicians - web mercator made me do it), this looks like a good
-start.</p>
-
-<h3>The way forward</h3>
-
-<p>We have two components (Ed: 'components'? they look more like a
-collection of functions to me...); a lazy image loader, and a
-tiler. How easily can we combine them? We'll find out in the next
-instalment.</p>
+<p>Barring the rather crude coordinate system (sorry, fellow mathematicians - web mercator made me do it), this looks like a good start.</p>
+<h3 id="the-way-forward">The way forward</h3>
+<p>We have two components (Ed: 'components'? they look more like a collection of functions to me...); a lazy image loader, and a tiler. How easily can we combine them? We'll find out in the next instalment.</p>
+</body>
+</html>

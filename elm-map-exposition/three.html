@@ -1,185 +1,151 @@
-<h3>Combining two ideas</h3>
-
-<p>Previously, we wrote a lazy image loader, and a very simple tiling
-function. Now we want to combine them.</p>
-
-<p>Our goal is to render a tiling of web mercator images, with each image
-being lazily loaded. Imagine the previous tiling demo, but instead of
-rendering the tile's coordinate we lazily load the equivalent map tile
-corresponding to that coordinate.</p>
-
-<p>We'll also provide some basic controls so we can change the origin of
-the resulting tiling.</p>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+</head>
+<body>
+<h3 id="combining-two-ideas">Combining two ideas</h3>
+<p>Previously, we wrote a lazy image loader, and a very simple tiling function. Now we want to combine them.</p>
+<p>Our goal is to render a tiling of web mercator images, with each image being lazily loaded. Imagine the previous tiling demo, but instead of rendering the tile's coordinate we lazily load the equivalent map tile corresponding to that coordinate.</p>
+<p>We'll also provide some basic controls so we can change the origin of the resulting tiling.</p>
 <p>Let's have a think about how to do this.</p>
-
-<pre><code>
-type alias TilingInstruction a = 
-    { rowCount: Int
-    , columnCount: Int
-    , origin: Tile
-    , view: Tile -> Html a
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="kw">type</span> alias <span class="dt">Tile</span> <span class="fu">=</span>
+    { x<span class="fu">:</span> <span class="dt">Int</span>
+    , y<span class="fu">:</span> <span class="dt">Int</span>
     }
-</code></pre>
 
-<p>It's clear that most of our change, from the previous demo, is going
-to be in the implementation of <code>view</code>. We'll also hold on to a bit
-more state in our model, which looks like this.</p>
-
-<pre><code>
-type alias Model = 
-    { rowCount: Int
-    , columnCount: Int
-    , origin: Tiler.Tile
-    , loadedImages : Dict (Int, Int) Url
-    }
-</pre></code>
-
-The events we're going to handle will also widen a little; we'll add
-the co-ordinate of the tile to the 'image loaded' event, and we'll
-also add an event to encapsulate a shift in the map's origin.
-
-<pre><code>
-type Msg = Complete (Int, Int) Url
-         | Shift (Int, Int)
-</pre></code>
-
-Let's look at how we define our view.
-
-<pre><code>
-view : Model -> Html Msg
-view m =
-    let tiles = Tiler.tile (TilingInstruction m.rowCount m.columnCount m.origin (loadingTileImages m.loadedImages))
-    in Html.div [] [controls, tiles]
-</code></pre>
-
-<p>We'll have some controls, and some tiles. The tiles are the bit we're
-interested in. We're invoking exactly the same <code>tile</code> function that
-was introduced in part two, but this time, the instruction we are
-passing it is slightly more dynamic.</p>
-
-<p>The type of <code>view</code> in <code>TilingInstruction</code> is <code>Tile -&gt; Html a</code>. It
-looks like <code>loadingTileImages m.loadedImages</code>. is going to have to be
-pretty clever.</p>
-
-<pre><code>
-loadingTileImages : Dict (Int, Int) Url -> Tiler.Tile -> Html Msg
-loadingTileImages cache tile =
-    let lookup = Dict.get (tile.x, tile.y) cache
-    in 
-      case lookup of
-        Just url -> readyImage url
-        Nothing -> loadingImage (tile.x, tile.y) (imageUrl tile)
-</code></pre>
-
-<p>...handily though, it is actually quite simple: we're <em>partially
-applying</em> this function, binding the loading images into place for
-each invocation. At the point where the tiler requests a view for a
-particular tile, we'll check to see if we've already loaded it, and
-we'll pick a rendering based on that state.</p>
-
-<p>Our definitions of <code>loadingImage</code> and <code>readyImage</code> are very similar to
-the original <code>LazyLoader</code> demo with the following difference:</p>
-
-<p>Before:</p>
-
-<pre><code>onWithOptions "load" (Options False False) (succeed (Complete url))</code></pre>
-
-<p>After:</p>
-
-<pre><code>onWithOptions "load" (Options False False) (succeed (Complete coordinate url))</code></pre>
-
+<span class="kw">type</span> alias <span class="dt">TilingInstruction</span> a <span class="fu">=</span> 
+    { rowCount<span class="fu">:</span> <span class="dt">Int</span>
+    , columnCount<span class="fu">:</span> <span class="dt">Int</span>
+    , origin<span class="fu">:</span> <span class="dt">Tile</span>
+    , view<span class="fu">:</span> <span class="dt">Tile</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> a
+    }</code></pre></div>
+<p>It's clear that most of our change, from the previous demo, is going to be in the implementation of <code>view</code>. We'll also hold on to a bit more state in our model, which looks like this.</p>
+<p>Author's note: somewhere in this post, a lot of <code>tile</code> related code got moved into a <code>Tiler</code> module.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="kw">type</span> alias <span class="dt">Model</span> <span class="fu">=</span> 
+    { rowCount<span class="fu">:</span> <span class="dt">Int</span>
+    , columnCount<span class="fu">:</span> <span class="dt">Int</span>
+    , origin<span class="fu">:</span> <span class="dt">Tiler.Tile</span>
+    , loadedImages <span class="fu">:</span> <span class="dt">Dict</span> (<span class="dt">Int</span>, <span class="dt">Int</span>) <span class="dt">Url</span>
+    }</code></pre></div>
+<p>The events we're going to handle will also widen a little; we'll add the co-ordinate of the tile to the 'image loaded' event, and we'll also add an event to encapsulate a shift in the map's origin.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Msg</span> <span class="fu">=</span> <span class="dt">Complete</span> (<span class="dt">Int</span>, <span class="dt">Int</span>) <span class="dt">Url</span>
+         <span class="fu">|</span> <span class="dt">Shift</span> (<span class="dt">Int</span>, <span class="dt">Int</span>)</code></pre></div>
+<p>Let's look at how we define our view.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">view <span class="fu">:</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+view m <span class="fu">=</span>
+    <span class="kw">let</span> tiles <span class="fu">=</span> Tiler.tile (<span class="dt">TilingInstruction</span> m<span class="fu">.</span>rowCount m<span class="fu">.</span>columnCount m<span class="fu">.</span>origin (loadingTileImages m<span class="fu">.</span>loadedImages))
+    <span class="kw">in</span> Html.div [] [controls, tiles]</code></pre></div>
+<p>We'll have some controls, and some tiles. The tiles are the bit we're interested in. We're invoking exactly the same <code>tile</code> function that was introduced in part two, but this time, the instruction we are passing it is slightly more dynamic.</p>
+<p>The type of <code>view</code> in <code>TilingInstruction</code> is <code>Tile -&gt; Html a</code>. It looks like <code>loadingTileImages m.loadedImages</code>. is going to have to be pretty clever.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">loadingTileImages <span class="fu">:</span> <span class="dt">Dict</span> (<span class="dt">Int</span>, <span class="dt">Int</span>) <span class="dt">Url</span> <span class="ot">-&gt;</span> <span class="dt">Tiler.Tile</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+loadingTileImages cache tile <span class="fu">=</span>
+    <span class="kw">let</span> lookup <span class="fu">=</span> Dict.get (tile<span class="fu">.</span>x, tile<span class="fu">.</span>y) cache
+    <span class="kw">in</span> 
+      <span class="kw">case</span> lookup <span class="kw">of</span>
+        <span class="dt">Just</span> url <span class="ot">-&gt;</span> readyImage url
+        <span class="dt">Nothing</span> <span class="ot">-&gt;</span> loadingImage (tile<span class="fu">.</span>x, tile<span class="fu">.</span>y) (imageUrl tile)</code></pre></div>
+<p>...handily though, it is actually quite simple: we're <em>partially applying</em> this function, binding the loading images into place for each invocation. At the point where the tiler requests a view for a particular tile, we'll check to see if we've already loaded it, and we'll pick a rendering based on that state.</p>
+<p>Our definitions of <code>loadingImage</code> and <code>readyImage</code> are very similar to the original <code>LazyLoader</code> demo with the following difference:</p>
+<p>Before: ~<sub>~</sub> {.haskell} onWithOptions &quot;load&quot; (Options False False) (succeed (Complete url)) ~<sub>~</sub></p>
+<p>After: ~<sub>~</sub> {.haskell} onWithOptions &quot;load&quot; (Options False False) (succeed (Complete coordinate url)) ~<sub>~</sub></p>
 <p>This way, when the load event arrives, handling it is much simpler.</p>
-
-<pre><code>
-update : Msg -> Model -> Model
-update message model =
-    case message of
-      Complete key value ->
-          { model | loadedImages = Dict.insert key value model.loadedImages }
-</code></pre>
-
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">update <span class="fu">:</span> <span class="dt">Msg</span> <span class="ot">-&gt;</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Model</span>
+update message model <span class="fu">=</span>
+    <span class="kw">case</span> message <span class="kw">of</span>
+      <span class="dt">Complete</span> key value <span class="ot">-&gt;</span>
+          { model <span class="fu">|</span> loadedImages <span class="fu">=</span> Dict.insert key value model<span class="fu">.</span>loadedImages }</code></pre></div>
 <p>Very simple.</p>
-
 <p>Adding the controls is...tedious but effective:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">controls <span class="fu">:</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+controls <span class="fu">=</span> 
+    <span class="kw">let</span> shiftButton shift text <span class="fu">=</span> Html.button [(Html.Events.on <span class="st">&quot;click&quot;</span> (succeed (<span class="dt">Shift</span> shift)))] [Html.text text]
+        upButton <span class="fu">=</span> shiftButton (<span class="dv">0</span>, <span class="fu">-</span><span class="dv">1</span>) <span class="st">&quot;North&quot;</span>
+        downButton <span class="fu">=</span> shiftButton (<span class="dv">0</span>, <span class="dv">1</span>) <span class="st">&quot;South&quot;</span>
+        leftButton <span class="fu">=</span> shiftButton (<span class="fu">-</span><span class="dv">1</span>, <span class="dv">0</span>) <span class="st">&quot;West&quot;</span>
+        rightButton <span class="fu">=</span> shiftButton (<span class="dv">1</span>, <span class="dv">0</span>) <span class="st">&quot;East&quot;</span>
+    <span class="kw">in</span> Html.div [] [upButton, downButton, leftButton, rightButton]</code></pre></div>
+<p>...and handling the <code>Shift</code> messages this sends is again trivial, here's the other half of our update function:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">      <span class="dt">Shift</span> diff <span class="ot">-&gt;</span> 
+          { model <span class="fu">|</span> origin <span class="fu">=</span> shift diff model<span class="fu">.</span>origin }
 
-<pre><code>
-controls : Html Msg
-controls = 
-    let shiftButton shift text = Html.button [(Html.Events.on "click" (succeed (Shift shift)))] [Html.text text]
-        upButton = shiftButton (0, -1) "North"
-        downButton = shiftButton (0, 1) "South"
-        leftButton = shiftButton (-1, 0) "West"
-        rightButton = shiftButton (1, 0) "East"
-    in Html.div [] [upButton, downButton, leftButton, rightButton]
-</code></pre>
-
-<p>...and handling the <code>Shift</code> messages this sends is again trivial,
-here's the other half of our update function:</p>
-
-<pre><code>
-      Shift diff -> 
-          { model | origin = shift diff model.origin }
-
-shift : (Int, Int) -> Tiler.Tile -> Tiler.Tile
-shift (dx, dy) tile =
-    Tiler.Tile (tile.x + dx) (tile.y + dy) 
-</code></pre>
-
-<p>We'll provide a function, <code>imageUrl : Tiler.Tile -&gt; Url</code>, that knows
-how to craft a <code>URL</code> that corresponds to appropriate web mercator
-tiles source from <a href="http://www.mapbox.com">MapBox</a>, and we'll have our
-next demo.</p>
-
-<p>Author's note: an extended battle with HTML/CSS followed here after
-realising that this demo worked rather poorly on viewports with a
-width smaller than 1024px. HTML/CSS won, so we're going to
-have to do some more work.</p>
-
-<p>To cut a long story short, the <code>div</code> that the <code>Tiler</code> creates to house
-each row of tiles will need to be given an explicit width to prevent
-non-fitting tile images from skipping on to the next line. Ugh.</p>
-
-<h3>Widening <code>TilingInstruction</code></h3>
-
-<pre><code>
-type alias TilingInstruction a = 
-    { rowCount: Int
-    , columnCount: Int
-    , origin: Tile
-    , viewTile: Tile -> Html a
-    , viewRow: List (Html a) -> Html a
-    }
-</code></pre>
-
-<p>Previously, our <code>tile</code> function handily dropped our elements into
-appropriate <code>div</code>s and we were done. Now we have to get each row's
-<code>div</code> to have a fixed width, so we pass a row viewer, as well as a
-tile viewer. We should probably think about whether <code>tile</code> really
-wants to know about <code>Html</code> at some point, but this was the easiest way
-to get things to work in any given browser window for this post.</p>
-
+shift <span class="fu">:</span> (<span class="dt">Int</span>, <span class="dt">Int</span>) <span class="ot">-&gt;</span> <span class="dt">Tiler.Tile</span> <span class="ot">-&gt;</span> <span class="dt">Tiler.Tile</span>
+shift (dx, dy) tile <span class="fu">=</span>
+    <span class="dt">Tiler.Tile</span> (tile<span class="fu">.</span>x <span class="fu">+</span> dx) (tile<span class="fu">.</span>y <span class="fu">+</span> dy) </code></pre></div>
+<p>We'll provide a function, <code>imageUrl : Tiler.Tile -&gt; Url</code>, that knows how to craft a <code>URL</code> that corresponds to appropriate web mercator tiles source from <a href="http://www.mapbox.com">MapBox</a>, and we'll have our next demo.</p>
+<p>Author's note: an extended battle with HTML/CSS followed here after realising that this demo worked rather poorly on viewports with a width smaller than 1024px. HTML/CSS won, so we're going to have to do some more work.</p>
+<p>To cut a long story short, the <code>div</code> that the <code>Tiler</code> creates to house each row of tiles will need to be given an explicit width to prevent non-fitting tile images from skipping on to the next line. Ugh.</p>
+<h3 id="widening-tilinginstruction">Widening <code>TilingInstruction</code></h3>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> alias <span class="dt">TilingInstruction</span> a <span class="fu">=</span> 
+    { rowCount<span class="fu">:</span> <span class="dt">Int</span>
+    , columnCount<span class="fu">:</span> <span class="dt">Int</span>
+    , origin<span class="fu">:</span> <span class="dt">Tile</span>
+    , viewTile<span class="fu">:</span> <span class="dt">Tile</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> a
+    , viewRow<span class="fu">:</span> <span class="dt">List</span> (<span class="dt">Html</span> a) <span class="ot">-&gt;</span> <span class="dt">Html</span> a
+    }</code></pre></div>
+<p>Previously, our <code>tile</code> function handily dropped our elements into appropriate <code>div</code>s and we were done. Now we have to get each row's <code>div</code> to have a fixed width, so we pass a row viewer, as well as a tile viewer. We should probably think about whether <code>tile</code> really wants to know about <code>Html</code> at some point, but this was the easiest way to get things to work in any given browser window for this post.</p>
 <p>Here's what our <code>view</code> function looks like now:</p>
-
-<pre><code>
-view : Model -> Html Msg
-view m =
-    let tiles = 
-            Tiler.tile { rowCount = m.rowCount
-                       , columnCount = m.columnCount
-                       , origin = m.origin
-                       , viewTile = (loadingTileImages m.images)
-                       , viewRow = fixedWidth
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">view <span class="fu">:</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+view m <span class="fu">=</span>
+    <span class="kw">let</span> tiles <span class="fu">=</span> 
+            Tiler.tile { rowCount <span class="fu">=</span> m<span class="fu">.</span>rowCount
+                       , columnCount <span class="fu">=</span> m<span class="fu">.</span>columnCount
+                       , origin <span class="fu">=</span> m<span class="fu">.</span>origin
+                       , viewTile <span class="fu">=</span> (loadingTileImages m<span class="fu">.</span>images)
+                       , viewRow <span class="fu">=</span> fixedWidth
                        }
-    in Html.div [] [controls, tiles]
+    <span class="kw">in</span> Html.div [] [controls, tiles]
 
-px : Int -> String
-px pixels = (toString pixels) ++ "px"
+px <span class="fu">:</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+px pixels <span class="fu">=</span> (toString pixels) <span class="fu">++</span> <span class="st">&quot;px&quot;</span>
 
-fixedWidth : List (Html a) -> Html a
-fixedWidth htmls = 
-    let width = (List.length htmls) * 256
-    in Html.div [style [("width", (px width))]] htmls
-</code></pre>
-
+fixedWidth <span class="fu">:</span> <span class="dt">List</span> (<span class="dt">Html</span> a) <span class="ot">-&gt;</span> <span class="dt">Html</span> a
+fixedWidth htmls <span class="fu">=</span> 
+    <span class="kw">let</span> width <span class="fu">=</span> (List.length htmls) <span class="fu">*</span> <span class="dv">256</span>
+    <span class="kw">in</span> Html.div [style [(<span class="st">&quot;width&quot;</span>, (px width))]] htmls</code></pre></div>
 <p>...and finally, here is the <a href="demo-3.1.html">demo</a></p>
+</body>
+</html>

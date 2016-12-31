@@ -1,85 +1,93 @@
-<h3>What is elm?</h3>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+</head>
+<body>
+<h3 id="what-is-elm">What is elm?</h3>
 <p>and why am I using it?</p>
-
-<p>Elm is "a delightful language for reliable webapps", according to <a href="http://www.elm-lang.org">the official website</a>.</p>
-
-<p>For me, Elm is the answer to the following series of questions:</p>
-
-<ol>
+<p>elm (it is <em>always</em> a lowercase e, apologies, pedants and e e cummings haters) is &quot;a delightful language for reliable webapps&quot;, according to <a href="http://www.elm-lang.org">the official website</a>.</p>
+<p>For me, elm is the answer to the following series of questions:</p>
+<ol style="list-style-type: decimal">
 <li>Can't we write just reliable webapps in javascript?</li>
 </ol>
-
 <p>Yes, but it is <em>hard</em>. <code>undefined</code> is not a <code>function</code>, we hear.</p>
-
-<p>It's hard enough that a great deal of effort has been expended
-creating build pipelines for javascript webapps to make things easier.</p>
-
-<p>Wait, <em>build</em> pipelines? Isn't javascript interpreted? If we're going
-to preprocess our javascript, why don't we write in a language that
-compiles to javascript, but hates freedom less/kills fewer kittens, etc?</p>
-
-<p>What would we want that language to look like?</p>
-
-<h3>My language bucket list</h3>
-
-<ul>
-<li>Statically typed</li>
-<li>Immutability by default</li>
-<li>Functions over objects</li>
-<li>Exceptions are bugs, not design choices</li>
-<li>No null</li>
-<li>No eval</li>
-</ul>
-
-<p>Those things exclude a few others.</p>
-
-<p>If we're statically typed, we're not going to want to construct <code>DOM</code> nodes from strings, so we're going to need an excellent <code>dsl</code> for describing them.</p>
-
-<p>We're going to need a language that's going to make it easy to write code that parses json into types. It's going to have to make handling failure cases simple, too.</p>
-
-<p>Elm ticks every single one of those boxes, and then adds even more bells and whistles on top.</p>
-
-<h3>So, about elm...</h3>
-
-<p>It's statically <em>and</em> strongly typed. Moving between types must always be explicit, there is no coercion. </p>
-
+<p>It's hard enough that a great deal of effort has been expended creating build pipelines for javascript webapps to make things easier.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Wait, <em>build</em> pipelines?</p></li>
+<li><p>Isn't javascript interpreted?</p></li>
+<li><p>If we're going to preprocess our javascript, why don't we write in a language that compiles to javascript, but hates freedom less/kills fewer kittens, etc?</p></li>
+<li><p>What would we want that language to look like?</p></li>
+</ol>
+<p>Author's note: A bucket list of language features was removed from here. Suffice to say: elm is a good fit for me.</p>
+<h3 id="so-about-elm...">So, about elm...</h3>
+<p>It's statically <em>and</em> strongly typed. Moving between types must always be explicit, there is no coercion.</p>
 <p>It doesn't just prefer immutability - it requires it. Unless we start writing native modules, elm won't allow mutation <em>at all</em>.</p>
-
 <p>How the hell do we write a webapp where anything changes, then? Well, elm isn't really just a language. It also provides an architecture (although I'd be more tempted to call it a runtime) and an excellent standard library.</p>
-
-<h3>Behind the curtain: the elm architecture</h3>
-
+<h3 id="behind-the-curtain-the-elm-architecture">Behind the curtain: the elm architecture</h3>
 <p>elm grandly claims we can write a whole webapp with only four ingredients:</p>
-
 <ul>
 <li>a type, <code>Model</code>, representing the 'state' of our app. This is usually an <a href="https://en.wikipedia.org/wiki/Abstract_data_type">ADT</a>, but it could just be a <code>String</code>. We'll provide an initial value for this state, <code>initialModel</code>.</li>
-<li>another type, <code>Msg</code>, that defines what events our application will respond to</li>
+<li>another type, <code>Msg</code>, that defines what events our application will produce and react to.</li>
 <li>a function, <code>update: Msg -&gt; Model -&gt; Model</code>. Given an event and the current state, produce the new state.</li>
 <li>another function, <code>view: Model -&gt; Html Msg</code>. Given this state, produce a <code>Html</code> view.</li>
 </ul>
-
 <p>You'll note that the return type of <code>view</code> is parameterized by our event type. This means that our resulting <code>Html</code> has hooks within it to trigger 'Msg' events based on user interactions, like a mouse click.</p>
-
 <p>Under the covers, elm is running an event loop something like this:</p>
-
-<pre><code>
-var model = initialModel;
-var currentView = view(initialModel);
-applyToDom(currentView);
-while (true) {
-    var event = events.poll();
-    model = update(event, model);
-    var newView = view(model);
-    applyDiffToDom(diff(currentView, newView));
-    currentView = newView;
-}
-</code></pre>
-
-<p>I've represented that in terrible javascript pseudocode in the spirit of comprehensibility. I suspect that in reality there is not a queue, but a callback; this isn't going to be too important for this discussion though.</p>
-
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> model <span class="op">=</span> initialModel<span class="op">;</span>
+<span class="kw">var</span> currentView <span class="op">=</span> <span class="at">view</span>(initialModel)<span class="op">;</span>
+<span class="at">applyToDom</span>(currentView)<span class="op">;</span>
+<span class="cf">while</span> (<span class="kw">true</span>) <span class="op">{</span>
+    <span class="kw">var</span> event <span class="op">=</span> <span class="va">events</span>.<span class="at">poll</span>()<span class="op">;</span>
+    model <span class="op">=</span> <span class="at">update</span>(event<span class="op">,</span> model)<span class="op">;</span>
+    <span class="kw">var</span> newView <span class="op">=</span> <span class="at">view</span>(model)<span class="op">;</span>
+    <span class="at">applyDiffToDom</span>(<span class="at">diff</span>(currentView<span class="op">,</span> newView))<span class="op">;</span>
+    currentView <span class="op">=</span> newView<span class="op">;</span>
+<span class="op">}</span></code></pre></div>
+<p>I've represented that in terrible javascript pseudocode in the spirit of comprehensibility. I suspect that in reality there is not a queue, but a callback; this isn't going to be too important for this discussion though. Events turn up in the queue when events that trigger <code>Msg</code>s occur.</p>
 <p>We've used some functions I haven't defined: <code>applyToDom</code>, <code>diff</code> and <code>applyDiffToDom</code>. The first of these takes the elm representation of our view and makes the DOM reflect it. The second, <code>diff</code> takes two elm view representations and computes the differences between them. The third, <code>applyDiffToDom</code> takes the resulting diff and applies it to the real DOM.</p>
-
 <p>Whence events? Well, the Html return type returned from view has event sending attributes buried within it. <a href="https://guide.elm-lang.org/architecture/user_input/buttons.html">This demo</a> from the official documentation is the easiest to follow example.</p>
-
 <p>Convinced? Good. Let's build something with elm.</p>
+</body>
+</html>
