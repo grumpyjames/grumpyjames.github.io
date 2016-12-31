@@ -90,8 +90,10 @@ loadingTileImages cache tile <span class="fu">=</span>
         <span class="dt">Nothing</span> <span class="ot">-&gt;</span> loadingImage (tile<span class="fu">.</span>x, tile<span class="fu">.</span>y) (imageUrl tile)</code></pre></div>
 <p>...handily though, it is actually quite simple: we're <em>partially applying</em> this function, binding the loading images into place for each invocation. At the point where the tiler requests a view for a particular tile, we'll check to see if we've already loaded it, and we'll pick a rendering based on that state.</p>
 <p>Our definitions of <code>loadingImage</code> and <code>readyImage</code> are very similar to the original <code>LazyLoader</code> demo with the following difference:</p>
-<p>Before: ~<sub>~</sub> {.haskell} onWithOptions &quot;load&quot; (Options False False) (succeed (Complete url)) ~<sub>~</sub></p>
-<p>After: ~<sub>~</sub> {.haskell} onWithOptions &quot;load&quot; (Options False False) (succeed (Complete coordinate url)) ~<sub>~</sub></p>
+<p>Before:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">onWithOptions <span class="st">&quot;load&quot;</span> (<span class="dt">Options</span> <span class="dt">False</span> <span class="dt">False</span>) (succeed (<span class="dt">Complete</span> url))</code></pre></div>
+<p>After:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">onWithOptions <span class="st">&quot;load&quot;</span> (<span class="dt">Options</span> <span class="dt">False</span> <span class="dt">False</span>) (succeed (<span class="dt">Complete</span> coordinate url))</code></pre></div>
 <p>This way, when the load event arrives, handling it is much simpler.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">update <span class="fu">:</span> <span class="dt">Msg</span> <span class="ot">-&gt;</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Model</span>
 update message model <span class="fu">=</span>
