@@ -7440,28 +7440,31 @@ var _grumpyjames$lazyloader$Tiler$viewRow = F2(
 		return ti.viewRow(
 			A2(_elm_lang$core$List$map, ti.viewTile, tiles));
 	});
-var _grumpyjames$lazyloader$Tiler$Tile = F2(
-	function (a, b) {
-		return {x: a, y: b};
+var _grumpyjames$lazyloader$Tiler$Tile = F3(
+	function (a, b, c) {
+		return {x: a, y: b, zoom: c};
 	});
 var _grumpyjames$lazyloader$Tiler$rows = function (instruction) {
+	var t = F2(
+		function (x, y) {
+			return A3(_grumpyjames$lazyloader$Tiler$Tile, x, y, instruction.origin.zoom);
+		});
 	var columnRange = A2(_grumpyjames$lazyloader$Tiler$range, instruction.origin.x, instruction.columnCount);
 	var rowRange = A2(_grumpyjames$lazyloader$Tiler$range, instruction.origin.y, instruction.rowCount);
-	return A3(_grumpyjames$lazyloader$Tiler$mapTwo, _grumpyjames$lazyloader$Tiler$Tile, columnRange, rowRange);
+	return A3(_grumpyjames$lazyloader$Tiler$mapTwo, t, columnRange, rowRange);
 };
 var _grumpyjames$lazyloader$Tiler$tile = function (instruction) {
 	return A2(
 		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
+		instruction.outerAttributes,
 		A2(
 			_elm_lang$core$List$map,
 			_grumpyjames$lazyloader$Tiler$viewRow(instruction),
 			_grumpyjames$lazyloader$Tiler$rows(instruction)));
 };
-var _grumpyjames$lazyloader$Tiler$TilingInstruction = F5(
-	function (a, b, c, d, e) {
-		return {rowCount: a, columnCount: b, origin: c, viewTile: d, viewRow: e};
+var _grumpyjames$lazyloader$Tiler$TilingInstruction = F6(
+	function (a, b, c, d, e, f) {
+		return {rowCount: a, columnCount: b, origin: c, viewTile: d, viewRow: e, outerAttributes: f};
 	});
 var _grumpyjames$lazyloader$TilerDemo$view = function (m) {
 	return _grumpyjames$lazyloader$Tiler$tile(m);
@@ -7486,7 +7489,7 @@ var _grumpyjames$lazyloader$TilerDemo$describe = function (tile) {
 						_elm_lang$core$Basics$toString(tile.y),
 						')')))));
 };
-var _grumpyjames$lazyloader$TilerDemo$model = A5(
+var _grumpyjames$lazyloader$TilerDemo$model = A6(
 	_grumpyjames$lazyloader$Tiler$TilingInstruction,
 	3,
 	5,
@@ -7498,7 +7501,9 @@ var _grumpyjames$lazyloader$TilerDemo$model = A5(
 			_elm_lang$core$Native_List.fromArray(
 				[]),
 			htmls);
-	});
+	},
+	_elm_lang$core$Native_List.fromArray(
+		[]));
 var _grumpyjames$lazyloader$TilerDemo$main = {
 	main: _elm_lang$html$Html_App$beginnerProgram(
 		{model: _grumpyjames$lazyloader$TilerDemo$model, view: _grumpyjames$lazyloader$Tiler$tile, update: _grumpyjames$lazyloader$TilerDemo$update})

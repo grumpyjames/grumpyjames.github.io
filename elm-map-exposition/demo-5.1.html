@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="UTF-8"><title>MapTilerDemo</title><style>html,head,body { padding:0; margin:0; }
+<html><head><meta charset="UTF-8"><title>CentreDemo</title><style>html,head,body { padding:0; margin:0; }
 body { font-family: calibri, helvetica, arial, sans-serif; }</style><script type="text/javascript">
 (function() {
 'use strict';
@@ -8028,14 +8028,165 @@ var _grumpyjames$lazyloader$LazyTiles$loadingTileImages = F2(
 				_grumpyjames$lazyloader$LazyTiles$imageUrl(tile));
 		}
 	});
-var _grumpyjames$lazyloader$MapTilerDemo$px = function (pixels) {
+var _grumpyjames$lazyloader$Locator$lon2tilex = F2(
+	function (zoom, lon) {
+		return ((lon + 180.0) / 360.0) * Math.pow(
+			2.0,
+			_elm_lang$core$Basics$toFloat(
+				_elm_lang$core$Basics$floor(zoom)));
+	});
+var _grumpyjames$lazyloader$Locator$log = _elm_lang$core$Basics$logBase(_elm_lang$core$Basics$e);
+var _grumpyjames$lazyloader$Locator$lat2tiley = F2(
+	function (zoom, lat) {
+		return ((1.0 - (_grumpyjames$lazyloader$Locator$log(
+			_elm_lang$core$Basics$tan((lat * _elm_lang$core$Basics$pi) / 180.0) + (1.0 / _elm_lang$core$Basics$cos((lat * _elm_lang$core$Basics$pi) / 180.0))) / _elm_lang$core$Basics$pi)) / 2.0) * Math.pow(
+			2.0,
+			_elm_lang$core$Basics$toFloat(
+				_elm_lang$core$Basics$floor(zoom)));
+	});
+var _grumpyjames$lazyloader$Locator$tileSize = 256;
+var _grumpyjames$lazyloader$Locator$address = function (tileFloat) {
+	var tileIndex = _elm_lang$core$Basics$floor(tileFloat);
+	var pixel = _elm_lang$core$Basics$floor(
+		_grumpyjames$lazyloader$Locator$tileSize * (tileFloat - _elm_lang$core$Basics$toFloat(tileIndex)));
+	return {ctor: '_Tuple2', _0: tileIndex, _1: pixel};
+};
+var _grumpyjames$lazyloader$Locator$LatLn = F2(
+	function (a, b) {
+		return {latitude: a, longitude: b};
+	});
+var _grumpyjames$lazyloader$Locator$TileAddress = F2(
+	function (a, b) {
+		return {tile: a, pixelWithinTile: b};
+	});
+var _grumpyjames$lazyloader$Locator$lookup = F2(
+	function (zoom, latln) {
+		var zoomAsFloat = _elm_lang$core$Basics$toFloat(zoom);
+		var _p0 = _grumpyjames$lazyloader$Locator$address(
+			A2(_grumpyjames$lazyloader$Locator$lon2tilex, zoomAsFloat, latln.longitude));
+		var xTile = _p0._0;
+		var xPixel = _p0._1;
+		var _p1 = _grumpyjames$lazyloader$Locator$address(
+			A2(_grumpyjames$lazyloader$Locator$lat2tiley, zoomAsFloat, latln.latitude));
+		var yTile = _p1._0;
+		var yPixel = _p1._1;
+		return A2(
+			_grumpyjames$lazyloader$Locator$TileAddress,
+			{ctor: '_Tuple2', _0: xTile, _1: yTile},
+			{ctor: '_Tuple2', _0: xPixel, _1: yPixel});
+	});
+var _grumpyjames$lazyloader$CentreDemo$px = function (pixels) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
 		_elm_lang$core$Basics$toString(pixels),
 		'px');
 };
-var _grumpyjames$lazyloader$MapTilerDemo$fixedWidth = function (htmls) {
-	var width = _elm_lang$core$List$length(htmls) * 256;
+var _grumpyjames$lazyloader$CentreDemo$fixedWidth = F2(
+	function (tileSize, htmls) {
+		var width = _elm_lang$core$List$length(htmls) * tileSize;
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{
+							ctor: '_Tuple2',
+							_0: 'width',
+							_1: _grumpyjames$lazyloader$CentreDemo$px(width)
+						}
+						]))
+				]),
+			htmls);
+	});
+var _grumpyjames$lazyloader$CentreDemo$calculateOffsets = F4(
+	function (tileSize, _p2, _p1, _p0) {
+		var _p3 = _p2;
+		var _p4 = _p1;
+		var _p5 = _p0;
+		var yoff = ((_p4._1 / 2) | 0) * tileSize;
+		var xoff = ((_p4._0 / 2) | 0) * tileSize;
+		return {ctor: '_Tuple2', _0: ((_p3._0 / 2) | 0) - (xoff + _p5._0), _1: ((_p3._1 / 2) | 0) - (yoff + _p5._1)};
+	});
+var _grumpyjames$lazyloader$CentreDemo$calculateTileCount = F2(
+	function (tileSize, _p6) {
+		var _p7 = _p6;
+		return {ctor: '_Tuple2', _0: ((_p7._0 / tileSize) | 0) + 3, _1: ((_p7._1 / tileSize) | 0) + 3};
+	});
+var _grumpyjames$lazyloader$CentreDemo$update = F2(
+	function (message, model) {
+		var _p8 = message;
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				images: A3(_elm_lang$core$Dict$insert, _p8._0, _p8._1, model.images)
+			});
+	});
+var _grumpyjames$lazyloader$CentreDemo$Model = F4(
+	function (a, b, c, d) {
+		return {location: a, x: b, y: c, images: d};
+	});
+var _grumpyjames$lazyloader$CentreDemo$model = A4(
+	_grumpyjames$lazyloader$CentreDemo$Model,
+	A2(_grumpyjames$lazyloader$Locator$LatLn, 48.858193, 2.2940533),
+	712,
+	466,
+	_elm_lang$core$Dict$empty);
+var _grumpyjames$lazyloader$CentreDemo$Complete = F2(
+	function (a, b) {
+		return {ctor: 'Complete', _0: a, _1: b};
+	});
+var _grumpyjames$lazyloader$CentreDemo$view = function (model) {
+	var lift = function (imageLoaded) {
+		return A2(_grumpyjames$lazyloader$CentreDemo$Complete, imageLoaded.coordinate, imageLoaded.url);
+	};
+	var tileAddress = A2(_grumpyjames$lazyloader$Locator$lookup, 15, model.location);
+	var _p9 = tileAddress.tile;
+	var centreTx = _p9._0;
+	var centreTy = _p9._1;
+	var tileSize = 256;
+	var _p10 = A2(
+		_grumpyjames$lazyloader$CentreDemo$calculateTileCount,
+		tileSize,
+		{ctor: '_Tuple2', _0: model.x, _1: model.y});
+	var columnCount = _p10._0;
+	var rowCount = _p10._1;
+	var _p11 = A4(
+		_grumpyjames$lazyloader$CentreDemo$calculateOffsets,
+		tileSize,
+		{ctor: '_Tuple2', _0: model.x, _1: model.y},
+		{ctor: '_Tuple2', _0: columnCount, _1: rowCount},
+		tileAddress.pixelWithinTile);
+	var left = _p11._0;
+	var top = _p11._1;
+	var zoom = 15;
+	var tiles = _grumpyjames$lazyloader$Tiler$tile(
+		{
+			rowCount: rowCount,
+			columnCount: columnCount,
+			origin: A3(_grumpyjames$lazyloader$Tiler$Tile, centreTx - ((columnCount / 2) | 0), centreTy - ((rowCount / 2) | 0), zoom),
+			viewTile: _grumpyjames$lazyloader$LazyTiles$loadingTileImages(model.images),
+			viewRow: _grumpyjames$lazyloader$CentreDemo$fixedWidth(tileSize),
+			outerAttributes: _elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'position', _1: 'relative'},
+							{
+							ctor: '_Tuple2',
+							_0: 'top',
+							_1: _grumpyjames$lazyloader$CentreDemo$px(top)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'left',
+							_1: _grumpyjames$lazyloader$CentreDemo$px(left)
+						}
+						]))
+				])
+		});
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -8046,230 +8197,28 @@ var _grumpyjames$lazyloader$MapTilerDemo$fixedWidth = function (htmls) {
 						{
 						ctor: '_Tuple2',
 						_0: 'width',
-						_1: _grumpyjames$lazyloader$MapTilerDemo$px(width)
-					}
+						_1: _grumpyjames$lazyloader$CentreDemo$px(model.x)
+					},
+						{
+						ctor: '_Tuple2',
+						_0: 'height',
+						_1: _grumpyjames$lazyloader$CentreDemo$px(model.y)
+					},
+						{ctor: '_Tuple2', _0: 'overflow', _1: 'hidden'}
 					]))
 			]),
-		htmls);
-};
-var _grumpyjames$lazyloader$MapTilerDemo$shift = F2(
-	function (_p0, tile) {
-		var _p1 = _p0;
-		return A3(_grumpyjames$lazyloader$Tiler$Tile, tile.x + _p1._0, tile.y + _p1._1, tile.zoom);
-	});
-var _grumpyjames$lazyloader$MapTilerDemo$update = F2(
-	function (message, model) {
-		var _p2 = message;
-		if (_p2.ctor === 'Complete') {
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{
-					images: A3(_elm_lang$core$Dict$insert, _p2._0, _p2._1, model.images)
-				});
-		} else {
-			var _p3 = _p2._0;
-			switch (_p3.ctor) {
-				case 'Up':
-					return _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							origin: A2(
-								_grumpyjames$lazyloader$MapTilerDemo$shift,
-								{ctor: '_Tuple2', _0: 0, _1: -1},
-								model.origin)
-						});
-				case 'Down':
-					return _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							origin: A2(
-								_grumpyjames$lazyloader$MapTilerDemo$shift,
-								{ctor: '_Tuple2', _0: 0, _1: 1},
-								model.origin)
-						});
-				case 'Left':
-					return _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							origin: A2(
-								_grumpyjames$lazyloader$MapTilerDemo$shift,
-								{ctor: '_Tuple2', _0: -1, _1: 0},
-								model.origin)
-						});
-				default:
-					return _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							origin: A2(
-								_grumpyjames$lazyloader$MapTilerDemo$shift,
-								{ctor: '_Tuple2', _0: 1, _1: 0},
-								model.origin)
-						});
-			}
-		}
-	});
-var _grumpyjames$lazyloader$MapTilerDemo$model = {
-	rowCount: 3,
-	columnCount: 4,
-	origin: A3(_grumpyjames$lazyloader$Tiler$Tile, 16380, 10890, 15),
-	images: _elm_lang$core$Dict$empty
-};
-var _grumpyjames$lazyloader$MapTilerDemo$readyImage = function (url) {
-	var attrs = _elm_lang$core$Native_List.fromArray(
-		[
-			_elm_lang$html$Html_Attributes$src(url),
-			_elm_lang$html$Html_Attributes$style(
-			_elm_lang$core$Native_List.fromArray(
-				[
-					{ctor: '_Tuple2', _0: 'float', _1: 'left'}
-				]))
-		]);
-	return A2(
-		_elm_lang$html$Html$img,
-		attrs,
 		_elm_lang$core$Native_List.fromArray(
-			[]));
-};
-var _grumpyjames$lazyloader$MapTilerDemo$Model = F4(
-	function (a, b, c, d) {
-		return {rowCount: a, columnCount: b, origin: c, images: d};
-	});
-var _grumpyjames$lazyloader$MapTilerDemo$Right = {ctor: 'Right'};
-var _grumpyjames$lazyloader$MapTilerDemo$Left = {ctor: 'Left'};
-var _grumpyjames$lazyloader$MapTilerDemo$Down = {ctor: 'Down'};
-var _grumpyjames$lazyloader$MapTilerDemo$Up = {ctor: 'Up'};
-var _grumpyjames$lazyloader$MapTilerDemo$Shift = function (a) {
-	return {ctor: 'Shift', _0: a};
-};
-var _grumpyjames$lazyloader$MapTilerDemo$controls = function () {
-	var shiftButton = F2(
-		function (shift, text) {
-			return A2(
-				_elm_lang$html$Html$button,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A2(
-						_elm_lang$html$Html_Events$on,
-						'click',
-						_elm_lang$core$Json_Decode$succeed(
-							_grumpyjames$lazyloader$MapTilerDemo$Shift(shift)))
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(text)
-					]));
-		});
-	var upButton = A2(shiftButton, _grumpyjames$lazyloader$MapTilerDemo$Up, 'North');
-	var downButton = A2(shiftButton, _grumpyjames$lazyloader$MapTilerDemo$Down, 'South');
-	var leftButton = A2(shiftButton, _grumpyjames$lazyloader$MapTilerDemo$Left, 'West');
-	var rightButton = A2(shiftButton, _grumpyjames$lazyloader$MapTilerDemo$Right, 'East');
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[upButton, downButton, leftButton, rightButton]));
-}();
-var _grumpyjames$lazyloader$MapTilerDemo$Complete = F2(
-	function (a, b) {
-		return {ctor: 'Complete', _0: a, _1: b};
-	});
-var _grumpyjames$lazyloader$MapTilerDemo$loadingImage = F2(
-	function (coordinate, url) {
-		var loadingImageAttrs = _elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html_Attributes$src(url),
-				_elm_lang$html$Html_Attributes$style(
-				_elm_lang$core$Native_List.fromArray(
-					[
-						{ctor: '_Tuple2', _0: 'display', _1: 'none'}
-					])),
-				A3(
-				_elm_lang$html$Html_Events$onWithOptions,
-				'load',
-				A2(_elm_lang$html$Html_Events$Options, false, false),
-				_elm_lang$core$Json_Decode$succeed(
-					A2(_grumpyjames$lazyloader$MapTilerDemo$Complete, coordinate, url)))
-			]);
-		var loadingGifAttrs = _elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html_Attributes$src('loading.gif'),
-				_elm_lang$html$Html_Attributes$style(
-				_elm_lang$core$Native_List.fromArray(
-					[
-						{ctor: '_Tuple2', _0: 'float', _1: 'left'},
-						{ctor: '_Tuple2', _0: 'display', _1: 'block'},
-						{ctor: '_Tuple2', _0: 'margin', _1: 'auto'}
-					]))
-			]);
-		var divStyles = _elm_lang$html$Html_Attributes$style(
-			_elm_lang$core$Native_List.fromArray(
-				[
-					{ctor: '_Tuple2', _0: 'width', _1: '256px'},
-					{ctor: '_Tuple2', _0: 'height', _1: '256px'},
-					{ctor: '_Tuple2', _0: 'float', _1: 'left'},
-					{ctor: '_Tuple2', _0: 'display', _1: 'flex'}
-				]));
-		return A3(
-			_elm_lang$html$Html$node,
-			'div',
-			_elm_lang$core$Native_List.fromArray(
-				[divStyles]),
-			_elm_lang$core$Native_List.fromArray(
-				[
-					A2(
-					_elm_lang$html$Html$img,
-					loadingGifAttrs,
-					_elm_lang$core$Native_List.fromArray(
-						[])),
-					A2(
-					_elm_lang$html$Html$img,
-					loadingImageAttrs,
-					_elm_lang$core$Native_List.fromArray(
-						[]))
-				]));
-	});
-var _grumpyjames$lazyloader$MapTilerDemo$loadingTileImages = F2(
-	function (cache, tile) {
-		var lookup = A2(
-			_elm_lang$core$Dict$get,
-			{ctor: '_Tuple2', _0: tile.x, _1: tile.y},
-			cache);
-		var _p4 = lookup;
-		if (_p4.ctor === 'Just') {
-			return _grumpyjames$lazyloader$MapTilerDemo$readyImage(_p4._0);
-		} else {
-			return A2(
-				_grumpyjames$lazyloader$MapTilerDemo$loadingImage,
-				{ctor: '_Tuple2', _0: tile.x, _1: tile.y},
-				_grumpyjames$lazyloader$LazyTiles$imageUrl(tile));
-		}
-	});
-var _grumpyjames$lazyloader$MapTilerDemo$view = function (m) {
-	var tiles = _grumpyjames$lazyloader$Tiler$tile(
-		{
-			rowCount: m.rowCount,
-			columnCount: m.columnCount,
-			origin: m.origin,
-			viewTile: _grumpyjames$lazyloader$MapTilerDemo$loadingTileImages(m.images),
-			viewRow: _grumpyjames$lazyloader$MapTilerDemo$fixedWidth,
-			outerAttributes: _elm_lang$core$Native_List.fromArray(
-				[])
-		});
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[_grumpyjames$lazyloader$MapTilerDemo$controls, tiles]));
+				A2(_elm_lang$html$Html_App$map, lift, tiles)
+			]));
 };
-var _grumpyjames$lazyloader$MapTilerDemo$main = {
+var _grumpyjames$lazyloader$CentreDemo$main = {
 	main: _elm_lang$html$Html_App$beginnerProgram(
-		{model: _grumpyjames$lazyloader$MapTilerDemo$model, view: _grumpyjames$lazyloader$MapTilerDemo$view, update: _grumpyjames$lazyloader$MapTilerDemo$update})
+		{model: _grumpyjames$lazyloader$CentreDemo$model, view: _grumpyjames$lazyloader$CentreDemo$view, update: _grumpyjames$lazyloader$CentreDemo$update})
 };
 var Elm = {};
-Elm['MapTilerDemo'] = Elm['MapTilerDemo'] || {};
-_elm_lang$core$Native_Platform.addPublicModule(Elm['MapTilerDemo'], 'MapTilerDemo', typeof _grumpyjames$lazyloader$MapTilerDemo$main === 'undefined' ? null : _grumpyjames$lazyloader$MapTilerDemo$main);
+Elm['CentreDemo'] = Elm['CentreDemo'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['CentreDemo'], 'CentreDemo', typeof _grumpyjames$lazyloader$CentreDemo$main === 'undefined' ? null : _grumpyjames$lazyloader$CentreDemo$main);
 
 if (typeof define === "function" && define['amd'])
 {
@@ -8300,4 +8249,4 @@ for (var publicModule in Elm)
 }
 
 }).call(this);
-</script></head><body><script type="text/javascript">Elm.MapTilerDemo.fullscreen()</script></body></html>
+</script></head><body><script type="text/javascript">Elm.CentreDemo.fullscreen()</script></body></html>

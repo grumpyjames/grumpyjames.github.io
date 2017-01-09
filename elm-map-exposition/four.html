@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+</head>
+<body>
+<p>Let's recap.</p>
+<p>We can render a fixed grid of map tiles. We can lazily load them. We can even navigate a little bit, so long as we are prepared to only ever move in units of tile.</p>
+<p>Our next step is to cope with moving around in a finer grained unit than the tile. We'll approach this in three parts:</p>
+<ol style="list-style-type: decimal">
+<li>Working out in what tile (and whereabouts within the tile) the centre is.</li>
+<li>Rendering a fixed size map centred on a particular location.</li>
+<li>Making the centre movable.</li>
+</ol>
+<h3 id="x-marks-the-spot.">X marks the spot.</h3>
+<p>We're going to have to do some fairly tedious calculations here.</p>
+<p>First, we're going to need to translate latitude/longitude into a tile address.</p>
+<p>Handily, <a href="https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Haskell">OpenStreetMap</a> provides two <code>Haskell</code> functions that translate very nicely into <code>elm</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+log <span class="fu">=</span> logBase e
+
+lon2tilex <span class="fu">:</span> <span class="dt">Float</span> <span class="ot">-&gt;</span> <span class="dt">Float</span> <span class="ot">-&gt;</span> <span class="dt">Float</span>
+lon2tilex zoom lon <span class="fu">=</span> 
+    (lon <span class="fu">+</span> <span class="fl">180.0</span>) <span class="fu">/</span> <span class="fl">360.0</span> <span class="fu">*</span> (<span class="fl">2.0</span> <span class="fu">^</span> (toFloat (floor zoom))) 
+
+lat2tiley <span class="fu">:</span> <span class="dt">Float</span> <span class="ot">-&gt;</span> <span class="dt">Float</span> <span class="ot">-&gt;</span> <span class="dt">Float</span>
+lat2tiley zoom lat <span class="fu">=</span> 
+    (<span class="fl">1.0</span> <span class="fu">-</span> log( tan(lat <span class="fu">*</span> pi<span class="fu">/</span><span class="fl">180.0</span>) <span class="fu">+</span> <span class="fl">1.0</span> <span class="fu">/</span> cos(lat <span class="fu">*</span> pi<span class="fu">/</span><span class="fl">180.0</span>)) <span class="fu">/</span> pi) <span class="fu">/</span> <span class="fl">2.0</span> <span class="fu">*</span> (<span class="fl">2.0</span> <span class="fu">^</span> (toFloat (floor zoom)))</code></pre></div>
+<p>These functions take a zoom level, a latitude or longitude, and return a floating point x or y tile co-ordinate. The integer part refers to the tile's index, and the fractional part refers to the location within the tile. Given our tiles are <code>256px</code> squares, We'll be translating <code>4.25</code> as tile <code>4</code>, <code>64px</code> in.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="kw">type</span> alias <span class="dt">LatLn</span> <span class="fu">=</span>
+    { latitude<span class="fu">:</span> <span class="dt">Float</span>
+    , longitude<span class="fu">:</span> <span class="dt">Float</span>
+    }
+
+<span class="kw">type</span> alias <span class="dt">TileAddress</span> <span class="fu">=</span>
+    { tile<span class="fu">:</span> (<span class="dt">Int</span>, <span class="dt">Int</span>)
+    , pixelWithinTile<span class="fu">:</span> (<span class="dt">Int</span>, <span class="dt">Int</span>)
+    }
+
+lookup <span class="fu">:</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">LatLn</span> <span class="ot">-&gt;</span> <span class="dt">TileAddress</span>
+lookup zoom latln <span class="fu">=</span> 
+    <span class="kw">let</span> zoomAsFloat <span class="fu">=</span> toFloat zoom
+        (xTile, xPixel) <span class="fu">=</span> address <span class="fu">&lt;|</span> lon2tilex zoomAsFloat latln<span class="fu">.</span>longitude
+        (yTile, yPixel) <span class="fu">=</span> address <span class="fu">&lt;|</span> lat2tiley zoomAsFloat latln<span class="fu">.</span>latitude
+    <span class="kw">in</span> <span class="dt">TileAddress</span> (xTile, yTile) (xPixel, yPixel)
+
+tileSize <span class="fu">=</span> <span class="dv">256</span>
+
+address <span class="fu">:</span> <span class="dt">Float</span> <span class="ot">-&gt;</span> (<span class="dt">Int</span>, <span class="dt">Int</span>)
+address tileFloat <span class="fu">=</span>
+    <span class="kw">let</span> tileIndex <span class="fu">=</span> floor tileFloat
+        pixel <span class="fu">=</span> floor <span class="fu">&lt;|</span> tileSize <span class="fu">*</span> (tileFloat <span class="fu">-</span> (toFloat tileIndex))
+    <span class="kw">in</span> (tileIndex, pixel)</code></pre></div>
+<p><code>address</code> would be improved if there were a nice function in elm to get the fractional part of a floating point number, but afaics there isn't one.</p>
+<p>Let's test this with another simple demo. Given a well known centre point, we should be able to render the tile that contains it, and an indicator to show whereabouts in the tile the precise point is.</p>
+<h3 id="first-go---just-render-the-relevant-tile">First go - just render the relevant tile</h3>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+model <span class="fu">=</span> 
+    [ <span class="dt">Place</span> <span class="st">&quot;Sydney Opera House&quot;</span> (<span class="dt">LatLn</span> <span class="fu">-</span><span class="fl">33.8568</span> <span class="fl">151.2153</span>)
+    , <span class="dt">Place</span> <span class="st">&quot;Statue of Liberty&quot;</span> (<span class="dt">LatLn</span> <span class="fl">40.6892</span> <span class="fu">-</span><span class="fl">74.0445</span>)
+    , <span class="dt">Place</span> <span class="st">&quot;Eiffel Tower&quot;</span> (<span class="dt">LatLn</span> <span class="fl">48.8584</span> <span class="fl">2.2945</span>)
+    ]
+
+view <span class="fu">:</span> <span class="dt">List</span> <span class="dt">Place</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+view model <span class="fu">=</span>
+    Html.div [] (List.map viewOnePlace model)
+
+viewOnePlace <span class="fu">:</span> <span class="dt">Place</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+viewOnePlace p <span class="fu">=</span>
+    <span class="kw">let</span> tileAddress <span class="fu">=</span> lookup <span class="dv">15</span> p<span class="fu">.</span>latln
+        tileUrl <span class="fu">=</span> imageUrl tileAddress<span class="fu">.</span>tile
+    <span class="kw">in</span> Html.div [] [titled p<span class="fu">.</span>name, image tileUrl]
+
+titled<span class="fu">:</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+titled name <span class="fu">=</span> Html.text name
+
+image imageUrl <span class="fu">=</span> Html.img [src imageUrl] []</code></pre></div>
+<p>This found one issue; latitude and longitude were confused in the locator code.</p>
+<p>With that fixed, we get the following <a href="demo-4.1.html">demo</a>; looks like our landmarks are in the tile we'd expect.</p>
+<h3 id="no-really-x-will-mark-the-spot-in-a-minute">No, really, X will mark the spot in a minute</h3>
+<p>We fight with CSS for a bit, then come up with the following:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">viewOnePlace <span class="fu">:</span> <span class="dt">Place</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+viewOnePlace p <span class="fu">=</span>
+    <span class="kw">let</span> tileAddress <span class="fu">=</span> lookup <span class="dv">15</span> p<span class="fu">.</span>latln
+        tileUrl <span class="fu">=</span> imageUrl tileAddress<span class="fu">.</span>tile
+    <span class="kw">in</span> Html.div [] [titled p<span class="fu">.</span>name, Html.div [] [image tileUrl, markTheSpot tileAddress<span class="fu">.</span>pixelWithinTile]]
+
+image imageUrl <span class="fu">=</span> 
+    <span class="kw">let</span> styles <span class="fu">=</span> style [(<span class="st">&quot;position&quot;</span>, <span class="st">&quot;relative&quot;</span>), (<span class="st">&quot;z-index&quot;</span>, <span class="st">&quot;0&quot;</span>)]
+    <span class="kw">in</span> Html.img [styles, src imageUrl] []
+
+px <span class="fu">:</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+px i <span class="fu">=</span> toString i <span class="fu">++</span> <span class="st">&quot;px&quot;</span>
+
+markTheSpot <span class="fu">:</span> (<span class="dt">Int</span>, <span class="dt">Int</span>) <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+markTheSpot (x, y) <span class="fu">=</span> 
+    <span class="kw">let</span> txt <span class="fu">=</span> Html.text <span class="st">&quot;X&quot;</span>
+        styles <span class="fu">=</span> style [ (<span class="st">&quot;position&quot;</span>, <span class="st">&quot;relative&quot;</span>)
+                       , (<span class="st">&quot;z-index&quot;</span>, <span class="st">&quot;1&quot;</span>)
+                       , (<span class="st">&quot;top&quot;</span>, (px (y <span class="fu">-</span> <span class="dv">265</span>)))
+                       , (<span class="st">&quot;left&quot;</span>, (px (x <span class="fu">-</span> <span class="dv">9</span>)))]
+    <span class="kw">in</span> Html.div [styles] [txt]</code></pre></div>
+<p>We've guessed that a div with just 'X' in it puts the intersection of the X around 9x9px into that div. We also subtract tile size from the 'top' co-ordinate, because it works.</p>
+<p>It looks <a href="demo-4.2.html">like this</a>. Let's agree that those Xs are in the right place, and move on.</p>
+</body>
+</html>
