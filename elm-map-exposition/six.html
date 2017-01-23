@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+</head>
+<body>
+<h3 id="making-the-centre-movable">Making the centre movable</h3>
+<p>This...is going to be the fun bit.</p>
+<h3 id="the-prestige">The prestige</h3>
+<p>It's <em>already</em> movable.</p>
+<p>Remember our model definition from <a href="five.html">part five</a>?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> alias <span class="dt">Model</span> <span class="fu">=</span> 
+    { location<span class="fu">:</span> <span class="dt">LatLn</span>
+    , x<span class="fu">:</span> <span class="dt">Int</span>
+    , y<span class="fu">:</span> <span class="dt">Int</span>
+    , images <span class="fu">:</span> <span class="dt">Dict</span> (<span class="dt">Int</span>, <span class="dt">Int</span>) <span class="dt">Url</span>
+    }</code></pre></div>
+<p>You can think of the state of any elm application as a sequence of <code>model</code> values. All we need to do is plumb in an event that can change the location.</p>
+<p>Let's do that in a really simple way to illustrate.</p>
+<p>We've seen these places before:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="kw">type</span> alias <span class="dt">Place</span> <span class="fu">=</span> 
+    { name<span class="fu">:</span> <span class="dt">String</span>
+    , latln<span class="fu">:</span> <span class="dt">LatLn</span>  
+    }
+
+places <span class="fu">=</span> 
+    [ <span class="dt">Place</span> <span class="st">&quot;Sydney Opera House&quot;</span> (<span class="dt">LatLn</span> <span class="fu">-</span><span class="fl">33.8568</span> <span class="fl">151.2153</span>)
+    , <span class="dt">Place</span> <span class="st">&quot;Statue of Liberty&quot;</span> (<span class="dt">LatLn</span> <span class="fl">40.6892</span> <span class="fu">-</span><span class="fl">74.0445</span>)
+    , <span class="dt">Place</span> <span class="st">&quot;Eiffel Tower&quot;</span> (<span class="dt">LatLn</span> <span class="fl">48.8584</span> <span class="fl">2.2945</span>)
+    ]</code></pre></div>
+<p>Now let's move to them. Or warp to them, rather. We're not going to try and animate anything just yet.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Msg</span> 
+    <span class="fu">=</span> <span class="dt">Complete</span> (<span class="dt">Int</span>, <span class="dt">Int</span>) <span class="dt">Url</span>
+    <span class="fu">|</span> <span class="dt">Goto</span> <span class="dt">LatLn</span>
+
+update <span class="fu">:</span> <span class="dt">Msg</span> <span class="ot">-&gt;</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Model</span>
+update message model <span class="fu">=</span> 
+    <span class="kw">case</span> message <span class="kw">of</span>
+      <span class="dt">Complete</span> key url <span class="ot">-&gt;</span>
+          { model <span class="fu">|</span> images <span class="fu">=</span> Dict.insert key url model<span class="fu">.</span>images }
+      <span class="dt">Goto</span> latln <span class="ot">-&gt;</span>
+          { model <span class="fu">|</span> location <span class="fu">=</span> latln }</code></pre></div>
+<p>Finally, let's make it easy to move around:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">buttons <span class="fu">:</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+buttons <span class="fu">=</span> 
+    <span class="kw">let</span> button <span class="fu">=</span> \place <span class="ot">-&gt;</span> Html.button [Events.onClick (<span class="dt">Goto</span> place<span class="fu">.</span>latln)] [Html.text place<span class="fu">.</span>name] 
+    <span class="kw">in</span> Html.div [] (List.map button places)
+
+view <span class="fu">:</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Html</span> <span class="dt">Msg</span>
+view model <span class="fu">=</span> 
+    <span class="kw">let</span> map <span class="fu">=</span> mapView model
+    <span class="kw">in</span> Html.div [] [ buttons, map ]</code></pre></div>
+<p>...and we're done. Demo <a href="demo-6.1.html">here</a></p>
+</body>
+</html>
