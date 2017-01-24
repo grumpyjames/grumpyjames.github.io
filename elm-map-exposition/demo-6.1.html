@@ -8156,16 +8156,15 @@ var _grumpyjames$lazyloader$CentreDemo$Model = F4(
 	function (a, b, c, d) {
 		return {location: a, x: b, y: c, images: d};
 	});
-var _grumpyjames$lazyloader$CentreDemo$model = A4(
-	_grumpyjames$lazyloader$CentreDemo$Model,
-	A2(_grumpyjames$lazyloader$Locator$LatLn, 48.858193, 2.2940533),
-	712,
-	466,
-	_elm_lang$core$Dict$empty);
 var _grumpyjames$lazyloader$CentreDemo$Place = F2(
 	function (a, b) {
 		return {name: a, latln: b};
 	});
+var _grumpyjames$lazyloader$CentreDemo$laTourEiffel = A2(
+	_grumpyjames$lazyloader$CentreDemo$Place,
+	'Eiffel Tower',
+	A2(_grumpyjames$lazyloader$Locator$LatLn, 48.8584, 2.2945));
+var _grumpyjames$lazyloader$CentreDemo$model = A4(_grumpyjames$lazyloader$CentreDemo$Model, _grumpyjames$lazyloader$CentreDemo$laTourEiffel.latln, 712, 466, _elm_lang$core$Dict$empty);
 var _grumpyjames$lazyloader$CentreDemo$places = _elm_lang$core$Native_List.fromArray(
 	[
 		A2(
@@ -8176,10 +8175,7 @@ var _grumpyjames$lazyloader$CentreDemo$places = _elm_lang$core$Native_List.fromA
 		_grumpyjames$lazyloader$CentreDemo$Place,
 		'Statue of Liberty',
 		A2(_grumpyjames$lazyloader$Locator$LatLn, 40.6892, -74.0445)),
-		A2(
-		_grumpyjames$lazyloader$CentreDemo$Place,
-		'Eiffel Tower',
-		A2(_grumpyjames$lazyloader$Locator$LatLn, 48.8584, 2.2945))
+		_grumpyjames$lazyloader$CentreDemo$laTourEiffel
 	]);
 var _grumpyjames$lazyloader$CentreDemo$Goto = function (a) {
 	return {ctor: 'Goto', _0: a};
