@@ -7440,17 +7440,60 @@ var _grumpyjames$lazyloader$Tiler$viewRow = F2(
 		return ti.viewRow(
 			A2(_elm_lang$core$List$map, ti.viewTile, tiles));
 	});
-var _grumpyjames$lazyloader$Tiler$Tile = F3(
+var _grumpyjames$lazyloader$Tiler$fold = F2(
+	function (t, f) {
+		var _p0 = t;
+		return A3(f, _p0._0, _p0._1, _p0._2);
+	});
+var _grumpyjames$lazyloader$Tiler$TileSpec = F3(
 	function (a, b, c) {
 		return {x: a, y: b, zoom: c};
 	});
+var _grumpyjames$lazyloader$Tiler$TilingInstruction = F6(
+	function (a, b, c, d, e, f) {
+		return {rowCount: a, columnCount: b, origin: c, viewTile: d, viewRow: e, outerAttributes: f};
+	});
+var _grumpyjames$lazyloader$Tiler$ValidTile = F3(
+	function (a, b, c) {
+		return {ctor: 'ValidTile', _0: a, _1: b, _2: c};
+	});
+var _grumpyjames$lazyloader$Tiler$newTile = function (tileSpec) {
+	var wrap = F2(
+		function (z, c) {
+			return A2(
+				_elm_lang$core$Basics_ops['%'],
+				c,
+				Math.pow(2, z));
+		});
+	return A3(
+		_grumpyjames$lazyloader$Tiler$ValidTile,
+		A2(wrap, tileSpec.zoom, tileSpec.x),
+		tileSpec.y,
+		tileSpec.zoom);
+};
 var _grumpyjames$lazyloader$Tiler$rows = function (instruction) {
 	var t = F2(
 		function (x, y) {
-			return A3(_grumpyjames$lazyloader$Tiler$Tile, x, y, instruction.origin.zoom);
+			return _grumpyjames$lazyloader$Tiler$newTile(
+				A3(
+					_grumpyjames$lazyloader$Tiler$TileSpec,
+					x,
+					y,
+					function () {
+						var _p1 = instruction.origin;
+						return _p1._2;
+					}()));
 		});
-	var columnRange = A2(_grumpyjames$lazyloader$Tiler$range, instruction.origin.x, instruction.columnCount);
-	var rowRange = A2(_grumpyjames$lazyloader$Tiler$range, instruction.origin.y, instruction.rowCount);
+	var ty = function () {
+		var _p2 = instruction.origin;
+		return _p2._1;
+	}();
+	var rowRange = A2(_grumpyjames$lazyloader$Tiler$range, ty, instruction.rowCount);
+	var tx = function () {
+		var _p3 = instruction.origin;
+		return _p3._0;
+	}();
+	var columnRange = A2(_grumpyjames$lazyloader$Tiler$range, tx, instruction.columnCount);
 	return A3(_grumpyjames$lazyloader$Tiler$mapTwo, t, columnRange, rowRange);
 };
 var _grumpyjames$lazyloader$Tiler$tile = function (instruction) {
@@ -7462,10 +7505,6 @@ var _grumpyjames$lazyloader$Tiler$tile = function (instruction) {
 			_grumpyjames$lazyloader$Tiler$viewRow(instruction),
 			_grumpyjames$lazyloader$Tiler$rows(instruction)));
 };
-var _grumpyjames$lazyloader$Tiler$TilingInstruction = F6(
-	function (a, b, c, d, e, f) {
-		return {rowCount: a, columnCount: b, origin: c, viewTile: d, viewRow: e, outerAttributes: f};
-	});
 var _grumpyjames$lazyloader$TilerDemo$view = function (m) {
 	return _grumpyjames$lazyloader$Tiler$tile(m);
 };
@@ -7474,26 +7513,31 @@ var _grumpyjames$lazyloader$TilerDemo$update = F2(
 		return model;
 	});
 var _grumpyjames$lazyloader$TilerDemo$describe = function (tile) {
-	return _elm_lang$html$Html$text(
-		A2(
-			_elm_lang$core$Basics_ops['++'],
-			'(',
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				_elm_lang$core$Basics$toString(tile.x),
+	var f = F3(
+		function (x, y, z) {
+			return _elm_lang$html$Html$text(
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					', ',
+					'(',
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						_elm_lang$core$Basics$toString(tile.y),
-						')')))));
+						_elm_lang$core$Basics$toString(x),
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							', ',
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								_elm_lang$core$Basics$toString(y),
+								')')))));
+		});
+	return A2(_grumpyjames$lazyloader$Tiler$fold, tile, f);
 };
 var _grumpyjames$lazyloader$TilerDemo$model = A6(
 	_grumpyjames$lazyloader$Tiler$TilingInstruction,
 	3,
 	5,
-	A2(_grumpyjames$lazyloader$Tiler$Tile, 3, 5),
+	_grumpyjames$lazyloader$Tiler$newTile(
+		A3(_grumpyjames$lazyloader$Tiler$TileSpec, 3, 5, 0)),
 	_grumpyjames$lazyloader$TilerDemo$describe,
 	function (htmls) {
 		return A2(

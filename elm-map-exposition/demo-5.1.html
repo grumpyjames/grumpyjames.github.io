@@ -7938,17 +7938,60 @@ var _grumpyjames$lazyloader$Tiler$viewRow = F2(
 		return ti.viewRow(
 			A2(_elm_lang$core$List$map, ti.viewTile, tiles));
 	});
-var _grumpyjames$lazyloader$Tiler$Tile = F3(
+var _grumpyjames$lazyloader$Tiler$fold = F2(
+	function (t, f) {
+		var _p0 = t;
+		return A3(f, _p0._0, _p0._1, _p0._2);
+	});
+var _grumpyjames$lazyloader$Tiler$TileSpec = F3(
 	function (a, b, c) {
 		return {x: a, y: b, zoom: c};
 	});
+var _grumpyjames$lazyloader$Tiler$TilingInstruction = F6(
+	function (a, b, c, d, e, f) {
+		return {rowCount: a, columnCount: b, origin: c, viewTile: d, viewRow: e, outerAttributes: f};
+	});
+var _grumpyjames$lazyloader$Tiler$ValidTile = F3(
+	function (a, b, c) {
+		return {ctor: 'ValidTile', _0: a, _1: b, _2: c};
+	});
+var _grumpyjames$lazyloader$Tiler$newTile = function (tileSpec) {
+	var wrap = F2(
+		function (z, c) {
+			return A2(
+				_elm_lang$core$Basics_ops['%'],
+				c,
+				Math.pow(2, z));
+		});
+	return A3(
+		_grumpyjames$lazyloader$Tiler$ValidTile,
+		A2(wrap, tileSpec.zoom, tileSpec.x),
+		tileSpec.y,
+		tileSpec.zoom);
+};
 var _grumpyjames$lazyloader$Tiler$rows = function (instruction) {
 	var t = F2(
 		function (x, y) {
-			return A3(_grumpyjames$lazyloader$Tiler$Tile, x, y, instruction.origin.zoom);
+			return _grumpyjames$lazyloader$Tiler$newTile(
+				A3(
+					_grumpyjames$lazyloader$Tiler$TileSpec,
+					x,
+					y,
+					function () {
+						var _p1 = instruction.origin;
+						return _p1._2;
+					}()));
 		});
-	var columnRange = A2(_grumpyjames$lazyloader$Tiler$range, instruction.origin.x, instruction.columnCount);
-	var rowRange = A2(_grumpyjames$lazyloader$Tiler$range, instruction.origin.y, instruction.rowCount);
+	var ty = function () {
+		var _p2 = instruction.origin;
+		return _p2._1;
+	}();
+	var rowRange = A2(_grumpyjames$lazyloader$Tiler$range, ty, instruction.rowCount);
+	var tx = function () {
+		var _p3 = instruction.origin;
+		return _p3._0;
+	}();
+	var columnRange = A2(_grumpyjames$lazyloader$Tiler$range, tx, instruction.columnCount);
 	return A3(_grumpyjames$lazyloader$Tiler$mapTwo, t, columnRange, rowRange);
 };
 var _grumpyjames$lazyloader$Tiler$tile = function (instruction) {
@@ -7960,10 +8003,6 @@ var _grumpyjames$lazyloader$Tiler$tile = function (instruction) {
 			_grumpyjames$lazyloader$Tiler$viewRow(instruction),
 			_grumpyjames$lazyloader$Tiler$rows(instruction)));
 };
-var _grumpyjames$lazyloader$Tiler$TilingInstruction = F6(
-	function (a, b, c, d, e, f) {
-		return {rowCount: a, columnCount: b, origin: c, viewTile: d, viewRow: e, outerAttributes: f};
-	});
 var _grumpyjames$lazyloader$FixedViewport$calculateOffsets = F3(
 	function (requirements, _p1, _p0) {
 		var _p2 = _p1;
@@ -7990,16 +8029,17 @@ var _grumpyjames$lazyloader$FixedViewport$calculateDimensions = function (requir
 		tileAddress.pixelWithinTile);
 	var left = _p6._0;
 	var top = _p6._1;
-	var origin = A3(_grumpyjames$lazyloader$Tiler$Tile, centreTx - ((columnCount / 2) | 0), centreTy - ((rowCount / 2) | 0), requirements.zoom);
-	return {rowCount: rowCount, columnCount: columnCount, top: top, left: left, origin: origin};
+	var origin = _grumpyjames$lazyloader$Tiler$newTile(
+		A3(_grumpyjames$lazyloader$Tiler$TileSpec, centreTx - ((columnCount / 2) | 0), centreTy - ((rowCount / 2) | 0), requirements.zoom));
+	return {rowCount: rowCount, columnCount: columnCount, height: requirements.height, width: requirements.width, top: top, left: left, origin: origin, zoom: requirements.zoom, tileSize: requirements.tileSize};
 };
 var _grumpyjames$lazyloader$FixedViewport$Requirements = F5(
 	function (a, b, c, d, e) {
 		return {centre: a, zoom: b, tileSize: c, width: d, height: e};
 	});
-var _grumpyjames$lazyloader$FixedViewport$Dimensions = F5(
-	function (a, b, c, d, e) {
-		return {rowCount: a, columnCount: b, origin: c, top: d, left: e};
+var _grumpyjames$lazyloader$FixedViewport$Dimensions = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {rowCount: a, columnCount: b, origin: c, height: d, width: e, top: f, left: g, zoom: h, tileSize: i};
 	});
 var _grumpyjames$lazyloader$LazyTiles$readyImage = function (url) {
 	var attrs = _elm_lang$core$Native_List.fromArray(
@@ -8017,26 +8057,31 @@ var _grumpyjames$lazyloader$LazyTiles$readyImage = function (url) {
 		_elm_lang$core$Native_List.fromArray(
 			[]));
 };
+var _grumpyjames$lazyloader$LazyTiles$accessToken = 'pk.eyJ1IjoiZ3J1bXB5amFtZXMiLCJhIjoiNWQzZjdjMDY1YTI2MjExYTQ4ZWU4YjgwZGNmNjUzZmUifQ.BpRWJBEup08Z9DJzstigvg';
 var _grumpyjames$lazyloader$LazyTiles$imageUrl = function (tile) {
-	return A2(
-		_elm_lang$core$Basics_ops['++'],
-		'https://api.tiles.mapbox.com/v4/mapbox.run-bike-hike/',
-		A2(
-			_elm_lang$core$Basics_ops['++'],
-			_elm_lang$core$Basics$toString(tile.zoom),
-			A2(
+	var toUrl = F3(
+		function (x, y, z) {
+			return A2(
 				_elm_lang$core$Basics_ops['++'],
-				'/',
+				'https://api.tiles.mapbox.com/v4/mapbox.run-bike-hike/',
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(tile.x),
+					_elm_lang$core$Basics$toString(z),
 					A2(
 						_elm_lang$core$Basics_ops['++'],
 						'/',
 						A2(
 							_elm_lang$core$Basics_ops['++'],
-							_elm_lang$core$Basics$toString(tile.y),
-							'.png?access_token=pk.eyJ1IjoiZ3J1bXB5amFtZXMiLCJhIjoiNWQzZjdjMDY1YTI2MjExYTQ4ZWU4YjgwZGNmNjUzZmUifQ.BpRWJBEup08Z9DJzstigvg'))))));
+							_elm_lang$core$Basics$toString(x),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'/',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_elm_lang$core$Basics$toString(y),
+									A2(_elm_lang$core$Basics_ops['++'], '.png?access_token=', _grumpyjames$lazyloader$LazyTiles$accessToken)))))));
+		});
+	return A2(_grumpyjames$lazyloader$Tiler$fold, tile, toUrl);
 };
 var _grumpyjames$lazyloader$LazyTiles$ImageLoaded = F2(
 	function (a, b) {
@@ -8098,17 +8143,21 @@ var _grumpyjames$lazyloader$LazyTiles$loadingImage = F2(
 	});
 var _grumpyjames$lazyloader$LazyTiles$loadingTileImages = F2(
 	function (cache, tile) {
-		var lookup = A2(
-			_elm_lang$core$Dict$get,
-			{ctor: '_Tuple2', _0: tile.x, _1: tile.y},
-			cache);
+		var key = A2(
+			_grumpyjames$lazyloader$Tiler$fold,
+			tile,
+			F3(
+				function (x, y, z) {
+					return {ctor: '_Tuple2', _0: x, _1: y};
+				}));
+		var lookup = A2(_elm_lang$core$Dict$get, key, cache);
 		var _p0 = lookup;
 		if (_p0.ctor === 'Just') {
 			return _grumpyjames$lazyloader$LazyTiles$readyImage(_p0._0);
 		} else {
 			return A2(
 				_grumpyjames$lazyloader$LazyTiles$loadingImage,
-				{ctor: '_Tuple2', _0: tile.x, _1: tile.y},
+				key,
 				_grumpyjames$lazyloader$LazyTiles$imageUrl(tile));
 		}
 	});
@@ -8140,17 +8189,11 @@ var _grumpyjames$lazyloader$CentreDemo$fixedWidth = F2(
 var _grumpyjames$lazyloader$CentreDemo$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		if (_p0.ctor === 'Complete') {
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{
-					images: A3(_elm_lang$core$Dict$insert, _p0._0, _p0._1, model.images)
-				});
-		} else {
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{location: _p0._0});
-		}
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				images: A3(_elm_lang$core$Dict$insert, _p0._0, _p0._1, model.images)
+			});
 	});
 var _grumpyjames$lazyloader$CentreDemo$Model = F4(
 	function (a, b, c, d) {
@@ -8162,53 +8205,11 @@ var _grumpyjames$lazyloader$CentreDemo$model = A4(
 	712,
 	466,
 	_elm_lang$core$Dict$empty);
-var _grumpyjames$lazyloader$CentreDemo$Place = F2(
-	function (a, b) {
-		return {name: a, latln: b};
-	});
-var _grumpyjames$lazyloader$CentreDemo$places = _elm_lang$core$Native_List.fromArray(
-	[
-		A2(
-		_grumpyjames$lazyloader$CentreDemo$Place,
-		'Sydney Opera House',
-		A2(_grumpyjames$lazyloader$Locator$LatLn, -33.8568, 151.2153)),
-		A2(
-		_grumpyjames$lazyloader$CentreDemo$Place,
-		'Statue of Liberty',
-		A2(_grumpyjames$lazyloader$Locator$LatLn, 40.6892, -74.0445)),
-		A2(
-		_grumpyjames$lazyloader$CentreDemo$Place,
-		'Eiffel Tower',
-		A2(_grumpyjames$lazyloader$Locator$LatLn, 48.8584, 2.2945))
-	]);
-var _grumpyjames$lazyloader$CentreDemo$Goto = function (a) {
-	return {ctor: 'Goto', _0: a};
-};
-var _grumpyjames$lazyloader$CentreDemo$buttons = function () {
-	var button = function (place) {
-		return A2(
-			_elm_lang$html$Html$button,
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html_Events$onClick(
-					_grumpyjames$lazyloader$CentreDemo$Goto(place.latln))
-				]),
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html$text(place.name)
-				]));
-	};
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		A2(_elm_lang$core$List$map, button, _grumpyjames$lazyloader$CentreDemo$places));
-}();
 var _grumpyjames$lazyloader$CentreDemo$Complete = F2(
 	function (a, b) {
 		return {ctor: 'Complete', _0: a, _1: b};
 	});
-var _grumpyjames$lazyloader$CentreDemo$mapView = function (model) {
+var _grumpyjames$lazyloader$CentreDemo$view = function (model) {
 	var lift = function (imageLoaded) {
 		return A2(_grumpyjames$lazyloader$CentreDemo$Complete, imageLoaded.coordinate, imageLoaded.url);
 	};
@@ -8266,15 +8267,6 @@ var _grumpyjames$lazyloader$CentreDemo$mapView = function (model) {
 			[
 				A2(_elm_lang$html$Html_App$map, lift, tiles)
 			]));
-};
-var _grumpyjames$lazyloader$CentreDemo$view = function (model) {
-	var map = _grumpyjames$lazyloader$CentreDemo$mapView(model);
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[_grumpyjames$lazyloader$CentreDemo$buttons, map]));
 };
 var _grumpyjames$lazyloader$CentreDemo$main = {
 	main: _elm_lang$html$Html_App$beginnerProgram(
