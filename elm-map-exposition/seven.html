@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+</head>
+<body>
+<h3 id="obvious-problem-1---the-world-isnt-flat.">Obvious Problem #1 - The world isn't flat.</h3>
+<p>We've conveniently neglected a couple of issues; at extremes of East/West and at extremes of North/South.</p>
+<p>In this post, we'll look at fixing the East/West issue. Next time we'll look at North/South.</p>
+<p>After that, we'll think carefully about our tile cache, and worry that when we start zooming, we're going to hit trouble.</p>
+<h3 id="dealing-with-extremes-of-longitude">Dealing with extremes of longitude</h3>
+<p>Wrapping at the East/West boundary is actually pretty simple - at zoom <code>z</code>, the web mercator tiling is <code>2^z</code> tiles square. Wrapping at the boundary could be as simple as adding a <code>% (2 ^ tile.zoom)</code> next to <code>tile.x</code> when we transform our tile into a <code>URL</code>.</p>
+<p>Bundling that logic into the <code>view</code> seems a bit of a hack though; it'll probably break the tile cache as well. It would be better to build the understanding of wrapping into 'Tile' itself.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="fu">-</span><span class="kw">type</span> alias <span class="dt">Tile</span> <span class="fu">=</span>
+<span class="fu">+</span><span class="kw">type</span> <span class="dt">Tile</span> <span class="fu">=</span>
+<span class="fu">+</span>    <span class="dt">ValidTile</span> <span class="dt">Int</span> <span class="dt">Int</span> <span class="dt">Int</span></code></pre></div>
+<p>We swap our <code>type alias</code>ed Tile for a full blown ADT. We <em>won't</em> expose its constructors, though. How will we construct a <code>Tile</code> then?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+newTile <span class="fu">:</span> <span class="dt">TileSpec</span> <span class="ot">-&gt;</span> <span class="dt">Tile</span>
+newTile tileSpec <span class="fu">=</span>
+    <span class="kw">let</span> wrap z c <span class="fu">=</span> c <span class="fu">%</span> (<span class="dv">2</span> <span class="fu">^</span> z)
+    <span class="kw">in</span> <span class="dt">ValidTile</span> (wrap tileSpec<span class="fu">.</span>zoom tileSpec<span class="fu">.</span>x) tileSpec<span class="fu">.</span>y tileSpec<span class="fu">.</span>zoom</code></pre></div>
+<p>At the moment, the only valid condition we know about is to make sure that our tile's <code>x</code> co-ordinate. In order to create tiles we're going to force everyone through this new function that does the wrapping for us.</p>
+<p>We create a <code>type alias</code> that looks very much like the old <code>Tile</code> to make the change a bit easier. We also provide:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fold <span class="fu">:</span> <span class="dt">Tile</span> <span class="ot">-&gt;</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a
+fold t f <span class="fu">=</span>
+    <span class="kw">case</span> t <span class="kw">of</span> <span class="dt">ValidTile</span> x y z <span class="ot">-&gt;</span> f x y z</code></pre></div>
+<p>...what the hell is that, though? Well, <em>usually</em> we'd let <code>Tile</code>'s constructor out and let folk pattern match on it. Unfortunately this also gives out the ability to construct <code>ValidTile</code>s to all and sundry.</p>
+<p>Instead, fold provides a way for outsiders to access the parts of <code>ValidTile</code> without knowing about the constructor itself. If and when we add a second species of <code>Tile</code> (it won't be long), we'll probably create type aliases for each of the 'inner' types.</p>
+<p>After a couple of minutes of fixing up compile errors, we're done. A demonstration is all that is required now. Let's try and be little cooler than just rendering a viewport near Fiji - let's go on a round the world trip instead.</p>
+<h3 id="around-the-world-in-nine-seconds">Around the world in nine seconds</h3>
+<p>Let's boldly claim we're no longer beginners. Yes, that's right, it's time to graduate to using <a href="http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html#program"><code>Html.program</code></a>. Why? Because we're going to want to use the time in our program, and that means using subscriptions.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="ot"># from Time&#39;s docs:</span>
+every <span class="fu">:</span> <span class="dt">Time</span> <span class="ot">-&gt;</span> (<span class="dt">Time</span> <span class="ot">-&gt;</span> msg) <span class="ot">-&gt;</span> <span class="dt">Sub</span> msg
+
+<span class="ot"># in our application:</span>
+subs <span class="fu">:</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> <span class="dt">Sub</span> <span class="dt">Msg</span>
+subs m <span class="fu">=</span> Time.every (<span class="dv">25</span> <span class="fu">*</span> millisecond) <span class="dt">Tick</span>
+
+main <span class="fu">=</span>
+    App.program 
+           { init <span class="fu">=</span> (model, Cmd.none)
+           , update <span class="fu">=</span> update
+           , subscriptions <span class="fu">=</span> subs
+           , view <span class="fu">=</span> view
+           }</code></pre></div>
+<p><code>program</code> parcels up some subscriptions to add to the events that our Html (from <code>view</code>) is allowed to send. In this case, we're going to inform elm that we'd like a <code>Tick</code> event every twenty five milliseconds. We also gain the ability to send <code>elm</code> <code>Cmd</code>s from our update function and our initial model. Not only that, but our subscriptions are not a constant - they can change based on the value of our model.</p>
+<p>We're keeping it simple, and only having a single, permanent subscription. No further commands are added.</p>
+<p>What will we do with our tick, then?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+update <span class="fu">:</span> <span class="dt">Msg</span> <span class="ot">-&gt;</span> <span class="dt">Model</span> <span class="ot">-&gt;</span> (<span class="dt">Model</span>, <span class="dt">Cmd</span> <span class="dt">Msg</span>)
+update message model <span class="fu">=</span> 
+    <span class="kw">case</span> message <span class="kw">of</span>
+      <span class="dt">Complete</span> key url <span class="ot">-&gt;</span>
+          ( { model <span class="fu">|</span> images <span class="fu">=</span> Dict.insert key url model<span class="fu">.</span>images }, Cmd.none )
+      <span class="dt">Tick</span> time <span class="ot">-&gt;</span>
+          ( { model <span class="fu">|</span> location <span class="fu">=</span> rotateOneDegree model<span class="fu">.</span>location }, Cmd.none )
+
+rotateOneDegree <span class="fu">:</span> <span class="dt">LatLn</span> <span class="ot">-&gt;</span> <span class="dt">LatLn</span>
+rotateOneDegree latln <span class="fu">=</span> 
+    <span class="kw">let</span> newLongitude <span class="fu">=</span> latln<span class="fu">.</span>longitude <span class="fu">+</span> <span class="dv">1</span>
+    <span class="kw">in</span> <span class="dt">LatLn</span> latln<span class="fu">.</span>latitude newLongitude </code></pre></div>
+<p>The tile locator functions are written in terms of appropriately periodic functions such that we can happily forget about keeping our longitude within <code>(-180, 180)</code>.</p>
+<p><a href="demo-7.1.html">Here</a> is the demo. Hypnotic, isn't it.</p>
+</body>
+</html>
