@@ -8237,55 +8237,74 @@ var _grumpyjames$lazyloader$FixedViewportRenderer$render = F2(
 			_elm_lang$core$Native_List.fromArray(
 				[tiles]));
 	});
-var _grumpyjames$lazyloader$CentreDemo$px = function (pixels) {
-	return A2(
-		_elm_lang$core$Basics_ops['++'],
-		_elm_lang$core$Basics$toString(pixels),
-		'px');
-};
-var _grumpyjames$lazyloader$CentreDemo$fixedWidth = F2(
-	function (tileSize, htmls) {
-		var width = _elm_lang$core$List$length(htmls) * tileSize;
-		return A2(
-			_elm_lang$html$Html$div,
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html_Attributes$style(
-					_elm_lang$core$Native_List.fromArray(
-						[
-							{
-							ctor: '_Tuple2',
-							_0: 'width',
-							_1: _grumpyjames$lazyloader$CentreDemo$px(width)
-						}
-						]))
-				]),
-			htmls);
-	});
 var _grumpyjames$lazyloader$CentreDemo$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		return _elm_lang$core$Native_Utils.update(
-			model,
-			{
-				images: A3(_elm_lang$core$Dict$insert, _p0._0, _p0._1, model.images)
-			});
+		if (_p0.ctor === 'Complete') {
+			return _elm_lang$core$Native_Utils.update(
+				model,
+				{
+					images: A3(_elm_lang$core$Dict$insert, _p0._0, _p0._1, model.images)
+				});
+		} else {
+			return _elm_lang$core$Native_Utils.update(
+				model,
+				{location: _p0._0});
+		}
 	});
 var _grumpyjames$lazyloader$CentreDemo$Model = F4(
 	function (a, b, c, d) {
 		return {location: a, x: b, y: c, images: d};
 	});
-var _grumpyjames$lazyloader$CentreDemo$model = A4(
-	_grumpyjames$lazyloader$CentreDemo$Model,
-	A2(_grumpyjames$lazyloader$Locator$LatLn, 48.858193, 2.2940533),
-	712,
-	466,
-	_elm_lang$core$Dict$empty);
+var _grumpyjames$lazyloader$CentreDemo$Place = F2(
+	function (a, b) {
+		return {name: a, latln: b};
+	});
+var _grumpyjames$lazyloader$CentreDemo$laTourEiffel = A2(
+	_grumpyjames$lazyloader$CentreDemo$Place,
+	'Eiffel Tower',
+	A2(_grumpyjames$lazyloader$Locator$LatLn, 48.8584, 2.2945));
+var _grumpyjames$lazyloader$CentreDemo$model = A4(_grumpyjames$lazyloader$CentreDemo$Model, _grumpyjames$lazyloader$CentreDemo$laTourEiffel.latln, 712, 466, _elm_lang$core$Dict$empty);
+var _grumpyjames$lazyloader$CentreDemo$places = _elm_lang$core$Native_List.fromArray(
+	[
+		A2(
+		_grumpyjames$lazyloader$CentreDemo$Place,
+		'Sydney Opera House',
+		A2(_grumpyjames$lazyloader$Locator$LatLn, -33.8568, 151.2153)),
+		A2(
+		_grumpyjames$lazyloader$CentreDemo$Place,
+		'Statue of Liberty',
+		A2(_grumpyjames$lazyloader$Locator$LatLn, 40.6892, -74.0445)),
+		_grumpyjames$lazyloader$CentreDemo$laTourEiffel
+	]);
+var _grumpyjames$lazyloader$CentreDemo$Goto = function (a) {
+	return {ctor: 'Goto', _0: a};
+};
+var _grumpyjames$lazyloader$CentreDemo$buttons = function () {
+	var button = function (place) {
+		return A2(
+			_elm_lang$html$Html$button,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Events$onClick(
+					_grumpyjames$lazyloader$CentreDemo$Goto(place.latln))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text(place.name)
+				]));
+	};
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(_elm_lang$core$List$map, button, _grumpyjames$lazyloader$CentreDemo$places));
+}();
 var _grumpyjames$lazyloader$CentreDemo$Complete = F2(
 	function (a, b) {
 		return {ctor: 'Complete', _0: a, _1: b};
 	});
-var _grumpyjames$lazyloader$CentreDemo$view = function (model) {
+var _grumpyjames$lazyloader$CentreDemo$mapView = function (model) {
 	var lift = function (imageLoaded) {
 		return A2(_grumpyjames$lazyloader$CentreDemo$Complete, imageLoaded.coordinate, imageLoaded.url);
 	};
@@ -8293,56 +8312,17 @@ var _grumpyjames$lazyloader$CentreDemo$view = function (model) {
 	var zoom = 15;
 	var dimensions = _grumpyjames$lazyloader$FixedViewport$calculateDimensions(
 		A5(_grumpyjames$lazyloader$FixedViewport$Requirements, model.location, zoom, tileSize, model.x, model.y));
-	var tiles = _grumpyjames$lazyloader$Tiler$tile(
-		{
-			rowCount: dimensions.rowCount,
-			columnCount: dimensions.columnCount,
-			origin: dimensions.origin,
-			viewTile: _grumpyjames$lazyloader$LazyTiles$loadingTileImages(model.images),
-			viewRow: _grumpyjames$lazyloader$CentreDemo$fixedWidth(tileSize),
-			outerAttributes: _elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html_Attributes$style(
-					_elm_lang$core$Native_List.fromArray(
-						[
-							{ctor: '_Tuple2', _0: 'position', _1: 'relative'},
-							{
-							ctor: '_Tuple2',
-							_0: 'top',
-							_1: _grumpyjames$lazyloader$CentreDemo$px(dimensions.top)
-						},
-							{
-							ctor: '_Tuple2',
-							_0: 'left',
-							_1: _grumpyjames$lazyloader$CentreDemo$px(dimensions.left)
-						}
-						]))
-				])
-		});
+	var map = A2(_grumpyjames$lazyloader$FixedViewportRenderer$render, model.images, dimensions);
+	return A2(_elm_lang$html$Html_App$map, lift, map);
+};
+var _grumpyjames$lazyloader$CentreDemo$view = function (model) {
+	var map = _grumpyjames$lazyloader$CentreDemo$mapView(model);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html_Attributes$style(
-				_elm_lang$core$Native_List.fromArray(
-					[
-						{
-						ctor: '_Tuple2',
-						_0: 'width',
-						_1: _grumpyjames$lazyloader$CentreDemo$px(model.x)
-					},
-						{
-						ctor: '_Tuple2',
-						_0: 'height',
-						_1: _grumpyjames$lazyloader$CentreDemo$px(model.y)
-					},
-						{ctor: '_Tuple2', _0: 'overflow', _1: 'hidden'}
-					]))
-			]),
+			[]),
 		_elm_lang$core$Native_List.fromArray(
-			[
-				A2(_elm_lang$html$Html_App$map, lift, tiles)
-			]));
+			[_grumpyjames$lazyloader$CentreDemo$buttons, map]));
 };
 var _grumpyjames$lazyloader$CentreDemo$main = {
 	main: _elm_lang$html$Html_App$beginnerProgram(
